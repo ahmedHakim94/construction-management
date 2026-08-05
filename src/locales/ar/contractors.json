@@ -1,0 +1,17 @@
+{
+  "contractors": "المقاولين",
+  "contractorsDescription": "إدارة سجلات المقاولين وتحديثات الحالة.",
+  "searchContractors": "البحث بالكود، الاسم، الهاتف",
+  "addContractor": "إضافة مقاول",
+  "editContractor": "تعديل مقاول",
+  "deleteContractor": "حذف مقاول",
+  "contractorName": "اسم المقاول",
+  "code": "الكود",
+  "name": "الاسم",
+  "phone": "الهاتف",
+  "address": "العنوان",
+  "nationalId": "الرقم القومي",
+  "notes": "ملاحظات",
+  "deleteConfirmation": "هل أنت متأكد من رغبتك في حذف <strong>{{name}}</strong>؟",
+  "thisContractor": "هذا المقاول"
+}

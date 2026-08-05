@@ -1,44 +1,97 @@
-import { Box } from "@mui/material";
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
+import { DataGrid, type DataGridProps } from "@mui/x-data-grid";
+import { arSD, enUS } from "@mui/x-data-grid/locales";
+import { useTranslation } from "react-i18next";
 
-interface AppTableProps<TData> {
-  data: TData[];
-  columns: ColumnDef<TData, any>[];
-}
+const defaultTableStyles = {
+  border: 0,
+  borderRadius: 4,
+  backgroundColor: "#fff",
 
-export function AppTable<TData>({ data, columns }: AppTableProps<TData>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  // Header
+  "& .MuiDataGrid-columnHeaders": {
+    backgroundColor: "#F8FAFC",
+    borderBottom: "1px solid #E5E7EB",
+  },
+
+  "& .MuiDataGrid-columnHeader": {
+    justifyContent: "center",
+  },
+
+  "& .MuiDataGrid-columnHeaderTitle": {
+    width: "100%",
+    textAlign: "center",
+    fontWeight: 700,
+    fontSize: "14px",
+    color: "#334155",
+    marginInlineStart: "10px",
+  },
+
+  // Cells
+  "& .MuiDataGrid-cell": {
+    display: "flex",
+    alignItems: "center",
+    borderBottom: "1px solid #F1F5F9",
+    fontSize: "14px",
+    color: "#1E293B",
+  },
+
+  // Hover
+  "& .MuiDataGrid-row:hover": {
+    backgroundColor: "#F8FAFC",
+  },
+
+  // Remove focus
+  "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+    outline: "none",
+  },
+
+  "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
+    {
+      outline: "none",
+    },
+
+  // Footer
+  "& .MuiDataGrid-footerContainer": {
+    borderTop: "1px solid #E5E7EB",
+  },
+
+  // Pagination arrows
+  "& .MuiTablePagination-actions": {
+    direction: "ltr",
+  },
+};
+
+export function AppTable({
+  sx,
+  pageSizeOptions = [10, 25, 50],
+  ...props
+}: DataGridProps) {
+  const { i18n } = useTranslation();
+
+  const localeText =
+    i18n.language === "ar"
+      ? arSD.components.MuiDataGrid.defaultProps.localeText
+      : enUS.components.MuiDataGrid.defaultProps.localeText;
 
   return (
-    <Box sx={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} style={{ textAlign: "left", padding: "12px 8px" }}>
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} style={{ padding: "12px 8px", borderTop: "1px solid #e5e7eb" }}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Box>
+    <DataGrid
+      autoHeight
+      disableRowSelectionOnClick
+      pageSizeOptions={pageSizeOptions}
+      localeText={localeText}
+      initialState={{
+        pagination: {
+          paginationModel: {
+            page: 0,
+            pageSize: 10,
+          },
+        },
+      }}
+      sx={{
+        ...defaultTableStyles,
+        ...sx,
+      }}
+      {...props}
+    />
   );
 }

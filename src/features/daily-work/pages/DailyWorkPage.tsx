@@ -1,5 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
 
 export function DailyWorkPage() {
-  return <PlaceholderPage title="Daily Work" description="Capture daily progress and site updates." />;
+  const { t } = useTranslation();
+  return <PlaceholderPage title={t("dailyWork")} description={t("dailyWorkDescription")} />;
 }

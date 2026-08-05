@@ -1,5 +1,8 @@
 import { Box, FormHelperText } from "@mui/material";
 import Select from "react-select";
+import { useTranslation } from "react-i18next";
+
+import { reactSelectStyles } from "../../styles/reactSelectStyles";
 
 export interface SelectOption {
   value: string;
@@ -7,56 +10,59 @@ export interface SelectOption {
 }
 
 interface AppSelectProps {
-  options: SelectOption[];
-
+  label?: string;
+  required?: boolean;
+  options: readonly SelectOption[];
   value?: string;
-
   onChange?: (value: string) => void;
-
   placeholder?: string;
-
   error?: string;
+  className?: string;
 }
 
 export function AppSelect({
+  label,
+  required,
   options,
   value,
   onChange,
   placeholder,
   error,
+  className,
 }: AppSelectProps) {
-  return (
-    <Box sx={{
-      width: "100%",
-    }}>
-      <Select
-        options={options}
-        value={options.find((x) => x.value === value) ?? null}
-        onChange={(option) => onChange?.(option?.value ?? "")}
-        placeholder={placeholder}
-        styles={{
-          control: (base, state) => ({
-            ...base,
-            minHeight: 48,
-            borderRadius: 12,
-            borderColor: error
-              ? "#d32f2f"
-              : state.isFocused
-                ? "#1976d2"
-                : "#D9E2F0",
-            boxShadow: "none",
-            "&:hover": {
-              borderColor: "#1976d2",
-            },
-          }),
-        }}
-      />
+  const { i18n } = useTranslation();
 
-      {error && (
-        <FormHelperText error>
-          {error}
-        </FormHelperText>
+  const isRtl = i18n.language === "ar";
+
+  const finalLabel =
+    label && required
+      ? isRtl
+        ? `* ${label}`
+        : `${label} *`
+      : label;
+
+  return (
+    <Box width="100%">
+      {finalLabel && (
+        <label className="app-select-label">
+          {finalLabel}
+        </label>
       )}
+
+      <Box dir={isRtl ? "rtl" : "ltr"}>
+        <Select
+          options={options}
+          value={options.find((item) => item.value === value) ?? null}
+          onChange={(option) => onChange?.(option?.value ?? "")}
+          placeholder={placeholder}
+          isRtl={isRtl}
+          styles={reactSelectStyles(error)}
+          classNamePrefix="shared_Select"
+          className={className}
+        />
+      </Box>
+
+      {error && <FormHelperText error>{error}</FormHelperText>}
     </Box>
   );
 }

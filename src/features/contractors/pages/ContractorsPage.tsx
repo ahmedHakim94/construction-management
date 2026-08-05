@@ -1,29 +1,41 @@
-import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material";
-import { SearchOutlined, PersonAddAlt1Outlined } from "@mui/icons-material";
+import {
+  Box
+} from "@mui/material";
+import { PersonAddAlt1Outlined } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { AppButton, AppCard } from "@/components/ui";
+import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { ContractorsTable } from "../components/ContractorsTable";
 import { ContractorDialog } from "../components/ContractorDialog";
 import { DeleteContractorDialog } from "../components/DeleteContractorDialog";
 import { contractorService } from "../services/contractor.service";
 import type { Contractor, ContractorFormValues } from "../types";
+import { useDialog } from "@/hooks/useDialog";
+import { AppSearchInput } from "@/components/ui/AppSearchInput";
+import { notify } from "@/shared/utils/notify";
+import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 
 export function ContractorsPage() {
+  const { t } = useTranslation();
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedContractor, setSelectedContractor] = useState<Contractor | undefined>();
+  const [selectedContractor, setSelectedContractor] = useState<
+    Contractor | undefined
+  >();
   const [mode, setMode] = useState<"create" | "edit">("create");
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  const dialog = useDialog();
+  const deleteDialog = useDialog();
 
   useEffect(() => {
-    const loadContractors = async () => {
+    async function loadData() {
       const data = await contractorService.getAll();
       setContractors(data);
-    };
+    }
 
-    void loadContractors();
+    loadData();
   }, []);
 
   const filteredContractors = useMemo(() => {
@@ -42,109 +54,136 @@ export function ContractorsPage() {
   const handleOpenCreate = () => {
     setMode("create");
     setSelectedContractor(undefined);
-    setDialogOpen(true);
+    dialog.openDialog();
   };
 
   const handleOpenEdit = (contractor: Contractor) => {
     setMode("edit");
     setSelectedContractor(contractor);
-    setDialogOpen(true);
+    dialog.openDialog();
   };
 
   const handleCloseDialog = () => {
-    setDialogOpen(false);
+    dialog.closeDialog();
     setSelectedContractor(undefined);
   };
 
   const handleSubmit = async (values: ContractorFormValues) => {
-    if (mode === "edit" && selectedContractor) {
-      const updated = await contractorService.update(selectedContractor.id, values);
-      if (updated) {
-        setContractors((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+    try {
+      if (mode === "edit" && selectedContractor) {
+        const updated = await contractorService.update(
+          selectedContractor.id,
+          values,
+        );
+
+        if (updated) {
+          setContractors((current) =>
+            current.map((item) =>
+              item.id === updated.id ? updated : item,
+            ),
+          );
+
+          notify.success(t("updatedSuccessfully"));
+        }
+      } else {
+        const created = await contractorService.create(values);
+
+        setContractors((current) => [created, ...current]);
+
+        notify.success(t("createdSuccessfully"));
       }
-    } else {
-      const created = await contractorService.create(values);
-      setContractors((current) => [created, ...current]);
+
+      handleCloseDialog();
+    } catch {
+      notify.error(t("somethingWentWrong"));
     }
 
-    handleCloseDialog();
   };
 
   const handleDelete = async () => {
-    if (!selectedContractor) {
-      return;
-    }
+    setDeleteLoading(true)
 
-    await contractorService.delete(selectedContractor.id);
-    setContractors((current) => current.filter((item) => item.id !== selectedContractor.id));
-    setDeleteDialogOpen(false);
-    setSelectedContractor(undefined);
+    setTimeout(async () => {
+      try {
+        if (!selectedContractor) {
+          return;
+        }
+
+        await contractorService.delete(selectedContractor.id);
+        setContractors((current) =>
+          current.filter((item) => item.id !== selectedContractor.id),
+        );
+        notify.success(t("deletedSuccessfully"));
+        deleteDialog.closeDialog();
+        setSelectedContractor(undefined);
+        setDeleteLoading(false);
+
+      } catch {
+        notify.error(t("somethingWentWrong"));
+        setDeleteLoading(false);
+
+      }
+    }, 1500);
+
+
   };
 
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { xs: "stretch", md: "center" } }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}>
-              Contractors
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-              Manage contractor records and status updates.
-            </Typography>
-          </Box>
-
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
-            <TextField
-              size="small"
-              placeholder="Search code, name, phone"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchOutlined />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-            <AppButton startIcon={<PersonAddAlt1Outlined />} onClick={handleOpenCreate}>
-              Add Contractor
-            </AppButton>
-          </Stack>
-        </Stack>
-
+        <AppPageHeader
+          title={t("contractors")}
+          description={t("contractorsDescription")}
+          actions={
+            <>
+              <AppSearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder={t("searchContractors")}
+              />
+              <AppButton
+                startIcon={<PersonAddAlt1Outlined />}
+                onClick={handleOpenCreate}
+              >
+                {t("addContractor")}
+              </AppButton>
+            </>
+          }
+        />
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <ContractorsTable
             rows={filteredContractors}
             onEdit={handleOpenEdit}
             onDelete={(contractor) => {
               setSelectedContractor(contractor);
-              setDeleteDialogOpen(true);
+              deleteDialog.openDialog();
             }}
           />
         </AppCard>
       </Box>
 
       <ContractorDialog
-        open={dialogOpen}
+        open={dialog.open}
         mode={mode}
         contractor={selectedContractor}
         onClose={handleCloseDialog}
         onSubmit={handleSubmit}
       />
 
-      <DeleteContractorDialog
-        open={deleteDialogOpen}
-        contractorName={selectedContractor?.name}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setSelectedContractor(undefined);
-        }}
+      <AppConfirmDialog
+        open={deleteDialog.open}
+        title={t("deleteContractor")}
+        message={
+          <>
+            {t("deleteContractor")}
+            <strong>{selectedContractor?.name} ？</strong> 
+          </>
+        }
+        confirmText={t("delete")}
+        onClose={deleteDialog.closeDialog}
         onConfirm={handleDelete}
       />
+
     </PageContainer>
   );
 }

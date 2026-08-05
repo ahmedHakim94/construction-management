@@ -8,9 +8,8 @@ import {
   Settings,
   WorkHistory,
 } from "@mui/icons-material";
-import { useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { getTranslation } from "@/core/i18n/translations";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   open?: boolean;
@@ -31,16 +30,8 @@ const navigationItems = [
 
 export function Sidebar({ open = true, mobileOpen = false, onClose, locale = "ar" }: SidebarProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   const isArabic = locale === "ar";
-  const t = useMemo(() => ({
-    dashboard: getTranslation(locale, "dashboard"),
-    contractors: getTranslation(locale, "contractors"),
-    equipment: getTranslation(locale, "equipment"),
-    dailyWork: getTranslation(locale, "dailyWork"),
-    payments: getTranslation(locale, "payments"),
-    reports: getTranslation(locale, "reports"),
-    settings: getTranslation(locale, "settings"),
-  }), [locale]);
 
   const content = (
     <Box sx={{ width: { xs: 280, md: open ? 260 : 72 }, height: "100%", bgcolor: "background.paper", borderRight: "1px solid", borderColor: "divider", px: { xs: 2, md: 1.5 }, py: { xs: 2, md: 2.5 }, transition: "width 0.2s ease", overflow: "hidden" }}>
@@ -53,7 +44,7 @@ export function Sidebar({ open = true, mobileOpen = false, onClose, locale = "ar
 
         <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: 0.6 }}>
           {navigationItems.map(({ key, path, icon: Icon }) => {
-            const label = t[key as keyof typeof t];
+            const label = t(key);
             const isActive = location.pathname === path;
 
             return (

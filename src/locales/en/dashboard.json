@@ -1,0 +1,13 @@
+{
+  "dashboard": "Dashboard",
+  "dashboardDescription": "Overview of the current project portfolio.",
+  "overviewPlaceholder": "Overview placeholder",
+  "activityPlaceholder": "Activity placeholder",
+  "draft": "Draft",
+  "item": "Item",
+  "status": "Status",
+  "pending": "Pending",
+  "scheduled": "Scheduled",
+  "budgetReview": "Budget review",
+  "siteInspection": "Site inspection"
+}

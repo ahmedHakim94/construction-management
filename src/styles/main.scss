@@ -2,3 +2,61 @@
 @import "./base/reset";
 @import "./layout/app-shell";
 @import "./components/login";
+
+html[dir="rtl"] {
+  .shared_Select__control {
+    flex-direction: row-reverse !important;
+  }
+  .shared_Select__indicators {
+    flex-direction: row-reverse !important;
+  }
+  .shared_Select__menu {
+    direction: rtl;
+
+    .shared_Select__option {
+      text-align: start;
+    }
+  }
+}
+
+.app-select-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+html[dir="rtl"] {
+  .app-select-label {
+    text-align: right;
+    direction: rtl;
+  }
+
+  .shared_Select__control,
+  .shared_Select__menu {
+    direction: rtl;
+  }
+
+  .shared_Select__single-value,
+  .shared_Select__placeholder,
+  .shared_Select__option {
+    text-align: right;
+  }
+}
+
+html[dir="ltr"] {
+  .app-select-label {
+     text-align: right;
+    direction: rtl;
+  }
+
+  .shared_Select__control,
+  .shared_Select__menu {
+    direction: rtl;
+  }
+
+  .shared_Select__single-value,
+  .shared_Select__placeholder,
+  .shared_Select__option {
+    text-align: right;
+  }
+}

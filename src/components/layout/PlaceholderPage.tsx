@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppCard } from "@/components/ui";
 
@@ -8,6 +9,8 @@ interface PlaceholderPageProps {
 }
 
 export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
+  const { t } = useTranslation();
+
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -26,7 +29,7 @@ export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             {title}
           </Typography>
-          <Typography color="text.secondary">Coming Soon</Typography>
+          <Typography color="text.secondary">{t("comingSoon")}</Typography>
         </AppCard>
       </Box>
     </PageContainer>

@@ -1,7 +1,7 @@
 import { Avatar, Box, IconButton, Menu, MenuItem, Stack, Switch, Typography } from "@mui/material";
 import { Language, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
-import { useMemo, useState } from "react";
-import { getTranslation } from "@/core/i18n/translations";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
   locale?: "en" | "ar";
@@ -11,14 +11,8 @@ interface HeaderProps {
 
 export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { t } = useTranslation();
   const isArabic = locale === "ar";
-  const t = useMemo(() => ({
-    language: getTranslation(locale, "language"),
-    profile: getTranslation(locale, "profile"),
-    signOut: getTranslation(locale, "signOut"),
-    arabic: getTranslation(locale, "arabic"),
-    english: getTranslation(locale, "english"),
-  }), [locale]);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -43,14 +37,14 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
             lineHeight: 1.2,
           }}
         >
-          {isArabic ? "إدارة البناء" : "Construction Management"}
+          {t("appTitle")}
         </Typography>
       </Stack>
 
       <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", border: "1px solid", borderColor: "divider", borderRadius: 999, px: 1, py: 0.45 }}>
           <Language fontSize="small" color="action" />
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>{t.language}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>{t("language")}</Typography>
           <Switch
             size="small"
             checked={!isArabic}
@@ -67,8 +61,8 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
       </Stack>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu} keepMounted>
-        <MenuItem onClick={handleCloseMenu}>{t.profile}</MenuItem>
-        <MenuItem onClick={handleCloseMenu}>{t.signOut}</MenuItem>
+        <MenuItem onClick={handleCloseMenu}>{t("profile")}</MenuItem>
+        <MenuItem onClick={handleCloseMenu}>{t("signOut")}</MenuItem>
       </Menu>
     </Box>
   );

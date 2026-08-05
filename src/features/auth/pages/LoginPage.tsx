@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppButton, AppCard, AppInput, AppPasswordInput, AppSelect } from "@/components/ui";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setCredentials } from "@/features/auth/store/authSlice";
@@ -9,15 +11,17 @@ import { login } from "@/features/auth/services/auth.service";
 import { loginSchema } from "../schemas/login.schema";
 import type { LoginFormData } from "../schemas/login.schema";
 
-const roleOptions = [
-  { value: "admin", label: "Admin" },
-  { value: "manager", label: "Manager" },
-  { value: "viewer", label: "Viewer" },
-];
-
 export function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const roleOptions = useMemo(() => [
+    { value: "admin", label: t("admin") },
+    { value: "manager", label: t("manager") },
+    { value: "viewer", label: t("viewer") },
+  ], [t]);
+
   const { control, handleSubmit } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -84,7 +88,7 @@ export function LoginPage() {
                 <Typography variant="h5" sx={{
                   fontWeight: 700,
                 }}>
-                  Construction Management System
+                  {t("loginTitle")}
                 </Typography>
 
                 <Typography
@@ -92,7 +96,7 @@ export function LoginPage() {
                   color="text.secondary"
                   sx={{ mt: 1 }}
                 >
-                  Manage Contractors & Equipment
+                  {t("loginSubtitle")}
                 </Typography>
               </Box>
             </Stack>
@@ -105,8 +109,8 @@ export function LoginPage() {
                 render={({ field, fieldState }) => (
                   <AppInput
                     {...field}
-                    label="text"
-                    placeholder="name@example.com"
+                    label={t("email")}
+                    placeholder={t("emailPlaceholder")}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   />
@@ -119,8 +123,8 @@ export function LoginPage() {
                 render={({ field, fieldState }) => (
                   <AppPasswordInput
                     {...field}
-                    label="Password"
-                    placeholder="Enter your password"
+                    label={t("password")}
+                    placeholder={t("passwordPlaceholder")}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   />
@@ -134,7 +138,7 @@ export function LoginPage() {
                   <AppSelect
                     {...field}
                     options={roleOptions}
-                    placeholder="Select role"
+                    placeholder={t("selectRole")}
                     error={fieldState.error?.message}
                   />
                 )}
@@ -147,7 +151,7 @@ export function LoginPage() {
               control={control}
               render={({ field }) => (
                 <FormControlLabel
-                  label="Remember me"
+                  label={t("rememberMe")}
                   control={
                     <Checkbox
                       checked={field.value}
@@ -160,7 +164,7 @@ export function LoginPage() {
 
             {/* Submit */}
             <AppButton type="submit" variant="contained" fullWidth>
-              Sign In
+              {t("signIn")}
             </AppButton>
           </Stack>
         </AppCard>
