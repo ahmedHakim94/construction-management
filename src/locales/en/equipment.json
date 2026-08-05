@@ -1,4 +1,12 @@
 {
   "equipment": "Equipment",
-  "equipmentDescription": "Track equipment availability and maintenance."
+  "equipmentDescription": "Track equipment availability and maintenance.",
+  "equipmentTypes": "Equipment Types",
+  "equipmentTypesDescription": "Manage equipment type records.",
+  "searchEquipmentTypes": "Search code, Arabic name, English name",
+  "addEquipmentType": "Add Equipment Type",
+  "editEquipmentType": "Edit Equipment Type",
+  "deleteEquipmentType": "Delete Equipment Type",
+  "arabicName": "Arabic Name",
+  "englishName": "English Name"
 }

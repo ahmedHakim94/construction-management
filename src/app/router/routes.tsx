@@ -12,6 +12,7 @@ import { EquipmentPage } from "@/features/equipment/pages/EquipmentPage";
 import { PaymentsPage } from "@/features/payments/pages/PaymentsPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
+import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +70,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EquipmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings/equipment-types",
+        element: (
+          <ProtectedRoute>
+            <EquipmentTypePage />
           </ProtectedRoute>
         ),
       },

@@ -7,6 +7,7 @@ export const ROUTE_PATHS = {
   payments: "/payments",
   reports: "/reports",
   settings: "/settings",
+  equipmentTypes: "/settings/equipment-types",
 } as const;
 
 export const ROUTE_NAMES = {
@@ -18,4 +19,5 @@ export const ROUTE_NAMES = {
   payments: "Payments",
   reports: "Reports",
   settings: "Settings",
+  equipmentTypes: "Equipment Types",
 } as const;

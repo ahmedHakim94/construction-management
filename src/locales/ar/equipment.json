@@ -1,4 +1,12 @@
 {
   "equipment": "المعدات",
-  "equipmentDescription": "تتبع توفر المعدات وصيانتها."
+  "equipmentDescription": "تتبع توفر المعدات وصيانتها.",
+  "equipmentTypes": "أنواع المعدات",
+  "equipmentTypesDescription": "إدارة سجلات أنواع المعدات.",
+  "searchEquipmentTypes": "البحث بالكود، الاسم العربي، الاسم الإنجليزي",
+  "addEquipmentType": "إضافة نوع معدات",
+  "editEquipmentType": "تعديل نوع معدات",
+  "deleteEquipmentType": "حذف نوع معدات",
+  "arabicName": "الاسم العربي",
+  "englishName": "الاسم الإنجليزي"
 }

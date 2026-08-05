@@ -1,6 +1,12 @@
-import { DataGrid, type DataGridProps } from "@mui/x-data-grid";
+import { DataGrid, type DataGridProps, type GridColDef } from "@mui/x-data-grid";
 import { arSD, enUS } from "@mui/x-data-grid/locales";
 import { useTranslation } from "react-i18next";
+
+export type AppTableColDef = GridColDef;
+
+type AppTableProps = DataGridProps & {
+  showPagination?: boolean;
+};
 
 const defaultTableStyles = {
   border: 0,
@@ -46,9 +52,9 @@ const defaultTableStyles = {
   },
 
   "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
-    {
-      outline: "none",
-    },
+  {
+    outline: "none",
+  },
 
   // Footer
   "& .MuiDataGrid-footerContainer": {
@@ -61,11 +67,13 @@ const defaultTableStyles = {
   },
 };
 
+
 export function AppTable({
   sx,
   pageSizeOptions = [10, 25, 50],
+  showPagination = true,
   ...props
-}: DataGridProps) {
+}: AppTableProps) {
   const { i18n } = useTranslation();
 
   const localeText =
@@ -79,6 +87,9 @@ export function AppTable({
       disableRowSelectionOnClick
       pageSizeOptions={pageSizeOptions}
       localeText={localeText}
+      pagination
+      hideFooter={!showPagination}
+      hideFooterPagination={!showPagination}
       initialState={{
         pagination: {
           paginationModel: {
