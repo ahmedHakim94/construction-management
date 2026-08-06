@@ -34,4 +34,16 @@ export const contractorsMockData: Contractor[] = [
     status: "INACTIVE",
     createdAt: "2025-03-21",
   },
+  {
+    id: "c-system",
+    code: "SYS-000",
+    name: "خارجى (External)",
+    phone: "",
+    address: "",
+    nationalId: "",
+    notes: "",
+    status: "ACTIVE",
+    createdAt: "",
+    isSystem: true,
+  },
 ];

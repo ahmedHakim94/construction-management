@@ -10,6 +10,7 @@ export interface Contractor {
   notes?: string;
   status: ContractorStatus;
   createdAt: string;
+  isSystem?: boolean;
 }
 
 export interface ContractorFormValues {
