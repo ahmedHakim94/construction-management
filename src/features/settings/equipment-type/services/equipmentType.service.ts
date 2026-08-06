@@ -3,9 +3,19 @@ import type { EquipmentType, EquipmentTypeFormValues } from "../types";
 
 let equipmentTypes: EquipmentType[] = [...equipmentTypesMockData];
 
+const generatePrefix = (name: string) => {
+  const words = name.split(" ");
+  const prefix = words.map((word) => word.charAt(0).toUpperCase()).join("");
+  return prefix;
+}
+
 export const equipmentTypeService = {
   async getAll(): Promise<EquipmentType[]> {
     return [...equipmentTypes];
+  },
+
+  async getById(id: string): Promise<EquipmentType | undefined> {
+    return equipmentTypes.find((item) => item.id === id);
   },
 
   async create(data: EquipmentTypeFormValues): Promise<EquipmentType> {
@@ -15,6 +25,7 @@ export const equipmentTypeService = {
       nameAr: data.nameAr,
       nameEn: data.nameEn,
       createdAt: new Date().toISOString().split("T")[0],
+      prefix: generatePrefix(data.nameEn),
     };
 
     equipmentTypes = [nextEquipmentType, ...equipmentTypes];

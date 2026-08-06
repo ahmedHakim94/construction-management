@@ -1,0 +1,1 @@
+// Equipment is stored in the service mock state only.

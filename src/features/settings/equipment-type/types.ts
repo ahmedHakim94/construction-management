@@ -4,6 +4,7 @@ export interface EquipmentType {
   nameAr: string;
   nameEn: string;
   createdAt: string;
+  prefix: string;
 }
 
 export interface EquipmentTypeFormValues {

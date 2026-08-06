@@ -44,6 +44,12 @@ export function EquipmentTypeTable({
         minWidth: 140,
       },
       {
+        field: "prefix",
+        headerName: t("prefix"),
+        flex: 0.8,
+        minWidth: 110,
+      },
+      {
         field: "actions",
         headerName: t("actions"),
         sortable: false,
