@@ -1,4 +1,10 @@
 {
   "settings": "Settings",
-  "settingsDescription": "Configure application preferences and integrations."
+  "settingsDescription": "Configure application preferences and integrations.",
+  "tasks": "Tasks",
+  "tasksDescription": "Manage task records.",
+  "searchTasks": "Search Arabic name, English name",
+  "addTask": "Add Task",
+  "editTask": "Edit Task",
+  "deleteTask": "Delete Task"
 }

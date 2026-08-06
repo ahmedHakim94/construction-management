@@ -13,6 +13,7 @@ import { PaymentsPage } from "@/features/payments/pages/PaymentsPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
+import { TaskPage } from "@/features/settings/task/pages/TaskPage";
 
 export const router = createBrowserRouter([
   {
@@ -78,6 +79,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EquipmentTypePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings/tasks",
+        element: (
+          <ProtectedRoute>
+            <TaskPage />
           </ProtectedRoute>
         ),
       },

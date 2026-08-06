@@ -1,4 +1,10 @@
 {
   "settings": "الإعدادات",
-  "settingsDescription": "تهيئة تفضيلات التطبيق والتكاملات."
+  "settingsDescription": "تهيئة تفضيلات التطبيق والتكاملات.",
+  "tasks": "المهام",
+  "tasksDescription": "إدارة سجلات المهام.",
+  "searchTasks": "البحث بالاسم العربي أو الاسم الإنجليزي",
+  "addTask": "إضافة مهمة",
+  "editTask": "تعديل مهمة",
+  "deleteTask": "حذف مهمة"
 }

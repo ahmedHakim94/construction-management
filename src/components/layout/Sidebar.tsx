@@ -83,6 +83,11 @@ const navigationItems: SidebarItem[] = [
         path: "/settings/equipment-types",
         icon: Build,
       },
+      {
+        key: "tasks",
+        path: "/settings/tasks",
+        icon: Assessment,
+      },
     ],
   },
 ];
