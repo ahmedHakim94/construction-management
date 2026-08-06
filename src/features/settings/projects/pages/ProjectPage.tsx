@@ -6,17 +6,15 @@ import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
-import { EquipmentTypeTable } from "../components/EquipmentTypeTable";
-import { EquipmentTypeDialog } from "../components/EquipmentTypeDialog";
-import { equipmentTypeService } from "../services/equipmentType.service";
-import type { EquipmentType, EquipmentTypeFormValues } from "../types";
+import { ProjectTable } from "../components/ProjectTable";
+import { ProjectDialog } from "../components/ProjectDialog";
+import { projectService } from "../services/project.service";
+import type { Project, ProjectFormValues } from "../types";
 
-export function EquipmentTypePage() {
+export function ProjectPage() {
   const { t } = useTranslation();
-  const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
-  const [selectedEquipmentType, setSelectedEquipmentType] = useState<
-    EquipmentType | undefined
-  >();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -25,8 +23,8 @@ export function EquipmentTypePage() {
 
   useEffect(() => {
     async function loadData() {
-      const data = await equipmentTypeService.getAll();
-      setEquipmentTypes(data);
+      const data = await projectService.getAll();
+      setProjects(data);
     }
 
     loadData();
@@ -34,38 +32,35 @@ export function EquipmentTypePage() {
 
   const handleOpenCreate = () => {
     setMode("create");
-    setSelectedEquipmentType(undefined);
+    setSelectedProject(undefined);
     dialog.openDialog();
   };
 
-  const handleOpenEdit = (equipmentType: EquipmentType) => {
+  const handleOpenEdit = (project: Project) => {
     setMode("edit");
-    setSelectedEquipmentType(equipmentType);
+    setSelectedProject(project);
     dialog.openDialog();
   };
 
   const handleCloseDialog = () => {
     dialog.closeDialog();
-    setSelectedEquipmentType(undefined);
+    setSelectedProject(undefined);
   };
 
-  const handleSubmit = async (values: EquipmentTypeFormValues) => {
+  const handleSubmit = async (values: ProjectFormValues) => {
     try {
-      if (mode === "edit" && selectedEquipmentType) {
-        const updated = await equipmentTypeService.update(
-          selectedEquipmentType.id,
-          values,
-        );
+      if (mode === "edit" && selectedProject) {
+        const updated = await projectService.update(selectedProject.id, values);
 
         if (updated) {
-          setEquipmentTypes((current) =>
+          setProjects((current) =>
             current.map((item) => (item.id === updated.id ? updated : item)),
           );
           notify.success(t("updatedSuccessfully"));
         }
       } else {
-        const created = await equipmentTypeService.create(values);
-        setEquipmentTypes((current) => [created, ...current]);
+        const created = await projectService.create(values);
+        setProjects((current) => [created, ...current]);
         notify.success(t("createdSuccessfully"));
       }
 
@@ -77,18 +72,19 @@ export function EquipmentTypePage() {
 
   const handleDelete = async () => {
     setDeleteLoading(true);
+
     try {
-      if (!selectedEquipmentType) {
+      if (!selectedProject) {
         return;
       }
 
-      await equipmentTypeService.delete(selectedEquipmentType.id);
-      setEquipmentTypes((current) =>
-        current.filter((item) => item.id !== selectedEquipmentType.id),
+      await projectService.delete(selectedProject.id);
+      setProjects((current) =>
+        current.filter((item) => item.id !== selectedProject.id),
       );
       notify.success(t("deletedSuccessfully"));
       deleteDialog.closeDialog();
-      setSelectedEquipmentType(undefined);
+      setSelectedProject(undefined);
     } catch {
       notify.error(t("somethingWentWrong"));
     } finally {
@@ -100,49 +96,47 @@ export function EquipmentTypePage() {
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
         <AppPageHeader
-          title={t("equipmentTypes")}
-          description={t("equipmentTypesDescription")}
+          title={t("projects")}
+          description={t("projectsDescription")}
           actions={
             <>
               {/* <AppSearchInput
                 value={search}
                 onChange={setSearch}
-                placeholder={t("searchEquipmentTypes")}
+                placeholder={t("searchProjects")}
               /> */}
-              <AppButton onClick={handleOpenCreate}>
-                {t("addEquipmentType")}
-              </AppButton>
+              <AppButton onClick={handleOpenCreate}>{t("addProject")}</AppButton>
             </>
           }
         />
 
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
-          <EquipmentTypeTable
-            rows={equipmentTypes}
+          <ProjectTable
+            rows={projects}
             onEdit={handleOpenEdit}
-            onDelete={(equipmentType) => {
-              setSelectedEquipmentType(equipmentType);
+            onDelete={(project) => {
+              setSelectedProject(project);
               deleteDialog.openDialog();
             }}
           />
         </AppCard>
       </Box>
 
-      <EquipmentTypeDialog
+      <ProjectDialog
         open={dialog.open}
         mode={mode}
-        equipmentType={selectedEquipmentType}
+        project={selectedProject}
         onClose={handleCloseDialog}
         onSubmit={handleSubmit}
       />
 
       <AppConfirmDialog
         open={deleteDialog.open}
-        title={t("deleteEquipmentType")}
+        title={t("deleteProject")}
         message={
           <>
-            {t("deleteEquipmentType")}
-            <strong>{` ${selectedEquipmentType?.nameAr} ?`}</strong>
+            {t("deleteProject")}
+            <strong>{` ${selectedProject?.name} ?`}</strong>
           </>
         }
         confirmText={t("delete")}

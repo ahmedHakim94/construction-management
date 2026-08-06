@@ -6,5 +6,12 @@
   "searchTasks": "البحث بالاسم العربي أو الاسم الإنجليزي",
   "addTask": "إضافة مهمة",
   "editTask": "تعديل مهمة",
-  "deleteTask": "حذف مهمة"
+  "deleteTask": "حذف مهمة",
+  "projects": "المشاريع",
+  "projectsDescription": "إدارة سجلات المشاريع.",
+  "searchProjects": "البحث بالاسم أو العنوان",
+  "addProject": "إضافة مشروع",
+  "editProject": "تعديل مشروع",
+  "deleteProject": "حذف مشروع",
+  "projectName": "اسم المشروع"
 }

@@ -6,5 +6,12 @@
   "searchTasks": "Search Arabic name, English name",
   "addTask": "Add Task",
   "editTask": "Edit Task",
-  "deleteTask": "Delete Task"
+  "deleteTask": "Delete Task",
+  "projects": "Projects",
+  "projectsDescription": "Manage project records.",
+  "searchProjects": "Search name, address",
+  "addProject": "Add Project",
+  "editProject": "Edit Project",
+  "deleteProject": "Delete Project",
+  "projectName": "Project Name"
 }

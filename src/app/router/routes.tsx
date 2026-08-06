@@ -14,6 +14,7 @@ import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
 import { TaskPage } from "@/features/settings/task/pages/TaskPage";
+import { ProjectPage } from "@/features/settings/projects/pages/ProjectPage";
 
 export const router = createBrowserRouter([
   {
@@ -87,6 +88,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <TaskPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings/projects",
+        element: (
+          <ProtectedRoute>
+            <ProjectPage />
           </ProtectedRoute>
         ),
       },

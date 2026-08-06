@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
   settings: "/settings",
   equipmentTypes: "/settings/equipment-types",
   tasks: "/settings/tasks",
+  projects: "/settings/projects",
 } as const;
 
 export const ROUTE_NAMES = {
@@ -22,4 +23,5 @@ export const ROUTE_NAMES = {
   settings: "Settings",
   equipmentTypes: "Equipment Types",
   tasks: "Tasks",
+  projects: "Projects",
 } as const;

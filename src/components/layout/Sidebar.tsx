@@ -88,6 +88,11 @@ const navigationItems: SidebarItem[] = [
         path: "/settings/tasks",
         icon: Assessment,
       },
+      {
+        key: "projects",
+        path: "/settings/projects",
+        icon: Build,
+      },
     ],
   },
 ];
