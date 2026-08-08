@@ -18,6 +18,7 @@ interface AppSelectProps {
   placeholder?: string;
   error?: string;
   className?: string;
+  width?: string | number;
 }
 
 export function AppSelect({
@@ -29,6 +30,7 @@ export function AppSelect({
   placeholder,
   error,
   className,
+  width = "100%",
 }: AppSelectProps) {
   const { i18n } = useTranslation();
 
@@ -42,7 +44,7 @@ export function AppSelect({
       : label;
 
   return (
-    <Box width="100%">
+    <Box width={width}>
       {finalLabel && (
         <label className="app-select-label">
           {finalLabel}

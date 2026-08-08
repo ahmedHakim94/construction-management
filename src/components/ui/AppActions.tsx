@@ -9,17 +9,23 @@ interface AppActionsProps {
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  viewTooltip?: string;
+  editTooltip?: string;
+  deleteTooltip?: string;
 }
 
 export function AppActions({
   onView,
   onEdit,
   onDelete,
+  viewTooltip = "View",
+  editTooltip = "Edit",
+  deleteTooltip = "Delete",
 }: AppActionsProps) {
   return (
     <Stack direction="row" spacing={0.5}>
       {onView && (
-        <Tooltip title="View">
+        <Tooltip title={viewTooltip}>
           <IconButton size="small" onClick={onView}>
             <VisibilityOutlined fontSize="small" />
           </IconButton>
@@ -27,7 +33,7 @@ export function AppActions({
       )}
 
       {onEdit && (
-        <Tooltip title="Edit">
+        <Tooltip title={editTooltip}>
           <IconButton size="small" onClick={onEdit}>
             <EditOutlined fontSize="small" />
           </IconButton>
@@ -35,7 +41,7 @@ export function AppActions({
       )}
 
       {onDelete && (
-        <Tooltip title="Delete">
+        <Tooltip title={deleteTooltip}>
           <IconButton
             size="small"
             color="error"

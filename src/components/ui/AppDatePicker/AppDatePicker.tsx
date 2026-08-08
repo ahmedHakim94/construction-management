@@ -2,7 +2,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import type { Dayjs } from "dayjs";
-import ClearIcon from "@mui/icons-material/Clear";
 
 interface AppDatePickerProps {
   label?: string;
@@ -10,7 +9,9 @@ interface AppDatePickerProps {
   onChange: (value: Dayjs | null) => void;
   disabled?: boolean;
   format?: string;
-  clearable?: boolean;
+  error?: boolean;
+  helperText?: string;
+  fullWidth?: boolean;
 }
 
 export function AppDatePicker({
@@ -19,7 +20,9 @@ export function AppDatePicker({
   onChange,
   disabled,
   format = "DD/MM/YYYY",
-  clearable=true
+  error,
+  helperText,
+  fullWidth = false,
 }: AppDatePickerProps) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -32,14 +35,11 @@ export function AppDatePicker({
         slotProps={{
           textField: {
             size: "small",
-            // fullWidth: true,
-          },
-          field: {
-            clearable,
+            error,
+            helperText,
+            fullWidth: fullWidth ?? true,
           },
         }}
-        
-        
       />
     </LocalizationProvider>
   );
