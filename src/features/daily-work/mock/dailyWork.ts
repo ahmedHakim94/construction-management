@@ -1,0 +1,38 @@
+import type { DailyWork } from "../types";
+
+export const dailyWorkMockData: DailyWork[] = [
+  {
+    id: "dw-1001",
+    date: "2026-07-20",
+    projectId: "project-1",
+    contractorId: "c-1001",
+    equipmentId: "e-1001",
+    temporaryEquipmentName: undefined,
+    hourRate: 150,
+    workingHours: 8,
+    fuelConsumption: 12,
+    taskId: "task-2",
+    cost: 1200,
+    deduction: 0,
+    deductionReason: undefined,
+    notes: "Site leveling work",
+    createdAt: "2026-07-20",
+  },
+  {
+    id: "dw-1002",
+    date: "2026-07-21",
+    projectId: "project-2",
+    contractorId: "c-system",
+    equipmentId: undefined,
+    temporaryEquipmentName: "External Generator",
+    hourRate: 220,
+    workingHours: 5,
+    fuelConsumption: 6,
+    taskId: "task-3",
+    cost: 1100,
+    deduction: 100,
+    deductionReason: "Weather delay",
+    notes: "Excavation with temporary equipment",
+    createdAt: "2026-07-21",
+  },
+];

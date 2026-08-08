@@ -21,5 +21,7 @@
   "somethingWentWrong": "Something went wrong!",
   "deletedSuccessfully": "Deleted successfully",
   "createdSuccessfully": "Created successfully",
-  "updatedSuccessfully": "Updated successfully"
+  "updatedSuccessfully": "Updated successfully",
+  "home":"Dashboard"
+
 }

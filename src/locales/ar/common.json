@@ -21,5 +21,6 @@
   "somethingWentWrong":"حدث خطأ!",
  "deletedSuccessfully": "تم الحذف بنجاح",
 "createdSuccessfully": "تم الإنشاء بنجاح",
-"updatedSuccessfully": "تم التحديث بنجاح"
+"updatedSuccessfully": "تم التحديث بنجاح",
+"home":"الصفحه الرئيسية"
 }
