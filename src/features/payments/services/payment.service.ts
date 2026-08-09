@@ -3,7 +3,9 @@ import { paymentTransactionsMockData } from "../mock/paymentTransactions";
 import type { Payment, PaymentFormValues, PaymentTransaction } from "../types";
 
 let paymentRecords: Payment[] = [...paymentsMockData];
-let paymentTransactions: PaymentTransaction[] = [...paymentTransactionsMockData];
+let paymentTransactions: PaymentTransaction[] = [
+  ...paymentTransactionsMockData,
+];
 
 function calculateStatus(netAmount: number, paidAmount: number) {
   if (paidAmount <= 0) {
@@ -26,7 +28,13 @@ export const paymentService = {
     return paymentRecords.find((item) => item.id === id);
   },
 
-  async create(data: PaymentFormValues & { grossAmount: number; totalDeductions: number; netAmount: number; }): Promise<Payment> {
+  async create(
+    data: PaymentFormValues & {
+      grossAmount: number;
+      totalDeductions: number;
+      netAmount: number;
+    },
+  ): Promise<Payment> {
     const existingPayment = paymentRecords.find(
       (item) =>
         item.contractorId === data.contractorId &&
@@ -78,16 +86,42 @@ export const paymentService = {
 
   async delete(id: string): Promise<void> {
     paymentRecords = paymentRecords.filter((item) => item.id !== id);
-    paymentTransactions = paymentTransactions.filter((item) => item.paymentId !== id);
+    paymentTransactions = paymentTransactions.filter(
+      (item) => item.paymentId !== id,
+    );
   },
 
-  async recordPayment(paymentId: string, amount: number): Promise<PaymentTransaction> {
+  async recordPayment(
+    paymentId: string,
+    amount: number,
+  ): Promise<PaymentTransaction> {
     const payment = paymentRecords.find((item) => item.id === paymentId);
 
     if (!payment) {
       throw new Error("PaymentNotFound");
     }
 
+    // Validate payment amount
+    if (amount <= 0) {
+      throw new Error("InvalidPaymentAmount");
+    }
+
+    // Calculate current paid amount from existing transactions
+    const currentPaidAmount = paymentTransactions
+      .filter((item) => item.paymentId === paymentId)
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    const currentRemainingAmount = Math.max(
+      payment.netAmount - currentPaidAmount,
+      0,
+    );
+
+    // Prevent paying more than the remaining amount
+    if (amount > currentRemainingAmount) {
+      throw new Error("PaymentAmountExceedsRemaining");
+    }
+
+    // Create new payment transaction
     const transaction: PaymentTransaction = {
       id: `pt-${Date.now()}`,
       paymentId,
@@ -98,16 +132,24 @@ export const paymentService = {
 
     paymentTransactions = [transaction, ...paymentTransactions];
 
+    // Recalculate total paid after adding the new transaction
     const paidAmount = paymentTransactions
       .filter((item) => item.paymentId === paymentId)
       .reduce((sum, item) => sum + item.amount, 0);
 
     const remainingAmount = Math.max(payment.netAmount - paidAmount, 0);
+
     const status = calculateStatus(payment.netAmount, paidAmount);
 
+    // Update payment record
     paymentRecords = paymentRecords.map((item) =>
       item.id === paymentId
-        ? { ...item, paidAmount, remainingAmount, status }
+        ? {
+            ...item,
+            paidAmount,
+            remainingAmount,
+            status,
+          }
         : item,
     );
 
@@ -117,6 +159,45 @@ export const paymentService = {
   async getTransactions(paymentId: string): Promise<PaymentTransaction[]> {
     return paymentTransactions.filter((item) => item.paymentId === paymentId);
   },
+
+  async refreshSettlement(
+    paymentId: string,
+    data: {
+      grossAmount: number;
+      totalDeductions: number;
+      netAmount: number;
+    },
+  ): Promise<Payment | undefined> {
+    const payment = paymentRecords.find((item) => item.id === paymentId);
+
+    if (!payment) {
+      return undefined;
+    }
+
+    const paidAmount = paymentTransactions
+      .filter((item) => item.paymentId === paymentId)
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    const remainingAmount = Math.max(data.netAmount - paidAmount, 0);
+
+    const status = calculateStatus(data.netAmount, paidAmount);
+
+    const updatedPayment: Payment = {
+      ...payment,
+      grossAmount: data.grossAmount,
+      totalDeductions: data.totalDeductions,
+      netAmount: data.netAmount,
+      paidAmount,
+      remainingAmount,
+      status,
+    };
+
+    paymentRecords = paymentRecords.map((item) =>
+      item.id === paymentId ? updatedPayment : item,
+    );
+
+    return updatedPayment;
+  },
 };
 
 export const getAll = paymentService.getAll;
@@ -125,3 +206,4 @@ export const create = paymentService.create;
 export const deletePayment = paymentService.delete;
 export const recordPayment = paymentService.recordPayment;
 export const getTransactions = paymentService.getTransactions;
+export const refreshSettlement = paymentService.refreshSettlement;

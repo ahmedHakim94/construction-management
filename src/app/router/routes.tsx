@@ -9,7 +9,7 @@ import { ContractorsPage } from "@/features/contractors/pages/ContractorsPage";
 import { DailyWorkPage } from "@/features/daily-work/pages/DailyWorkPage";
 import { DashboardPlaceholderPage } from "@/features/dashboard/pages/DashboardPlaceholderPage";
 import { EquipmentPage } from "@/features/equipment/pages/EquipmentPage";
-import { PaymentsPage } from "@/features/payments/pages/PaymentsPage";
+import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
@@ -111,7 +111,7 @@ export const router = createBrowserRouter([
         path: "payments",
         element: (
           <ProtectedRoute>
-            <PaymentsPage />
+            <PaymentPage />
           </ProtectedRoute>
         ),
       },

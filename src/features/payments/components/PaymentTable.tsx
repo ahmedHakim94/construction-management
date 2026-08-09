@@ -7,16 +7,17 @@ import type { Payment } from "../types";
 interface PaymentRow extends Payment {
   contractorName: string;
   period: string;
+  statusLabel: string;
 }
 
-interface PaymentsTableProps {
+interface PaymentTableProps {
   rows: PaymentRow[];
   onView: (payment: PaymentRow) => void;
   onEdit?: (payment: PaymentRow) => void;
   onDelete: (payment: PaymentRow) => void;
 }
 
-export function PaymentsTable({ rows, onView, onEdit, onDelete }: PaymentsTableProps) {
+export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTableProps) {
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(
@@ -99,3 +100,5 @@ export function PaymentsTable({ rows, onView, onEdit, onDelete }: PaymentsTableP
 
   return <AppTable rows={rows} columns={columns} />;
 }
+
+
