@@ -47,5 +47,7 @@
   "recordPayment": "Record Payment",
   "paymentAmountInvalid": "Payment amount must be greater than zero.",
   "paymentAmountExceedsRemaining": "Payment amount cannot exceed the remaining due.",
-  "period":"Period"
+  "period": "Period",
+  "project": "Project",
+  "selectProject": "Select project"
 }

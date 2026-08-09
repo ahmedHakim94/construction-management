@@ -17,7 +17,7 @@ export function EquipmentTypeTable({
 }: EquipmentTypeTableProps) {
   const { t } = useTranslation();
 
-  const columns = useMemo(
+  const columns = useMemo<AppTableColDef[]>(
     () => [
     //   {
     //     field: "code",

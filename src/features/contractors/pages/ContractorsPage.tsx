@@ -8,7 +8,6 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { ContractorsTable } from "../components/ContractorsTable";
 import { ContractorDialog } from "../components/ContractorDialog";
-import { DeleteContractorDialog } from "../components/DeleteContractorDialog";
 import { contractorService } from "../services/contractor.service";
 import type { Contractor, ContractorFormValues } from "../types";
 import { useDialog } from "@/hooks/useDialog";
@@ -182,6 +181,7 @@ export function ContractorsPage() {
         confirmText={t("delete")}
         onClose={deleteDialog.closeDialog}
         onConfirm={handleDelete}
+        loading={deleteLoading}
       />
 
     </PageContainer>

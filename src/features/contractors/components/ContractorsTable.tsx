@@ -1,5 +1,4 @@
-import { Chip, IconButton, Stack } from "@mui/material";
-import { EditOutlined, DeleteOutlined } from "@mui/icons-material";
+import { Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import { AppTable, type AppTableColDef } from "@/components/ui";
@@ -21,7 +20,7 @@ export function ContractorsTable({
   const { t } = useTranslation();
 
 
-  const columns = useMemo(() => [
+  const columns = useMemo<AppTableColDef[]>(() => [
     {
       field: "code",
       headerName: t("code"),
@@ -51,7 +50,7 @@ export function ContractorsTable({
       headerName: t("status"),
       flex: 0.8,
       minWidth: 120,
-      renderCell: ({ value }) => (
+      renderCell: ({ value }: any) => (
         <Chip
           label={t(String(value).toLowerCase())}
           color={value === "ACTIVE" ? "success" : "default"}
@@ -72,14 +71,14 @@ export function ContractorsTable({
       filterable: false,
       flex: 0.8,
       minWidth: 110,
-      renderCell: ({ row }) => (
+      renderCell: ({ row }: any) => (
         row.isSystem ? null : <AppActions
           onEdit={() => onEdit(row)}
           onDelete={() => onDelete(row)}
         />
       ),
     },
-  ], [t]);
+  ], [t, onEdit, onDelete]);
 
   return <AppTable rows={rows} columns={columns} />;
 }

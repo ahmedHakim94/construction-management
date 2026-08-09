@@ -6,13 +6,11 @@ import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PaymentFilters } from "../components/PaymentFilters";
 import { PaymentTable } from "../components/PaymentTable";
-import { SettlePaymentDialog } from "../components/SettlePaymentDialog";
 import { PaymentDetailsDialog } from "../components/PaymentDetailsDialog";
 import { RecordPaymentDialog } from "../components/RecordPaymentDialog";
 import { usePayments } from "../hooks/usePayments";
 import { usePaymentFilters } from "../hooks/usePaymentFilters";
-import type { Payment, PaymentFormValues } from "../types";
-import type { SubmitHandler } from "react-hook-form";
+import type { Payment } from "../types";
 
 export function PaymentPage() {
   const { t } = useTranslation();
@@ -24,58 +22,22 @@ export function PaymentPage() {
     tasks,
     paymentTransactions,
     recordLoading,
-    settlementLoading,
     deleteLoading,
     loadTransactions,
-    createOrUpdateSettlement,
     recordPayment,
     deletePayment,
-    refreshPaymentSettlement,
+    refreshPaymentFromDailyWork,
   } = usePayments();
 
   const {
     control,
-    handleSubmit,
-    setError,
-    resetFilters,
-    contractorId,
-    startDate,
-    endDate,
-    paymentDetails,
     paymentRows,
-  } = usePaymentFilters(payments, contractors, dailyWorkRecords);
+  } = usePaymentFilters(payments, contractors);
 
   const [selectedPayment, setSelectedPayment] = useState<Payment & { contractorName: string } | undefined>();
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
-
-  const handlePreviewSettle: SubmitHandler<PaymentFormValues> = async () => {
-    if (paymentDetails.records.length === 0) {
-      setError("startDate", { type: "manual", message: t("noDailyWorkRecordsFound") });
-      return;
-    }
-
-    setPreviewOpen(true);
-  };
-
-  const handleConfirmCreateSettlement = async () => {
-    try {
-      setPreviewOpen(false);
-      await createOrUpdateSettlement({
-        contractorId,
-        startDate,
-        endDate,
-        grossAmount: paymentDetails.grossAmount,
-        totalDeductions: paymentDetails.totalDeductions,
-        netAmount: paymentDetails.netAmount,
-      });
-      resetFilters();
-    } catch (error) {
-      setError("contractorId", { type: "manual", message: t("somethingWentWrong") });
-    }
-  };
 
 //   const handleView = async (payment: Payment & { contractorName: string }) => {
 //     await loadTransactions(payment.id);
@@ -87,8 +49,7 @@ const handleView = async (
   payment: Payment & { contractorName: string },
 ) => {
   try {
-    // Recalculate settlement using the latest daily work records
-    const updatedPayment = await refreshPaymentSettlement(
+    const updatedPayment = await refreshPaymentFromDailyWork(
       payment,
       dailyWorkRecords,
     );
@@ -131,19 +92,17 @@ const handleView = async (
     setSelectedPayment(undefined);
   };
 
-  const selectedContractorName = contractors.find((item) => item.id === contractorId)?.name ?? "";
+
 
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
         <AppPageHeader title={t("payments")} description={t("paymentsDescription")} actions={null} />
 
-      <div >
+      <div>
         <PaymentFilters
           control={control}
-          onSubmit={handleSubmit(handlePreviewSettle)}
-          contractorOptions={contractors.map((item) => ({ value: item.id, label: item.name }))}
-          loading={settlementLoading}
+          projectOptions={projects.map((item) => ({ value: item.id, label: item.name }))}
         />
       </div>
 
@@ -179,19 +138,7 @@ const handleView = async (
         onRecordPayment={handleOpenRecordPayment}
       />
 
-      <SettlePaymentDialog
-        open={previewOpen}
-        contractorName={selectedContractorName}
-        startDate={startDate}
-        endDate={endDate}
-        grossAmount={paymentDetails.grossAmount}
-        totalDeductions={paymentDetails.totalDeductions}
-        netAmount={paymentDetails.netAmount}
-        records={paymentDetails.records}
-        onClose={() => setPreviewOpen(false)}
-        onConfirm={handleConfirmCreateSettlement}
-        loading={settlementLoading}
-      />
+
 
       <RecordPaymentDialog
         open={recordPaymentOpen}

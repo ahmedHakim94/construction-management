@@ -24,30 +24,31 @@ export function usePayments() {
     PaymentTransaction[]
   >([]);
   const [recordLoading, setRecordLoading] = useState(false);
-  const [settlementLoading, setSettlementLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       const [
-        paymentData,
         contractorData,
         dailyWorkData,
         projectData,
         taskData,
       ] = await Promise.all([
-        paymentService.getAll(),
         contractorService.getAll(),
         dailyWorkService.getAll(),
         projectService.getAll(),
         taskService.getAll(),
       ]);
 
-      setPayments(paymentData);
       setContractors(contractorData);
       setDailyWorkRecords(dailyWorkData);
       setProjects(projectData);
       setTasks(taskData);
+
+      const syncedPayments = await paymentService.synchronizeFromDailyWork(
+        dailyWorkData,
+      );
+      setPayments(syncedPayments);
     }
 
     loadData();
@@ -59,35 +60,12 @@ export function usePayments() {
     return transactions;
   };
 
-  const createOrUpdateSettlement = async (data: {
-    contractorId: string;
-    startDate: string;
-    endDate: string;
-    grossAmount: number;
-    totalDeductions: number;
-    netAmount: number;
-  }) => {
-    setSettlementLoading(true);
-
-    try {
-      const payment = await paymentService.create(data);
-
-      setPayments((current) => {
-        const existingIndex = current.findIndex(
-          (item) => item.id === payment.id,
-        );
-        if (existingIndex >= 0) {
-          return current.map((item) =>
-            item.id === payment.id ? payment : item,
-          );
-        }
-        return [payment, ...current];
-      });
-
-      return payment;
-    } finally {
-      setSettlementLoading(false);
-    }
+  const synchronizePayments = async () => {
+    const syncedPayments = await paymentService.synchronizeFromDailyWork(
+      dailyWorkRecords,
+    );
+    setPayments(syncedPayments);
+    return syncedPayments;
   };
 
   const recordPayment = async (paymentId: string, amount: number) => {
@@ -126,41 +104,17 @@ export function usePayments() {
     }
   };
 
-  const refreshPaymentSettlement = async (
+  const refreshPaymentFromDailyWork = async (
     payment: Payment,
     dailyWorkRecords: DailyWork[],
   ) => {
-    const records = dailyWorkRecords.filter(
-      (record) =>
-        record.contractorId === payment.contractorId &&
-        record.date >= payment.startDate &&
-        record.date <= payment.endDate,
+    const syncedPayments = await paymentService.synchronizeFromDailyWork(
+      dailyWorkRecords,
     );
 
-    const grossAmount = records.reduce((sum, record) => sum + record.cost, 0);
+    setPayments(syncedPayments);
 
-    const totalDeductions = records.reduce(
-      (sum, record) => sum + record.deduction,
-      0,
-    );
-
-    const netAmount = grossAmount - totalDeductions;
-
-    const updatedPayment = await paymentService.refreshSettlement(payment.id, {
-      grossAmount,
-      totalDeductions,
-      netAmount,
-    });
-
-    if (updatedPayment) {
-      setPayments((current) =>
-        current.map((item) =>
-          item.id === updatedPayment.id ? updatedPayment : item,
-        ),
-      );
-    }
-
-    return updatedPayment;
+    return syncedPayments.find((item) => item.id === payment.id) ?? payment;
   };
 
   return {
@@ -171,12 +125,11 @@ export function usePayments() {
     tasks,
     paymentTransactions,
     recordLoading,
-    settlementLoading,
     deleteLoading,
     loadTransactions,
-    createOrUpdateSettlement,
+    synchronizePayments,
     recordPayment,
     deletePayment,
-    refreshPaymentSettlement,
+    refreshPaymentFromDailyWork,
   };
 }

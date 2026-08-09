@@ -41,7 +41,7 @@ export function EquipmentDialog({
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<EquipmentFormValues>({
-    resolver: zodResolver(equipmentSchema),
+    resolver: zodResolver(equipmentSchema) as any,
     defaultValues: {
       contractorId: "",
       equipmentTypeId: "",
@@ -107,7 +107,7 @@ export function EquipmentDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit(submit)}
+          onSubmit={handleSubmit((values) => submit(values as EquipmentFormValues))}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -202,7 +202,7 @@ export function EquipmentDialog({
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
         </AppButton>
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
+        <AppButton loading={loading} onClick={handleSubmit((values) => submit(values as EquipmentFormValues))}>
           {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>

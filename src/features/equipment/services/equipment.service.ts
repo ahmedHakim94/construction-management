@@ -1,4 +1,3 @@
-import { contractorService } from "@/features/contractors/services/contractor.service";
 import { equipmentTypeService } from "@/features/settings/equipment-type/services/equipmentType.service";
 import { equipmentMockData } from "../mock/equipment";
 import type { Equipment, EquipmentFormValues } from "../types";
@@ -34,7 +33,7 @@ export const equipmentService = {
       model: data.model || undefined,
       plateNumber: data.plateNumber || undefined,
       equipmentNumber:
-        data.equipmentNumber || generateEquipmentNumber(equipmentType?.prefix),
+        data.equipmentNumber || generateEquipmentNumber(equipmentType?.prefix ?? "EQ"),
       hourRate: data.hourRate,
       notes: data.notes || undefined,
       createdAt: new Date().toISOString().split("T")[0],

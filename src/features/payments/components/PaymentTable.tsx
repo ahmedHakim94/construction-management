@@ -98,7 +98,23 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
     [t, onView, onEdit, onDelete],
   );
 
-  return <AppTable rows={rows} columns={columns} />;
+  return (
+    <AppTable
+      rows={rows}
+      columns={columns}
+      getRowClassName={({ row }: { row: PaymentRow }) => {
+        if (row.status === "PAID") return "row-paid";
+        if (row.status === "PARTIALLY_PAID") return "row-partially-paid";
+        return "row-unpaid";
+      }}
+      sx={{
+        "& .row-paid": { backgroundColor: "#f0fdf4" },
+        "& .row-paid:hover": { backgroundColor: "#dcfce7" },
+        "& .row-partially-paid": { backgroundColor: "#fffbeb" },
+        "& .row-partially-paid:hover": { backgroundColor: "#fef3c7" },
+        "& .row-unpaid": { backgroundColor: "#fff5f5" },
+        "& .row-unpaid:hover": { backgroundColor: "#fee2e2" },
+      }}
+    />
+  );
 }
-
-

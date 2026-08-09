@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -38,7 +38,6 @@ export function DailyWorkDialog({
 }: DailyWorkDialogProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const [loading, setLoading] = useState(false);
 
   const {
     control,
@@ -66,7 +65,6 @@ export function DailyWorkDialog({
     },
   });
 
-  const [project] = watch(["projectId"]);
   const [contractorId] = watch(["contractorId"]);
   const [equipmentId] = watch(["equipmentId"]);
   const [workingHours] = watch(["workingHours"]);
@@ -203,7 +201,7 @@ export function DailyWorkDialog({
           <Controller
             name="date"
             control={control}
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <AppDatePicker
                 label={t("date")}
                 value={field.value ? dayjs(field.value) : null}
@@ -405,7 +403,7 @@ export function DailyWorkDialog({
           {t("cancel")}
         </AppButton>
 
-        <AppButton loading={loading} onClick={handleSubmit(handleFormSubmit)}>
+        <AppButton loading={false} onClick={handleSubmit(handleFormSubmit)}>
           {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>

@@ -26,7 +26,7 @@ export function PaymentSummary({
 }: PaymentSummaryProps) {
   const { t } = useTranslation();
 
-  const cards = [
+  const cards: { label: string; value: number | string }[] = [
     { label: t("grossAmount"), value: grossAmount },
     { label: t("totalDeductions"), value: totalDeductions },
     { label: t("netDue"), value: netAmount },

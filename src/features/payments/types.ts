@@ -2,6 +2,7 @@ export type PaymentStatus = "UNPAID" | "PARTIALLY_PAID" | "PAID";
 
 export interface Payment {
   id: string;
+  projectId: string;
   contractorId: string;
   startDate: string;
   endDate: string;
@@ -20,12 +21,6 @@ export interface PaymentTransaction {
   amount: number;
   date: string;
   createdAt: string;
-}
-
-export interface PaymentFormValues {
-  contractorId: string;
-  startDate: string;
-  endDate: string;
 }
 
 export interface RecordPaymentFormValues {

@@ -6,7 +6,7 @@ export const equipmentSchema = z.object({
   model: z.string().optional(),
   plateNumber: z.string().optional(),
   equipmentNumber: z.string().optional(),
-  hourRate: z.number({ invalid_type_error: "Hour rate is required" }).min(0, "Hour rate must be positive"),
+  hourRate: z.coerce.number().min(0, "Hour rate must be positive"),
   notes: z.string().optional(),
 });
 

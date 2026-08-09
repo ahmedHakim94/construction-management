@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
-import { AppSearchInput } from "@/components/ui/AppSearchInput";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
@@ -16,7 +15,6 @@ import { AddCard } from "@mui/icons-material";
 export function TaskPage() {
   const { t } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [search, setSearch] = useState("");
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -33,18 +31,7 @@ export function TaskPage() {
     loadData();
   }, []);
 
-  const filteredTasks = useMemo(() => {
-    const term = search.trim().toLowerCase();
 
-    if (!term) {
-      return tasks;
-    }
-
-    return tasks.filter((item) => {
-      const values = [item.nameAr, item.nameEn];
-      return values.some((value) => value.toLowerCase().includes(term));
-    });
-  }, [tasks, search]);
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -125,7 +112,7 @@ export function TaskPage() {
 
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <TaskTable
-            rows={filteredTasks}
+            rows={tasks}
             onEdit={handleOpenEdit}
             onDelete={(task) => {
               setSelectedTask(task);

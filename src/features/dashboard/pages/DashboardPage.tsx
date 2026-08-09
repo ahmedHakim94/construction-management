@@ -7,7 +7,7 @@ interface DashboardRow {
   status: string;
 }
 
-const columns: AppTableColDef<DashboardRow>[] = [
+const columns: AppTableColDef[] = [
   { field: "item", headerName: "Item", flex: 1 },
   { field: "status", headerName: "Status", flex: 1 },
 ];

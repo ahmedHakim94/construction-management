@@ -47,5 +47,7 @@
   "recordPayment": "تسجيل الدفعة",
   "paymentAmountInvalid": "يجب أن يكون مبلغ الدفع أكبر من الصفر.",
   "paymentAmountExceedsRemaining": "لا يمكن أن يتجاوز مبلغ الدفع المبلغ المتبقي.",
-  "period":"الفترة"
+  "period": "الفترة",
+  "project": "المشروع",
+  "selectProject": "اختر المشروع"
 }

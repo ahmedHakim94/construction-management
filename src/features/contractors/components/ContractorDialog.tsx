@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,8 +59,8 @@ export function ContractorDialog({
     },
   ];
 
-  const { control, handleSubmit, reset } = useForm({
-    resolver: zodResolver(contractorSchema),
+  const { control, handleSubmit, reset } = useForm<ContractorFormValues>({
+    resolver: zodResolver(contractorSchema) as any,
     defaultValues: {
       name: "",
       phone: "",
@@ -96,6 +95,7 @@ export function ContractorDialog({
         notes: "",
         status: "ACTIVE",
       });
+       setLoading(false)
       onClose();
     }, 1000);
   };
@@ -114,7 +114,7 @@ export function ContractorDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit(submit)}
+          onSubmit={handleSubmit((values) => submit(values as ContractorFormValues))}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -204,7 +204,7 @@ export function ContractorDialog({
           {t("cancel")}
         </AppButton>
 
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
+        <AppButton loading={loading} onClick={handleSubmit((values) => submit(values as ContractorFormValues))}>
           {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
