@@ -20,9 +20,7 @@ export function usePayments() {
   const [dailyWorkRecords, setDailyWorkRecords] = useState<DailyWork[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [paymentTransactions, setPaymentTransactions] = useState<
-    PaymentTransaction[]
-  >([]);
+  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
   const [recordLoading, setRecordLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -45,9 +43,7 @@ export function usePayments() {
       setProjects(projectData);
       setTasks(taskData);
 
-      const syncedPayments = await paymentService.synchronizeFromDailyWork(
-        dailyWorkData,
-      );
+      const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkData);
       setPayments(syncedPayments);
     }
 
@@ -58,14 +54,6 @@ export function usePayments() {
     const transactions = await getTransactions(paymentId);
     setPaymentTransactions(transactions);
     return transactions;
-  };
-
-  const synchronizePayments = async () => {
-    const syncedPayments = await paymentService.synchronizeFromDailyWork(
-      dailyWorkRecords,
-    );
-    setPayments(syncedPayments);
-    return syncedPayments;
   };
 
   const recordPayment = async (paymentId: string, amount: number) => {
@@ -108,12 +96,8 @@ export function usePayments() {
     payment: Payment,
     dailyWorkRecords: DailyWork[],
   ) => {
-    const syncedPayments = await paymentService.synchronizeFromDailyWork(
-      dailyWorkRecords,
-    );
-
+    const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkRecords);
     setPayments(syncedPayments);
-
     return syncedPayments.find((item) => item.id === payment.id) ?? payment;
   };
 
@@ -127,7 +111,6 @@ export function usePayments() {
     recordLoading,
     deleteLoading,
     loadTransactions,
-    synchronizePayments,
     recordPayment,
     deletePayment,
     refreshPaymentFromDailyWork,

@@ -5,6 +5,7 @@ import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { Payment } from "../types";
 
 interface PaymentRow extends Payment {
+  projectName: string;
   contractorName: string;
   period: string;
   statusLabel: string;
@@ -22,6 +23,12 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
+      {
+        field: "projectName",
+        headerName: t("project"),
+        flex: 1.5,
+        minWidth: 200,
+      },
       {
         field: "contractorName",
         headerName: t("contractor"),

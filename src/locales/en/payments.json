@@ -38,6 +38,7 @@
   "grossAmount": "Gross Amount",
   "totalDeductions": "Total Deductions",
   "netAmount": "Net Amount",
+  "netDue": "Net Due",
   "paidAmount": "Paid Amount",
   "remainingAmount": "Remaining Amount",
   "createdDate": "Created Date",

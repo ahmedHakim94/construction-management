@@ -29,19 +29,16 @@ export function PaymentPage() {
     refreshPaymentFromDailyWork,
   } = usePayments();
 
-  const {
-    control,
-    paymentRows,
-  } = usePaymentFilters(payments, contractors);
+  const { control, paymentRows } = usePaymentFilters(payments, contractors,projects);
 
-  const [selectedPayment, setSelectedPayment] = useState<Payment & { contractorName: string } | undefined>();
+  const [selectedPayment, setSelectedPayment] = useState<
+    (Payment & { contractorName: string }) | undefined
+  >();
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
 
-  const handleView = async (
-    payment: Payment & { contractorName: string },
-  ) => {
+  const handleView = async (payment: Payment & { contractorName: string }) => {
     try {
       const updatedPayment = await refreshPaymentFromDailyWork(
         payment,
@@ -59,8 +56,7 @@ export function PaymentPage() {
       await loadTransactions(latestPayment.id);
 
       setViewOpen(true);
-    } catch {
-    }
+    } catch {}
   };
 
   const handleOpenRecordPayment = () => {
@@ -70,7 +66,10 @@ export function PaymentPage() {
   const handleRecordPayment = async (values: { amount: number }) => {
     if (!selectedPayment) return;
 
-    const updatedPayment = await recordPayment(selectedPayment.id, values.amount);
+    const updatedPayment = await recordPayment(
+      selectedPayment.id,
+      values.amount,
+    );
     if (updatedPayment) {
       setSelectedPayment({ ...selectedPayment, ...updatedPayment });
     }
@@ -89,7 +88,11 @@ export function PaymentPage() {
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-        <AppPageHeader title={t("payments")} description={t("paymentsDescription")} actions={null} />
+        <AppPageHeader
+          title={t("payments")}
+          description={t("paymentsDescription")}
+          actions={null}
+        />
 
         <div>
           <PaymentFilters
@@ -119,11 +122,23 @@ export function PaymentPage() {
         <PaymentDetailsDialog
           open={viewOpen}
           payment={selectedPayment}
-          projectMap={Object.fromEntries(projects.map((project) => [project.id, project.name]))}
-          taskMap={Object.fromEntries(tasks.map((task) => [task.id, task.nameEn]))}
+          projectMap={Object.fromEntries(
+            projects.map((project) => [project.id, project.name]),
+          )}
+          taskMap={Object.fromEntries(
+            tasks.map((task) => [task.id, task.nameEn]),
+          )}
+          // dailyWorkRecords={dailyWorkRecords.filter((record) =>
+          //   selectedPayment
+          //     ? record.contractorId === selectedPayment.contractorId &&
+          //       record.date >= selectedPayment.startDate &&
+          //       record.date <= selectedPayment.endDate
+          //     : false,
+          // )}
           dailyWorkRecords={dailyWorkRecords.filter((record) =>
             selectedPayment
-              ? record.contractorId === selectedPayment.contractorId &&
+              ? record.projectId === selectedPayment.projectId &&
+                record.contractorId === selectedPayment.contractorId &&
                 record.date >= selectedPayment.startDate &&
                 record.date <= selectedPayment.endDate
               : false,

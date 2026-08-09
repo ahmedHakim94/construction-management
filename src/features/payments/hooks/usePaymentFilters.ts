@@ -1,16 +1,17 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { Payment } from "../types";
 import type { PaymentSchemaValues } from "../schemas/payment.schema";
 import type { Contractor } from "@/features/contractors/types";
+import type { Project } from "@/features/settings/projects/types";
 
 export function usePaymentFilters(
   payments: Payment[],
   contractors: Contractor[],
+  projects: Project[],
 ) {
   const { t } = useTranslation();
-  const [search, setSearch] = useState("");
 
   const form = useForm<PaymentSchemaValues>({
     defaultValues: {
@@ -21,15 +22,17 @@ export function usePaymentFilters(
   const projectId = form.watch("projectId");
 
   const paymentRows = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    const enriched = payments
+    return payments
       .filter((payment) => {
         if (!projectId) return true;
         return payment.projectId === projectId;
       })
       .map((payment) => ({
         ...payment,
+
+        projectName:
+          projects.find((item) => item.id === payment.projectId)?.name ?? "",
+
         contractorName:
           contractors.find((item) => item.id === payment.contractorId)?.name ??
           "",
@@ -38,29 +41,14 @@ export function usePaymentFilters(
           payment.status === "UNPAID"
             ? t("statusUnpaid")
             : payment.status === "PARTIALLY_PAID"
-            ? t("statusPartiallyPaid")
-            : t("statusPaid"),
+              ? t("statusPartiallyPaid")
+              : t("statusPaid"),
       }));
-
-    return enriched.filter((item) => {
-      if (!term) return true;
-      return item.contractorName.toLowerCase().includes(term);
-    });
-  }, [payments, contractors, projectId, search, t]);
-
-  const clearFilters = () => {
-    setSearch("");
-    form.reset({ projectId: "" });
-  };
+  }, [payments, contractors,projects, projectId, t]);
 
   return {
     control: form.control,
-    handleSubmit: form.handleSubmit,
-    setError: form.setError,
-    resetFilters: clearFilters,
-    projectId,
     paymentRows,
-    search,
-    setSearch,
   };
 }
+  

@@ -38,6 +38,7 @@
   "grossAmount": "المبلغ الإجمالي",
   "totalDeductions": "إجمالي الخصومات",
   "netAmount": "الصافي المستحق",
+  "netDue": "الصافي المستحق",
   "paidAmount": "المبلغ المدفوع",
   "remainingAmount": "المتبقي",
   "createdDate": "تاريخ الإنشاء",

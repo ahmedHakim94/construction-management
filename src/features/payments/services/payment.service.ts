@@ -222,9 +222,5 @@ export const paymentService = {
   },
 };
 
-export const getAll = paymentService.getAll;
-export const getById = paymentService.getById;
-export const deletePayment = paymentService.delete;
-export const recordPayment = paymentService.recordPayment;
 export const getTransactions = paymentService.getTransactions;
-export const synchronizeFromDailyWork = paymentService.synchronizeFromDailyWork;
+export const recordPayment = paymentService.recordPayment;
