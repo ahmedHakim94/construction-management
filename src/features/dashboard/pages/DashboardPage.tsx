@@ -1,6 +1,5 @@
-import { AppBadge, AppCard, AppPageContainer, AppPageHeader, AppTable } from "@/components/ui";
+import { AppBadge, AppCard, AppPageContainer, AppPageHeader, AppTable, type AppTableColDef } from "@/components/ui";
 import { PageContainer } from "@/components/layout/PageContainer";
-import type { ColumnDef } from "@tanstack/react-table";
 
 interface DashboardRow {
   id: number;
@@ -8,9 +7,9 @@ interface DashboardRow {
   status: string;
 }
 
-const columns: ColumnDef<DashboardRow>[] = [
-  { accessorKey: "item", header: "Item" },
-  { accessorKey: "status", header: "Status" },
+const columns: AppTableColDef[] = [
+  { field: "item", headerName: "Item", flex: 1 },
+  { field: "status", headerName: "Status", flex: 1 },
 ];
 
 const rows: DashboardRow[] = [
@@ -26,7 +25,7 @@ export function DashboardPage() {
         <AppCard>Overview placeholder</AppCard>
         <AppCard>Activity placeholder</AppCard>
         <AppCard>
-          <AppTable data={rows} columns={columns} />
+          <AppTable rows={rows} columns={columns} />
         </AppCard>
       </AppPageContainer>
     </PageContainer>

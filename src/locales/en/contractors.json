@@ -1,0 +1,17 @@
+{
+  "contractors": "Contractors",
+  "contractorsDescription": "Manage contractor records and status updates.",
+  "searchContractors": "Search code, name, phone",
+  "addContractor": "Add Contractor",
+  "editContractor": "Edit Contractor",
+  "deleteContractor": "Delete Contractor",
+  "contractorName": "Contractor Name",
+  "code": "Code",
+  "name": "Name",
+  "phone": "Phone",
+  "address": "Address",
+  "nationalId": "National ID",
+  "notes": "Notes",
+  "deleteConfirmation": "Are you sure you want to delete <strong>{{name}}</strong>?",
+  "thisContractor": "this contractor"
+}

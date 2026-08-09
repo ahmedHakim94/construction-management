@@ -9,9 +9,12 @@ import { ContractorsPage } from "@/features/contractors/pages/ContractorsPage";
 import { DailyWorkPage } from "@/features/daily-work/pages/DailyWorkPage";
 import { DashboardPlaceholderPage } from "@/features/dashboard/pages/DashboardPlaceholderPage";
 import { EquipmentPage } from "@/features/equipment/pages/EquipmentPage";
-import { PaymentsPage } from "@/features/payments/pages/PaymentsPage";
+import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
+import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
+import { TaskPage } from "@/features/settings/task/pages/TaskPage";
+import { ProjectPage } from "@/features/settings/projects/pages/ProjectPage";
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +76,30 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "settings/equipment-types",
+        element: (
+          <ProtectedRoute>
+            <EquipmentTypePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings/tasks",
+        element: (
+          <ProtectedRoute>
+            <TaskPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings/projects",
+        element: (
+          <ProtectedRoute>
+            <ProjectPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "daily-work",
         element: (
           <ProtectedRoute>
@@ -84,7 +111,7 @@ export const router = createBrowserRouter([
         path: "payments",
         element: (
           <ProtectedRoute>
-            <PaymentsPage />
+            <PaymentPage />
           </ProtectedRoute>
         ),
       },

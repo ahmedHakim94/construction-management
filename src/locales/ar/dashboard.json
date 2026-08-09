@@ -1,0 +1,13 @@
+{
+  "dashboard": "الصفحة الرئيسية",
+  "dashboardDescription": "نظرة عامة على محفظة المشاريع الحالية.",
+  "overviewPlaceholder": "مخطط تفصيلي للمعلومات العامة",
+  "activityPlaceholder": "مخطط تفصيلي للنشاط",
+  "draft": "مسودة",
+  "item": "البند",
+  "status": "الحالة",
+  "pending": "معلق",
+  "scheduled": "مجدول",
+  "budgetReview": "مراجعة الميزانية",
+  "siteInspection": "فحص الموقع"
+}
