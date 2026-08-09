@@ -48,13 +48,20 @@ function calculateRemainingAmount(netAmount: number, paidAmount: number) {
 
 function calculateAmounts(records: DailyWork[]) {
   const grossAmount = records.reduce((sum, record) => sum + record.cost, 0);
-  const totalDeductions = records.reduce((sum, record) => sum + record.deduction, 0);
+  const totalDeductions = records.reduce(
+    (sum, record) => sum + record.deduction,
+    0,
+  );
   const netAmount = grossAmount - totalDeductions;
 
   return { grossAmount, totalDeductions, netAmount };
 }
 
-function buildPaymentKey(projectId: string, contractorId: string, monthKey: string) {
+function buildPaymentKey(
+  projectId: string,
+  contractorId: string,
+  monthKey: string,
+) {
   return `${projectId}|${contractorId}|${monthKey}`;
 }
 
@@ -117,12 +124,7 @@ export const paymentService = {
 
     paymentRecords = paymentRecords.map((item) =>
       item.id === paymentId
-        ? {
-            ...item,
-            paidAmount,
-            remainingAmount,
-            status,
-          }
+        ? { ...item, paidAmount, remainingAmount, status }
         : item,
     );
 
@@ -133,7 +135,10 @@ export const paymentService = {
     return paymentTransactions.filter((item) => item.paymentId === paymentId);
   },
 
-  async synchronizeFromDailyWork(dailyWorkRecords: DailyWork[]): Promise<Payment[]> {
+  async synchronizeFromDailyWork(
+    dailyWorkRecords: DailyWork[],
+  ): Promise<Payment[]> {
+    // Step 1: Group daily work records by projectId|contractorId|YYYY-MM
     const groupedDailyWork = new Map<
       string,
       {
@@ -147,7 +152,11 @@ export const paymentService = {
 
     for (const record of dailyWorkRecords) {
       const { monthKey, startDate, endDate } = getMonthPeriod(record.date);
-      const groupKey = buildPaymentKey(record.projectId, record.contractorId, monthKey);
+      const groupKey = buildPaymentKey(
+        record.projectId,
+        record.contractorId,
+        monthKey,
+      );
       const existingGroup = groupedDailyWork.get(groupKey);
 
       if (existingGroup) {
@@ -163,64 +172,80 @@ export const paymentService = {
       }
     }
 
-    const updatedPayments: Payment[] = paymentRecords.map((payment) => {
-      const paymentKey = buildPaymentKey(
+    // Step 2: Build a lookup map from existing payments keyed by projectId|contractorId|YYYY-MM
+    const existingPaymentByKey = new Map<string, Payment>();
+    for (const payment of paymentRecords) {
+      const key = buildPaymentKey(
         payment.projectId,
         payment.contractorId,
         getMonthKey(payment.startDate),
       );
-      const group = groupedDailyWork.get(paymentKey);
-
-      if (!group) {
-        return payment;
-      }
-
-      groupedDailyWork.delete(paymentKey);
-
-      const { grossAmount, totalDeductions, netAmount } = calculateAmounts(group.records);
-      const paidAmount = getPaidAmount(payment.id);
-
-      return {
-        ...payment,
-        startDate: group.startDate,
-        endDate: group.endDate,
-        grossAmount,
-        totalDeductions,
-        netAmount,
-        paidAmount,
-        remainingAmount: calculateRemainingAmount(netAmount, paidAmount),
-        status: calculateStatus(netAmount, paidAmount),
-      };
-    });
-
-    const newPayments: Payment[] = [];
-
-    for (const group of groupedDailyWork.values()) {
-      const { grossAmount, totalDeductions, netAmount } = calculateAmounts(group.records);
-      const paidAmount = 0;
-
-      const nextRecord: Payment = {
-        id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        projectId: group.projectId,
-        contractorId: group.contractorId,
-        startDate: group.startDate,
-        endDate: group.endDate,
-        grossAmount,
-        totalDeductions,
-        netAmount,
-        paidAmount,
-        remainingAmount: netAmount,
-        status: calculateStatus(netAmount, paidAmount),
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-
-      newPayments.push(nextRecord);
+      existingPaymentByKey.set(key, payment);
     }
 
-    paymentRecords = [...newPayments, ...updatedPayments];
+    // Step 3: For every DailyWork group, either update the existing payment or create a new one.
+    //         Payments with no matching DailyWork group are dropped (Daily Work is the source of truth).
+    //         paymentTransactions are never touched here.
+    const syncedPayments: Payment[] = [];
+
+    for (const [groupKey, group] of groupedDailyWork.entries()) {
+      const { grossAmount, totalDeductions, netAmount } = calculateAmounts(
+        group.records,
+      );
+      const existing = existingPaymentByKey.get(groupKey);
+
+      if (existing) {
+        // Preserve the existing payment id; recalculate amounts from paidAmount in transactions
+        const paidAmount = getPaidAmount(existing.id);
+        syncedPayments.push({
+          ...existing,
+          startDate: group.startDate,
+          endDate: group.endDate,
+          grossAmount,
+          totalDeductions,
+          netAmount,
+          paidAmount,
+          remainingAmount: calculateRemainingAmount(netAmount, paidAmount),
+          status: calculateStatus(netAmount, paidAmount),
+        });
+      } else {
+        // Brand-new group — no existing payment, paidAmount starts at 0
+        syncedPayments.push({
+          id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          projectId: group.projectId,
+          contractorId: group.contractorId,
+          startDate: group.startDate,
+          endDate: group.endDate,
+          grossAmount,
+          totalDeductions,
+          netAmount,
+          paidAmount: 0,
+          remainingAmount: netAmount,
+          status: calculateStatus(netAmount, 0),
+          createdAt: new Date().toISOString().split("T")[0],
+        });
+      }
+    }
+
+    paymentRecords = syncedPayments;
     return [...paymentRecords];
+  },
+
+  async hasPaidPaymentForDailyWork(record: DailyWork): Promise<boolean> {
+    const monthKey = getMonthKey(record.date);
+
+    return paymentRecords.some(
+      (payment) =>
+        payment.projectId === record.projectId &&
+        payment.contractorId === record.contractorId &&
+        getMonthKey(payment.startDate) === monthKey &&
+        payment.paidAmount > 0,
+    );
   },
 };
 
 export const getTransactions = paymentService.getTransactions;
 export const recordPayment = paymentService.recordPayment;
+
+export const hasPaidPaymentForDailyWork =
+  paymentService.hasPaidPaymentForDailyWork;

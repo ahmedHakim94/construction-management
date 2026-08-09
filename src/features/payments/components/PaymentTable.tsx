@@ -94,7 +94,7 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
           <AppActions
             onView={() => onView(row)}
             onEdit={onEdit ? () => onEdit(row) : undefined}
-            onDelete={() => onDelete(row)}
+            // onDelete={() => onDelete(row)}
             viewTooltip={t("view")}
             editTooltip={t("recordPayment")}
             deleteTooltip={t("delete")}

@@ -22,6 +22,7 @@ import type { Task } from "@/features/settings/task/types";
 import { AppFilters } from "@/components/ui/AppFilters";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
 import type { Dayjs } from "dayjs";
+import { hasPaidPaymentForDailyWork } from "@/features/payments/services/payment.service";
 
 export function DailyWorkPage() {
   const { t } = useTranslation();
@@ -41,13 +42,14 @@ export function DailyWorkPage() {
 
   useEffect(() => {
     async function loadData() {
-      const [recordData, projectData, contractorData, equipmentData, taskData] = await Promise.all([
-        dailyWorkService.getAll(),
-        projectService.getAll(),
-        contractorService.getAll(),
-        equipmentService.getAll(),
-        taskService.getAll(),
-      ]);
+      const [recordData, projectData, contractorData, equipmentData, taskData] =
+        await Promise.all([
+          dailyWorkService.getAll(),
+          projectService.getAll(),
+          contractorService.getAll(),
+          equipmentService.getAll(),
+          taskService.getAll(),
+        ]);
 
       setRecords(recordData);
       setProjects(projectData);
@@ -62,15 +64,19 @@ export function DailyWorkPage() {
   const displayRows = useMemo(() => {
     return records.map((item) => ({
       ...item,
-      projectName: projects.find((project) => project.id === item.projectId)?.name ?? "",
-      contractorName: contractors.find((contractor) => contractor.id === item.contractorId)?.name ?? "",
-      equipmentLabel:
-        item.equipmentId
-          ? equipment.find((eq) => eq.id === item.equipmentId)?.equipmentNumber ?? ""
-          : item.temporaryEquipmentName ?? "",
+      projectName:
+        projects.find((project) => project.id === item.projectId)?.name ?? "",
+      contractorName:
+        contractors.find((contractor) => contractor.id === item.contractorId)
+          ?.name ?? "",
+      equipmentLabel: item.equipmentId
+        ? (equipment.find((eq) => eq.id === item.equipmentId)
+            ?.equipmentNumber ?? "")
+        : (item.temporaryEquipmentName ?? ""),
       taskName:
         tasks.find((task) => task.id === item.taskId)?.nameEn ??
-        tasks.find((task) => task.id === item.taskId)?.nameAr ?? "",
+        tasks.find((task) => task.id === item.taskId)?.nameAr ??
+        "",
     }));
   }, [records, projects, contractors, equipment, tasks]);
 
@@ -90,7 +96,6 @@ export function DailyWorkPage() {
   const filteredRecords = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    console.log("🚀 ~ DailyWorkPage ~ displayRows:", displayRows)
     return displayRows.filter((item) => {
       const matchesSearch =
         !term ||
@@ -99,13 +104,10 @@ export function DailyWorkPage() {
           item.contractorName,
           item.equipmentLabel,
           item.taskName,
-        ].some((value) =>
-          value.toLowerCase().includes(term),
-        );
+        ].some((value) => value.toLowerCase().includes(term));
 
       const matchesDate =
-        !selectedDate ||
-        item.date === selectedDate.format("YYYY-MM-DD");
+        !selectedDate || item.date === selectedDate.format("YYYY-MM-DD");
 
       return matchesSearch && matchesDate;
     });
@@ -131,10 +133,15 @@ export function DailyWorkPage() {
   const handleSubmit = async (values: DailyWorkFormValues) => {
     try {
       if (mode === "edit" && selectedRecord) {
-        const updated = await dailyWorkService.update(selectedRecord.id, values);
+        const updated = await dailyWorkService.update(
+          selectedRecord.id,
+          values,
+        );
 
         if (updated) {
-          setRecords((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+          setRecords((current) =>
+            current.map((item) => (item.id === updated.id ? updated : item)),
+          );
           notify.success(t("updatedSuccessfully"));
         }
       } else {
@@ -157,8 +164,17 @@ export function DailyWorkPage() {
         return;
       }
 
+      const hasPaidPayment = await hasPaidPaymentForDailyWork(selectedRecord);
+
+      if (hasPaidPayment) {
+        notify.error(t("cannotDeleteDailyWorkWithPayment"));
+        return;
+      }
+
       await dailyWorkService.delete(selectedRecord.id);
-      setRecords((current) => current.filter((item) => item.id !== selectedRecord.id));
+      setRecords((current) =>
+        current.filter((item) => item.id !== selectedRecord.id),
+      );
       notify.success(t("deletedSuccessfully"));
       deleteDialog.closeDialog();
       setSelectedRecord(undefined);
@@ -178,7 +194,9 @@ export function DailyWorkPage() {
           actions={
             <>
               {/* <AppSearchInput value={search} onChange={setSearch} placeholder={t("searchDailyWork")} /> */}
-              <AppButton onClick={handleOpenCreate}>{t("addDailyWork")}</AppButton>
+              <AppButton onClick={handleOpenCreate}>
+                {t("addDailyWork")}
+              </AppButton>
             </>
           }
         />
@@ -194,8 +212,6 @@ export function DailyWorkPage() {
             onChange={setSelectedDate}
             label={t("date")}
           />
-
-
         </AppFilters>
 
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>

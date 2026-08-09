@@ -51,6 +51,7 @@
   "period": "الفترة",
   "project": "المشروع",
   "selectProject": "اختر المشروع",
-  "allProjects": "كل المشاريع"
+  "allProjects": "كل المشاريع",
+  "cannotDeleteDailyWorkWithPayment": "لا يمكن حذف سجل العمل اليومي لوجود دفعة مالية مرتبطة به."
 }
 
