@@ -262,6 +262,22 @@ export function DailyWorkDialog({
             />
           )}
 
+          <Controller
+            name="taskId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <AppSelect
+                label={t("task")}
+                required
+                options={taskOptions}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={t("selectTask")}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
           {selectedContractor?.isSystem && (
             <Controller
               name="temporaryEquipmentName"
@@ -312,38 +328,6 @@ export function DailyWorkDialog({
           />
 
           <Controller
-            name="fuelConsumption"
-            control={control}
-            render={({ field, fieldState }) => (
-              <AppInput
-                label={t("fuelConsumption")}
-                type="number"
-                inputProps={{ min: 0, step: 0.1 }}
-                {...field}
-                onChange={(event) => field.onChange(Number(event.target.value))}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="taskId"
-            control={control}
-            render={({ field, fieldState }) => (
-              <AppSelect
-                label={t("task")}
-                required
-                options={taskOptions}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder={t("selectTask")}
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Controller
             name="cost"
             control={control}
             render={({ field }) => (
@@ -379,6 +363,22 @@ export function DailyWorkDialog({
               <AppInput
                 label={t("deductionReason")}
                 {...field}
+              />
+            )}
+          />
+
+          <Controller
+            name="fuelConsumption"
+            control={control}
+            render={({ field, fieldState }) => (
+              <AppInput
+                label={t("fuelConsumption")}
+                type="number"
+                inputProps={{ min: 0, step: 0.1 }}
+                {...field}
+                onChange={(event) => field.onChange(Number(event.target.value))}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
               />
             )}
           />

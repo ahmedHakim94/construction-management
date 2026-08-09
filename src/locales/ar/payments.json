@@ -49,5 +49,7 @@
   "paymentAmountExceedsRemaining": "لا يمكن أن يتجاوز مبلغ الدفع المبلغ المتبقي.",
   "period": "الفترة",
   "project": "المشروع",
-  "selectProject": "اختر المشروع"
+  "selectProject": "اختر المشروع",
+  "allProjects": "كل المشاريع"
 }
+

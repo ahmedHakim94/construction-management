@@ -39,35 +39,29 @@ export function PaymentPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
 
-//   const handleView = async (payment: Payment & { contractorName: string }) => {
-//     await loadTransactions(payment.id);
-//     setSelectedPayment(payment);
-//     setViewOpen(true);
-//   };
+  const handleView = async (
+    payment: Payment & { contractorName: string },
+  ) => {
+    try {
+      const updatedPayment = await refreshPaymentFromDailyWork(
+        payment,
+        dailyWorkRecords,
+      );
 
-const handleView = async (
-  payment: Payment & { contractorName: string },
-) => {
-  try {
-    const updatedPayment = await refreshPaymentFromDailyWork(
-      payment,
-      dailyWorkRecords,
-    );
+      const latestPayment = updatedPayment ?? payment;
+      // Update the selected payment shown in Details
+      setSelectedPayment({
+        ...payment,
+        ...latestPayment,
+      });
 
-    const latestPayment = updatedPayment ?? payment;
-    // Update the selected payment shown in Details
-    setSelectedPayment({
-      ...payment,
-      ...latestPayment,
-    });
+      // Load latest payment transactions
+      await loadTransactions(latestPayment.id);
 
-    // Load latest payment transactions
-    await loadTransactions(latestPayment.id);
-
-    setViewOpen(true);
-  } catch {
-  }
-};
+      setViewOpen(true);
+    } catch {
+    }
+  };
 
   const handleOpenRecordPayment = () => {
     setRecordPaymentOpen(true);
@@ -92,79 +86,78 @@ const handleView = async (
     setSelectedPayment(undefined);
   };
 
-
-
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
         <AppPageHeader title={t("payments")} description={t("paymentsDescription")} actions={null} />
 
-      <div>
-        <PaymentFilters
-          control={control}
-          projectOptions={projects.map((item) => ({ value: item.id, label: item.name }))}
+        <div>
+          <PaymentFilters
+            control={control}
+            projectOptions={[
+              { value: "", label: t("allProjects") },
+              ...projects.map((item) => ({ value: item.id, label: item.name })),
+            ]}
+          />
+        </div>
+
+        <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
+          <PaymentTable
+            rows={paymentRows}
+            onView={handleView}
+            onEdit={(record) => {
+              setSelectedPayment(record);
+              setRecordPaymentOpen(true);
+            }}
+            onDelete={(record) => {
+              setSelectedPayment(record);
+              setDeleteOpen(true);
+            }}
+          />
+        </AppCard>
+
+        <PaymentDetailsDialog
+          open={viewOpen}
+          payment={selectedPayment}
+          projectMap={Object.fromEntries(projects.map((project) => [project.id, project.name]))}
+          taskMap={Object.fromEntries(tasks.map((task) => [task.id, task.nameEn]))}
+          dailyWorkRecords={dailyWorkRecords.filter((record) =>
+            selectedPayment
+              ? record.contractorId === selectedPayment.contractorId &&
+                record.date >= selectedPayment.startDate &&
+                record.date <= selectedPayment.endDate
+              : false,
+          )}
+          transactions={paymentTransactions}
+          onClose={() => setViewOpen(false)}
+          onRecordPayment={handleOpenRecordPayment}
         />
-      </div>
 
-      <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
-        <PaymentTable
-          rows={paymentRows}
-          onView={handleView}
-          onEdit={(record) => {
-            setSelectedPayment(record);
-            setRecordPaymentOpen(true);
-          }}
-          onDelete={(record) => {
-            setSelectedPayment(record);
-            setDeleteOpen(true);
-          }}
+        <RecordPaymentDialog
+          open={recordPaymentOpen}
+          netAmount={selectedPayment?.netAmount ?? 0}
+          paidAmount={selectedPayment?.paidAmount ?? 0}
+          remainingAmount={selectedPayment?.remainingAmount ?? 0}
+          loading={recordLoading}
+          onClose={() => setRecordPaymentOpen(false)}
+          onSubmit={handleRecordPayment}
         />
-      </AppCard>
 
-      <PaymentDetailsDialog
-        open={viewOpen}
-        payment={selectedPayment}
-        projectMap={Object.fromEntries(projects.map((project) => [project.id, project.name]))}
-        taskMap={Object.fromEntries(tasks.map((task) => [task.id, task.nameEn]))}
-        dailyWorkRecords={dailyWorkRecords.filter((record) =>
-          selectedPayment
-            ? record.contractorId === selectedPayment.contractorId &&
-              record.date >= selectedPayment.startDate &&
-              record.date <= selectedPayment.endDate
-            : false,
-        )}
-        transactions={paymentTransactions}
-        onClose={() => setViewOpen(false)}
-        onRecordPayment={handleOpenRecordPayment}
-      />
-
-
-
-      <RecordPaymentDialog
-        open={recordPaymentOpen}
-        netAmount={selectedPayment?.netAmount ?? 0}
-        paidAmount={selectedPayment?.paidAmount ?? 0}
-        remainingAmount={selectedPayment?.remainingAmount ?? 0}
-        loading={recordLoading}
-        onClose={() => setRecordPaymentOpen(false)}
-        onSubmit={handleRecordPayment}
-      />
-
-      <AppConfirmDialog
-        open={deleteOpen}
-        title={t("deletePayment")}
-        message={
-          <>
-            {t("deletePaymentConfirmation")}
-            <strong>{` ${selectedPayment?.contractorName ?? selectedPayment?.contractorId ?? ""} ?`}</strong>
-          </>
-        }
-        confirmText={t("delete")}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        loading={deleteLoading}
-      />
-    </Box>
+        <AppConfirmDialog
+          open={deleteOpen}
+          title={t("deletePayment")}
+          message={
+            <>
+              {t("deletePaymentConfirmation")}
+              <strong>{` ${selectedPayment?.contractorName ?? selectedPayment?.contractorId ?? ""} ?`}</strong>
+            </>
+          }
+          confirmText={t("delete")}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={handleDelete}
+          loading={deleteLoading}
+        />
+      </Box>
     </PageContainer>
   );
 }

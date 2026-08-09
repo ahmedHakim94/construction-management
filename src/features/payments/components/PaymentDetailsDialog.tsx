@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Box, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Box, Chip, DialogActions, DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppButton, AppDialog } from "@/components/ui";
 import type { Payment, PaymentTransaction } from "../types";
@@ -15,6 +15,12 @@ interface PaymentDetailsDialogProps {
   onClose: () => void;
   onRecordPayment: () => void;
 }
+
+const statusChipProps = {
+  PAID: { label: "statusPaid", color: "#f0fdf4", textColor: "#16a34a", border: "#bbf7d0" },
+  PARTIALLY_PAID: { label: "statusPartiallyPaid", color: "#fffbeb", textColor: "#d97706", border: "#fde68a" },
+  UNPAID: { label: "statusUnpaid", color: "#fff5f5", textColor: "#dc2626", border: "#fecaca" },
+} as const;
 
 export function PaymentDetailsDialog({
   open,
@@ -40,11 +46,26 @@ export function PaymentDetailsDialog({
     [dailyWorkRecords, projectMap, taskMap],
   );
 
+  const isPaid = payment?.status === "PAID";
+  const chipProps = payment ? statusChipProps[payment.status] : null;
+
+  const summaryItems = payment
+    ? [
+        { label: t("grossAmount"), value: payment.grossAmount },
+        { label: t("totalDeductions"), value: payment.totalDeductions },
+        { label: t("netAmount"), value: payment.netAmount },
+        { label: t("paidAmount"), value: payment.paidAmount },
+        { label: t("remainingAmount"), value: payment.remainingAmount },
+      ]
+    : [];
+
   return (
     <AppDialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>{t("paymentDetails")}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+
+          {/* Contractor & Period */}
           <Box>
             <Typography variant="subtitle2">{t("contractor")}</Typography>
             <Typography>{payment?.contractorName ?? ""}</Typography>
@@ -54,6 +75,58 @@ export function PaymentDetailsDialog({
             <Typography>{`${payment?.startDate ?? ""} - ${payment?.endDate ?? ""}`}</Typography>
           </Box>
 
+          <Divider />
+
+          {/* Payment Summary */}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+              <Typography variant="h6">{t("paymentPreview")}</Typography>
+              {chipProps && (
+                <Chip
+                  label={t(chipProps.label)}
+                  size="small"
+                  sx={{
+                    backgroundColor: chipProps.color,
+                    color: chipProps.textColor,
+                    border: `1px solid ${chipProps.border}`,
+                    fontWeight: 600,
+                    fontSize: "12px",
+                  }}
+                />
+              )}
+            </Box>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(5, 1fr)" },
+                gap: 1.5,
+              }}
+            >
+              {summaryItems.map(({ label, value }) => (
+                <Box
+                  key={label}
+                  sx={{
+                    bgcolor: "#F8FAFC",
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1.5,
+                    border: "1px solid #E5E7EB",
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: "#64748B", display: "block", mb: 0.5 }}>
+                    {label}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: "#1E293B" }}>
+                    {value}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* Daily Work Records */}
           <Box>
             <Typography variant="h6" sx={{ mb: 1 }}>
               {t("dailyWorkRecords")}
@@ -124,11 +197,14 @@ export function PaymentDetailsDialog({
             </Box>
           </Box>
 
+          {/* Payment History */}
           <Box>
-            <AppButton onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
-              {t("recordPayment")}
-            </AppButton>
-            <Typography variant="h6" sx={{ mb: 1, mt: 1 }}>
+            {!isPaid && (
+              <AppButton onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
+                {t("recordPayment")}
+              </AppButton>
+            )}
+            <Typography variant="h6" sx={{ mb: 1, mt: isPaid ? 0 : 1 }}>
               {t("paymentHistory")}
             </Typography>
             <Box sx={{ overflowX: "auto" }}>

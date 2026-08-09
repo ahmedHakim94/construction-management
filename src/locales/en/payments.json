@@ -49,5 +49,6 @@
   "paymentAmountExceedsRemaining": "Payment amount cannot exceed the remaining due.",
   "period": "Period",
   "project": "Project",
-  "selectProject": "Select project"
+  "selectProject": "Select project",
+  "allProjects": "All Projects"
 }
