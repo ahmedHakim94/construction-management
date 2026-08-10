@@ -1,9 +1,11 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
+
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { MainLayout } from "@/app/layouts/MainLayout";
 import { ProtectedRoute } from "@/app/router/ProtectedRoute";
 import { PublicRoute } from "@/app/router/PublicRoute";
 import { ROUTE_PATHS } from "@/app/router/routeConstants";
+
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { ContractorsPage } from "@/features/contractors/pages/ContractorsPage";
 import { DailyWorkPage } from "@/features/daily-work/pages/DailyWorkPage";
@@ -17,6 +19,9 @@ import { TaskPage } from "@/features/settings/task/pages/TaskPage";
 import { ProjectPage } from "@/features/settings/projects/pages/ProjectPage";
 
 export const router = createBrowserRouter([
+  // ==========================================
+  // Root
+  // ==========================================
   {
     path: "/",
     element: (
@@ -25,6 +30,10 @@ export const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
+
+  // ==========================================
+  // Public Routes
+  // ==========================================
   {
     path: "/",
     element: <AuthLayout />,
@@ -47,97 +56,62 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // ==========================================
+  // Protected Routes
+  // ==========================================
   {
     path: "/",
-    element: <MainLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        path: "dashboard",
-        element: (
-          <ProtectedRoute>
-            <DashboardPlaceholderPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "contractors",
-        element: (
-          <ProtectedRoute>
-            <ContractorsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "equipment",
-        element: (
-          <ProtectedRoute>
-            <EquipmentPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "settings/equipment-types",
-        element: (
-          <ProtectedRoute>
-            <EquipmentTypePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "settings/tasks",
-        element: (
-          <ProtectedRoute>
-            <TaskPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "settings/projects",
-        element: (
-          <ProtectedRoute>
-            <ProjectPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "daily-work",
-        element: (
-          <ProtectedRoute>
-            <DailyWorkPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "payments",
-        element: (
-          <ProtectedRoute>
-            <PaymentPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "reports",
-        element: (
-          <ProtectedRoute>
-            <ReportsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "settings",
-        element: (
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "*",
-        element: (
-          <ProtectedRoute>
-            <Navigate to={ROUTE_PATHS.dashboard} replace />
-          </ProtectedRoute>
-        ),
+        element: <MainLayout />,
+        children: [
+          {
+            path: "dashboard",
+            element: <DashboardPlaceholderPage />,
+          },
+          {
+            path: "contractors",
+            element: <ContractorsPage />,
+          },
+          {
+            path: "equipment",
+            element: <EquipmentPage />,
+          },
+          {
+            path: "settings/equipment-types",
+            element: <EquipmentTypePage />,
+          },
+          {
+            path: "settings/tasks",
+            element: <TaskPage />,
+          },
+          {
+            path: "settings/projects",
+            element: <ProjectPage />,
+          },
+          {
+            path: "daily-work",
+            element: <DailyWorkPage />,
+          },
+          {
+            path: "payments",
+            element: <PaymentPage />,
+          },
+          {
+            path: "reports",
+            element: <ReportsPage />,
+          },
+          {
+            path: "settings",
+            element: <SettingsPage />,
+          },
+          {
+            path: "*",
+            element: <Navigate to={ROUTE_PATHS.dashboard} replace />,
+          },
+        ],
       },
     ],
   },

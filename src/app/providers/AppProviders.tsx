@@ -9,7 +9,6 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-
   const { i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
@@ -17,8 +16,9 @@ export function AppProviders({ children }: AppProvidersProps) {
     <Provider store={store}>
       <PersistGate persistor={persistor}>
         {children}
+
         <ToastContainer
-          rtl={i18n.language === "ar"}
+          rtl={isArabic}
           position={isArabic ? "top-right" : "top-left"}
         />
       </PersistGate>

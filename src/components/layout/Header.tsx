@@ -1,7 +1,11 @@
 import { Avatar, Box, IconButton, Menu, MenuItem, Stack, Switch, Typography } from "@mui/material";
-import { Language, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
+import { Language, Logout, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/app/store/hooks";
+import { logout } from "@/features/auth/store/authSlice";
+import { ROUTE_PATHS } from "@/app/router/routeConstants";
 
 interface HeaderProps {
   locale?: "en" | "ar";
@@ -12,6 +16,8 @@ interface HeaderProps {
 export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const isArabic = locale === "ar";
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -20,6 +26,12 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleCloseMenu();
+    dispatch(logout());
+    navigate(ROUTE_PATHS.login);
   };
 
   return (
@@ -61,8 +73,10 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
       </Stack>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu} keepMounted>
-        <MenuItem onClick={handleCloseMenu}>{t("profile")}</MenuItem>
-        <MenuItem onClick={handleCloseMenu}>{t("signOut")}</MenuItem>
+        <MenuItem onClick={handleLogout}>
+          <Logout fontSize="small" sx={{ mr: 1 }} />
+          {t("signOut")}
+        </MenuItem>
       </Menu>
     </Box>
   );
