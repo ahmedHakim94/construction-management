@@ -1,11 +1,9 @@
-import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import {
   AssessmentOutlined,
   BusinessOutlined,
   ConstructionOutlined,
   GroupsOutlined,
-  LanguageOutlined,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 

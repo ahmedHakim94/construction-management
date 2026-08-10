@@ -9,13 +9,9 @@ import "../styles/login.scss";
 import BoxOverLayer from "../components/BoxOverLayer";
 
 export function LoginPage() {
-  const { t, i18n } = useTranslation("auth");
+  const { i18n } = useTranslation("auth");
 
   const isArabic = i18n.language === "ar";
-
-  const changeLanguage = (language: "ar" | "en") => {
-    i18n.changeLanguage(language);
-  };
 
   return (
     <Box
