@@ -1,17 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { projectService } from "@/features/settings/projects/services/project.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
 import { equipmentService } from "@/features/equipment/services/equipment.service";
 import { paymentService } from "@/features/payments/services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
+import { taskService } from "@/features/settings/task/services/task.service";
+import { useTranslation } from "react-i18next";
 import type {
   DashboardStats,
   DashboardFinancials,
   DashboardPayment,
+  DashboardDailyWork,
 } from "../types";
 import type { Payment } from "@/features/payments/types";
 import type { Project } from "@/features/settings/projects/types";
 import type { Contractor } from "@/features/contractors/types";
+import type { Equipment } from "@/features/equipment/types";
+import type { Task } from "@/features/settings/task/types";
+import type { DailyWork } from "@/features/daily-work/types";
 
 const calculateFinancials = (paymentsData: Payment[]): DashboardFinancials => {
   const totalCost = paymentsData.reduce(
@@ -53,7 +59,45 @@ const mapDashboardPayments = (
   });
 };
 
+const mapDashboardDailyWork = (
+  dailyWorkRecords: DailyWork[],
+  projectsData: Project[],
+  contractorsData: Contractor[],
+  equipmentData: Equipment[],
+  tasksData: Task[],
+  language: string,
+): DashboardDailyWork[] => {
+  return dailyWorkRecords.map((record) => {
+    const project = projectsData.find((p) => p.id === record.projectId);
+    const contractor = contractorsData.find((c) => c.id === record.contractorId);
+    
+    const equipment = equipmentData.find((eq) => eq.id === record.equipmentId);
+    const equipmentName = record.equipmentId
+      ? (equipment?.equipmentNumber ?? "")
+      : (record.temporaryEquipmentName ?? "");
+
+    const task = tasksData.find((t) => t.id === record.taskId);
+    const taskName = language === "ar"
+      ? (task?.nameAr ?? task?.nameEn ?? "")
+      : (task?.nameEn ?? task?.nameAr ?? "");
+
+    return {
+      id: record.id,
+      date: record.date,
+      projectName: project?.name ?? record.projectId,
+      contractorName: contractor?.name ?? record.contractorId,
+      equipmentName,
+      taskName,
+      workingHours: record.workingHours,
+      cost: record.cost,
+    };
+  });
+};
+
 export function useDashboard() {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language;
+
   const [isLoading, setIsLoading] = useState(true);
   const [isFinancialLoading, setIsFinancialLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
@@ -66,22 +110,41 @@ export function useDashboard() {
     totalPaid: 0,
     remainingAmount: 0,
   });
-  const [payments, setPayments] = useState<DashboardPayment[]>([]);
+
+  const [rawProjects, setRawProjects] = useState<Project[]>([]);
+  const [rawContractors, setRawContractors] = useState<Contractor[]>([]);
+  const [rawEquipment, setRawEquipment] = useState<Equipment[]>([]);
+  const [rawTasks, setRawTasks] = useState<Task[]>([]);
+  const [rawDailyWork, setRawDailyWork] = useState<DailyWork[]>([]);
+  const [rawPayments, setRawPayments] = useState<Payment[]>([]);
 
   useEffect(() => {
     let isMounted = true;
     async function loadDashboardData() {
       try {
         // Fetch all required data in parallel to avoid duplicate service calls
-        const [projectsData, contractorsData, equipmentData, dailyWorkData] =
-          await Promise.all([
-            projectService.getAll(),
-            contractorService.getAll(),
-            equipmentService.getAll(),
-            dailyWorkService.getAll(),
-          ]);
+        const [
+          projectsData,
+          contractorsData,
+          equipmentData,
+          dailyWorkData,
+          tasksData,
+        ] = await Promise.all([
+          projectService.getAll(),
+          contractorService.getAll(),
+          equipmentService.getAll(),
+          dailyWorkService.getAll(),
+          taskService.getAll(),
+        ]);
 
         if (!isMounted) return;
+
+        // Set raw data to trigger useMemos
+        setRawProjects(projectsData);
+        setRawContractors(contractorsData);
+        setRawEquipment(equipmentData);
+        setRawTasks(tasksData);
+        setRawDailyWork(dailyWorkData);
 
         // Set summary statistics
         setStats({
@@ -94,18 +157,12 @@ export function useDashboard() {
         // Recalculate payments using the existing synchronization logic
         const paymentsData =
           await paymentService.synchronizeFromDailyWork(dailyWorkData);
+        setRawPayments(paymentsData);
 
         // Calculate financials
         const calculatedFinancials = calculateFinancials(paymentsData);
         setFinancials(calculatedFinancials);
 
-        // Map calculated payments resolving contractor/project names from the already-fetched data
-        const mappedPayments = mapDashboardPayments(
-          paymentsData,
-          projectsData,
-          contractorsData,
-        );
-        setPayments(mappedPayments);
         setIsFinancialLoading(false);
       } catch (err) {
         console.error("Error loading dashboard data", err);
@@ -122,10 +179,26 @@ export function useDashboard() {
     };
   }, []);
 
+  const dailyWork = useMemo(() => {
+    return mapDashboardDailyWork(
+      rawDailyWork,
+      rawProjects,
+      rawContractors,
+      rawEquipment,
+      rawTasks,
+      currentLang,
+    );
+  }, [rawDailyWork, rawProjects, rawContractors, rawEquipment, rawTasks, currentLang]);
+
+  const payments = useMemo(() => {
+    return mapDashboardPayments(rawPayments, rawProjects, rawContractors);
+  }, [rawPayments, rawProjects, rawContractors]);
+
   return {
     stats,
     financials,
     payments,
+    dailyWork,
     isLoading,
     isFinancialLoading,
   };

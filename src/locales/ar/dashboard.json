@@ -16,5 +16,7 @@
   "pending": "معلق",
   "scheduled": "مجدول",
   "budgetReview": "مراجعة الميزانية",
-  "siteInspection": "فحص الموقع"
+  "siteInspection": "فحص الموقع",
+  "noDailyWorkRecordsFound": "لم يتم العثور على سجلات عمل يومية.",
+  "workingHoursFormat": "{{hours}} ساعة"
 }

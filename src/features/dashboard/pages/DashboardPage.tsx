@@ -11,10 +11,11 @@ import SharedTotalNumber from "../components/SharedTotalNumber";
 import { FinancialOverview } from "../components/FinancialOverview";
 import { useDashboard } from "../hooks/useDashboard";
 import { PaymentsOverview } from "../components/PaymentsOverview";
+import { DailyWorkOverview } from "../components/DailyWorkOverview";
 
 export function DashboardPage() {
   const { t } = useTranslation("dashboard");
-  const { stats, financials, payments, isLoading, isFinancialLoading } = useDashboard();
+  const { stats, financials, payments, dailyWork, isLoading, isFinancialLoading } = useDashboard();
 
 
   return (
@@ -93,6 +94,12 @@ export function DashboardPage() {
         {/* Payments Overview */}
         <PaymentsOverview
           payments={payments}
+          isLoading={isFinancialLoading}
+        />
+
+        {/* Daily Work Overview */}
+        <DailyWorkOverview
+          dailyWork={dailyWork}
           isLoading={isFinancialLoading}
         />
       </AppPageContainer>

@@ -16,5 +16,7 @@
   "pending": "Pending",
   "scheduled": "Scheduled",
   "budgetReview": "Budget review",
-  "siteInspection": "Site inspection"
+  "siteInspection": "Site inspection",
+  "noDailyWorkRecordsFound": "No daily work records found.",
+  "workingHoursFormat": "{{hours}} hrs"
 }

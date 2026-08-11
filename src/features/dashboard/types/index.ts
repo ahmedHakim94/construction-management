@@ -23,3 +23,14 @@ export interface DashboardPayment {
   remainingAmount: number;
   status: PaymentStatus;
 }
+
+export interface DashboardDailyWork {
+  id: string;
+  date: string;
+  projectName: string;
+  contractorName: string;
+  equipmentName: string;
+  taskName: string;
+  workingHours: number;
+  cost: number;
+}
