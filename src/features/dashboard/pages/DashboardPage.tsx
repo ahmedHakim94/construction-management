@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box } from "@mui/material";
 import {
@@ -8,97 +7,14 @@ import {
 } from "@mui/icons-material";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppPageContainer, AppPageHeader } from "@/components/ui";
-import { projectService } from "@/features/settings/projects/services/project.service";
-import { contractorService } from "@/features/contractors/services/contractor.service";
-import { equipmentService } from "@/features/equipment/services/equipment.service";
-import { paymentService } from "@/features/payments/services/payment.service";
 import SharedTotalNumber from "../components/SharedTotalNumber";
 import { FinancialOverview } from "../components/FinancialOverview";
+import { useDashboard } from "../hooks/useDashboard";
 
 export function DashboardPage() {
   const { t } = useTranslation("dashboard");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFinancialLoading, setIsFinancialLoading] = useState(true);
-  const [stats, setStats] = useState({
-    projects: 0,
-    contractors: 0,
-    equipment: 0,
-  });
-  const [financials, setFinancials] = useState({
-    totalCost: 0,
-    totalPaid: 0,
-    remainingAmount: 0,
-  });
+  const { stats, financials, isLoading, isFinancialLoading } = useDashboard();
 
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchStats() {
-      try {
-        const [projectsData, contractorsData, equipmentData] =
-          await Promise.all([
-            projectService.getAll(),
-            contractorService.getAll(),
-            equipmentService.getAll(),
-          ]);
-        if (isMounted) {
-          setStats({
-            projects: projectsData?.length ?? 0,
-            contractors: contractorsData?.length ?? 0,
-            equipment: equipmentData?.length ?? 0,
-          });
-        }
-      } catch (err) {
-        console.error("Error loading dashboard data", err);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-    void fetchStats();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchFinancials() {
-      try {
-        const paymentsData = await paymentService.getAll();
-        console.log("🚀 ~ fetchFinancials ~ paymentsData:", paymentsData)
-        if (isMounted) {
-          const totalCost = paymentsData.reduce(
-            (sum, item) => sum + (item.netAmount ?? 0),
-            0,
-          );
-          const totalPaid = paymentsData.reduce(
-            (sum, item) => sum + (item.paidAmount ?? 0),
-            0,
-          );
-          const remainingAmount = paymentsData.reduce(
-            (sum, item) => sum + (item.remainingAmount ?? 0),
-            0,
-          );
-          setFinancials({
-            totalCost,
-            totalPaid,
-            remainingAmount,
-          });
-        }
-      } catch (err) {
-        console.error("Error loading financial data", err);
-      } finally {
-        if (isMounted) {
-          setIsFinancialLoading(false);
-        }
-      }
-    }
-    void fetchFinancials();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   return (
     <PageContainer>
