@@ -9,7 +9,7 @@ import { ROUTE_PATHS } from "@/app/router/routeConstants";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { ContractorsPage } from "@/features/contractors/pages/ContractorsPage";
 import { DailyWorkPage } from "@/features/daily-work/pages/DailyWorkPage";
-import { DashboardPlaceholderPage } from "@/features/dashboard/pages/DashboardPlaceholderPage";
+import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { EquipmentPage } from "@/features/equipment/pages/EquipmentPage";
 import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
@@ -69,7 +69,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "dashboard",
-            element: <DashboardPlaceholderPage />,
+            element: <DashboardPage />,
           },
           {
             path: "contractors",
