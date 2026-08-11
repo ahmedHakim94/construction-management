@@ -1,4 +1,12 @@
 {
   "reports": "التقارير",
-  "reportsDescription": "إنشاء تقارير تشغيلية ورؤى حول المشاريع."
+  "reportsDescription": "إنشاء تقارير تشغيلية ورؤى حول المشاريع.",
+  "reportsOverview": "نظرة عامة على التقارير",
+  "totalWorkRecords": "سجلات العمل",
+  "totalWorkCost": "إجمالي تكلفة العمل",
+  "totalDeductions": "إجمالي الخصومات",
+  "netWorkAmount": "صافي مبلغ العمل",
+  "totalPaidAmount": "إجمالي المبلغ المدفوع",
+  "remainingBalance": "الرصيد المتبقي",
+  "noReportsFound": "لم يتم العثور على تقارير."
 }
