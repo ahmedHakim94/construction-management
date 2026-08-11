@@ -34,3 +34,12 @@ export interface DashboardDailyWork {
   workingHours: number;
   cost: number;
 }
+
+export interface DashboardProjectWork {
+  id: string;
+  projectId: string;
+  projectName: string;
+  workRecords: number;
+  workingHours: number;
+  totalCost: number;
+}

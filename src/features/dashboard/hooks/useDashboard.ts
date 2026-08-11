@@ -11,6 +11,7 @@ import type {
   DashboardFinancials,
   DashboardPayment,
   DashboardDailyWork,
+  DashboardProjectWork,
 } from "../types";
 import type { Payment } from "@/features/payments/types";
 import type { Project } from "@/features/settings/projects/types";
@@ -94,6 +95,42 @@ const mapDashboardDailyWork = (
   });
 };
 
+const mapWorkByProject = (
+  dailyWorkRecords: DailyWork[],
+  projectsData: Project[],
+): DashboardProjectWork[] => {
+  const projectGroups: Record<
+    string,
+    { workRecords: number; workingHours: number; totalCost: number }
+  > = {};
+
+  for (const record of dailyWorkRecords) {
+    const projectId = record.projectId;
+    if (!projectGroups[projectId]) {
+      projectGroups[projectId] = {
+        workRecords: 0,
+        workingHours: 0,
+        totalCost: 0,
+      };
+    }
+    projectGroups[projectId].workRecords += 1;
+    projectGroups[projectId].workingHours += record.workingHours ?? 0;
+    projectGroups[projectId].totalCost += record.cost ?? 0;
+  }
+
+  return Object.entries(projectGroups).map(([projectId, stats]) => {
+    const project = projectsData.find((p) => p.id === projectId);
+    return {
+      id: projectId,
+      projectId,
+      projectName: project?.name ?? projectId,
+      workRecords: stats.workRecords,
+      workingHours: stats.workingHours,
+      totalCost: stats.totalCost,
+    };
+  });
+};
+
 export function useDashboard() {
   const { i18n } = useTranslation();
   const currentLang = i18n.language;
@@ -117,6 +154,8 @@ export function useDashboard() {
   const [rawTasks, setRawTasks] = useState<Task[]>([]);
   const [rawDailyWork, setRawDailyWork] = useState<DailyWork[]>([]);
   const [rawPayments, setRawPayments] = useState<Payment[]>([]);
+
+  const [workByProject, setWorkByProject] = useState<DashboardProjectWork[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -163,6 +202,10 @@ export function useDashboard() {
         const calculatedFinancials = calculateFinancials(paymentsData);
         setFinancials(calculatedFinancials);
 
+        // Group work by project using the pure helper
+        const workByProjectData = mapWorkByProject(dailyWorkData, projectsData);
+        setWorkByProject(workByProjectData);
+
         setIsFinancialLoading(false);
       } catch (err) {
         console.error("Error loading dashboard data", err);
@@ -199,6 +242,7 @@ export function useDashboard() {
     financials,
     payments,
     dailyWork,
+    workByProject,
     isLoading,
     isFinancialLoading,
   };

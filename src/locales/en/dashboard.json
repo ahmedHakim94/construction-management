@@ -18,5 +18,8 @@
   "budgetReview": "Budget review",
   "siteInspection": "Site inspection",
   "noDailyWorkRecordsFound": "No daily work records found.",
-  "workingHoursFormat": "{{hours}} hrs"
+  "workingHoursFormat": "{{hours}} hrs",
+  "workByProject": "Work by Project",
+  "workRecords": "Work Records",
+  "noProjectWorkFound": "No work records found for any project."
 }

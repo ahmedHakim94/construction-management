@@ -18,5 +18,8 @@
   "budgetReview": "مراجعة الميزانية",
   "siteInspection": "فحص الموقع",
   "noDailyWorkRecordsFound": "لم يتم العثور على سجلات عمل يومية.",
-  "workingHoursFormat": "{{hours}} ساعة"
+  "workingHoursFormat": "{{hours}} ساعة",
+  "workByProject": "العمل حسب المشروع",
+  "workRecords": "سجلات العمل",
+  "noProjectWorkFound": "لم يتم العثور على سجلات عمل لأي مشروع."
 }

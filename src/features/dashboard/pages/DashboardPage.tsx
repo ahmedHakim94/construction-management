@@ -12,11 +12,19 @@ import { FinancialOverview } from "../components/FinancialOverview";
 import { useDashboard } from "../hooks/useDashboard";
 import { PaymentsOverview } from "../components/PaymentsOverview";
 import { DailyWorkOverview } from "../components/DailyWorkOverview";
+import { WorkByProject } from "../components/WorkByProject";
 
 export function DashboardPage() {
   const { t } = useTranslation("dashboard");
-  const { stats, financials, payments, dailyWork, isLoading, isFinancialLoading } = useDashboard();
-
+  const {
+    stats,
+    financials,
+    payments,
+    dailyWork,
+    workByProject,
+    isLoading,
+    isFinancialLoading,
+  } = useDashboard();
 
   return (
     <PageContainer>
@@ -92,8 +100,11 @@ export function DashboardPage() {
         />
 
         {/* Payments Overview */}
-        <PaymentsOverview
-          payments={payments}
+        <PaymentsOverview payments={payments} isLoading={isFinancialLoading} />
+
+        {/* Work by Project Overview */}
+        <WorkByProject
+          workByProject={workByProject}
           isLoading={isFinancialLoading}
         />
 
