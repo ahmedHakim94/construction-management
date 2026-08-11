@@ -4,7 +4,54 @@ import { contractorService } from "@/features/contractors/services/contractor.se
 import { equipmentService } from "@/features/equipment/services/equipment.service";
 import { paymentService } from "@/features/payments/services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
-import type { DashboardStats, DashboardFinancials } from "../types";
+import type {
+  DashboardStats,
+  DashboardFinancials,
+  DashboardPayment,
+} from "../types";
+import type { Payment } from "@/features/payments/types";
+import type { Project } from "@/features/settings/projects/types";
+import type { Contractor } from "@/features/contractors/types";
+
+const calculateFinancials = (paymentsData: Payment[]): DashboardFinancials => {
+  const totalCost = paymentsData.reduce(
+    (sum, item) => sum + (item.netAmount ?? 0),
+    0,
+  );
+  const totalPaid = paymentsData.reduce(
+    (sum, item) => sum + (item.paidAmount ?? 0),
+    0,
+  );
+  const remainingAmount = paymentsData.reduce(
+    (sum, item) => sum + (item.remainingAmount ?? 0),
+    0,
+  );
+  return { totalCost, totalPaid, remainingAmount };
+};
+
+const mapDashboardPayments = (
+  paymentsData: Payment[],
+  projectsData: Project[],
+  contractorsData: Contractor[],
+): DashboardPayment[] => {
+  return paymentsData.map((payment) => {
+    const project = projectsData.find((p) => p.id === payment.projectId);
+    const contractor = contractorsData.find(
+      (c) => c.id === payment.contractorId,
+    );
+    return {
+      id: payment.id,
+      projectName: project?.name ?? payment.projectId,
+      contractorName: contractor?.name ?? payment.contractorId,
+      startDate: payment.startDate,
+      endDate: payment.endDate,
+      netAmount: payment.netAmount,
+      paidAmount: payment.paidAmount,
+      remainingAmount: payment.remainingAmount,
+      status: payment.status,
+    };
+  });
+};
 
 export function useDashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,75 +66,57 @@ export function useDashboard() {
     totalPaid: 0,
     remainingAmount: 0,
   });
+  const [payments, setPayments] = useState<DashboardPayment[]>([]);
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchStats() {
+    async function loadDashboardData() {
       try {
-        const [projectsData, contractorsData, equipmentData] =
+        // Fetch all required data in parallel to avoid duplicate service calls
+        const [projectsData, contractorsData, equipmentData, dailyWorkData] =
           await Promise.all([
             projectService.getAll(),
             contractorService.getAll(),
             equipmentService.getAll(),
+            dailyWorkService.getAll(),
           ]);
-        if (isMounted) {
-          setStats({
-            projects: projectsData?.length ?? 0,
-            contractors: contractorsData?.length ?? 0,
-            equipment: equipmentData?.length ?? 0,
-          });
-        }
-      } catch (err) {
-        console.error("Error loading dashboard data", err);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-    void fetchStats();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchFinancials() {
-      try {
-        const dailyWorkData = await dailyWorkService.getAll();
+        if (!isMounted) return;
 
+        // Set summary statistics
+        setStats({
+          projects: projectsData?.length ?? 0,
+          contractors: contractorsData?.length ?? 0,
+          equipment: equipmentData?.length ?? 0,
+        });
+        setIsLoading(false);
+
+        // Recalculate payments using the existing synchronization logic
         const paymentsData =
           await paymentService.synchronizeFromDailyWork(dailyWorkData);
 
-        if (isMounted) {
-          const totalCost = paymentsData.reduce(
-            (sum, item) => sum + (item.netAmount ?? 0),
-            0,
-          );
-          const totalPaid = paymentsData.reduce(
-            (sum, item) => sum + (item.paidAmount ?? 0),
-            0,
-          );
-          const remainingAmount = paymentsData.reduce(
-            (sum, item) => sum + (item.remainingAmount ?? 0),
-            0,
-          );
-          setFinancials({
-            totalCost,
-            totalPaid,
-            remainingAmount,
-          });
-        }
+        // Calculate financials
+        const calculatedFinancials = calculateFinancials(paymentsData);
+        setFinancials(calculatedFinancials);
+
+        // Map calculated payments resolving contractor/project names from the already-fetched data
+        const mappedPayments = mapDashboardPayments(
+          paymentsData,
+          projectsData,
+          contractorsData,
+        );
+        setPayments(mappedPayments);
+        setIsFinancialLoading(false);
       } catch (err) {
-        console.error("Error loading financial data", err);
-      } finally {
+        console.error("Error loading dashboard data", err);
         if (isMounted) {
+          setIsLoading(false);
           setIsFinancialLoading(false);
         }
       }
     }
-    void fetchFinancials();
+
+    void loadDashboardData();
     return () => {
       isMounted = false;
     };
@@ -96,6 +125,7 @@ export function useDashboard() {
   return {
     stats,
     financials,
+    payments,
     isLoading,
     isFinancialLoading,
   };

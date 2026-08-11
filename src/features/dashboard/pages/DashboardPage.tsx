@@ -10,10 +10,11 @@ import { AppPageContainer, AppPageHeader } from "@/components/ui";
 import SharedTotalNumber from "../components/SharedTotalNumber";
 import { FinancialOverview } from "../components/FinancialOverview";
 import { useDashboard } from "../hooks/useDashboard";
+import { PaymentsOverview } from "../components/PaymentsOverview";
 
 export function DashboardPage() {
   const { t } = useTranslation("dashboard");
-  const { stats, financials, isLoading, isFinancialLoading } = useDashboard();
+  const { stats, financials, payments, isLoading, isFinancialLoading } = useDashboard();
 
 
   return (
@@ -86,6 +87,12 @@ export function DashboardPage() {
           totalCost={financials.totalCost}
           totalPaid={financials.totalPaid}
           remainingAmount={financials.remainingAmount}
+          isLoading={isFinancialLoading}
+        />
+
+        {/* Payments Overview */}
+        <PaymentsOverview
+          payments={payments}
           isLoading={isFinancialLoading}
         />
       </AppPageContainer>
