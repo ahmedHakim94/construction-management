@@ -13,5 +13,8 @@
   "netWorkAmount": "Net Work Amount",
   "totalPaidAmount": "Total Paid Amount",
   "remainingBalance": "Remaining Balance",
-  "noReportsFound": "No reports found."
+  "noReportsFound": "No reports found.",
+  "dailyWorkDetailedReport": "Daily Work Detailed Report",
+  "totalWorkingHours": "Total Working Hours",
+  "noDailyWorkRecords": "No Daily Work Records"
 }

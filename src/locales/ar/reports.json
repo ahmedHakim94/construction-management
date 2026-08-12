@@ -13,5 +13,8 @@
   "netWorkAmount": "صافي مبلغ العمل",
   "totalPaidAmount": "إجمالي المبلغ المدفوع",
   "remainingBalance": "الرصيد المتبقي",
-  "noReportsFound": "لم يتم العثور على تقارير."
+  "noReportsFound": "لم يتم العثور على تقارير.",
+  "dailyWorkDetailedReport": "تقرير تفصيلي للأعمال اليومية",
+  "totalWorkingHours": "إجمالي ساعات العمل",
+  "noDailyWorkRecords": "لا توجد سجلات أعمال يومية."
 }

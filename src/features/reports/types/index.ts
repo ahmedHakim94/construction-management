@@ -26,3 +26,21 @@ export interface ReportSummary {
   totalPaidAmount: number;
   remainingBalance: number;
 }
+
+export interface DailyWorkReport {
+  id: string;
+  date: string;
+  projectId: string;
+  projectName: string;
+  contractorId: string;
+  contractorName: string;
+  equipmentName: string;
+  taskName: string;
+  workingHours: number;
+  hourRate: number;
+  fuelConsumption: number;
+  cost: number;
+  deduction: number;
+  deductionReason?: string;
+  netAmount: number;
+}

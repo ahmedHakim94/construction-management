@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppCard, AppPageHeader } from "@/components/ui";
@@ -7,6 +7,7 @@ import { useReports } from "../hooks/useReports";
 import { ReportsTable } from "../components/ReportsTable";
 import { ReportsFilters } from "../components/ReportsFilters";
 import { ReportsSummary } from "../components/ReportsSummary";
+import { DailyWorkReportTable } from "../components/DailyWorkReportTable";
 
 export function ReportsPage() {
   const { t } = useTranslation(["reports"]);
@@ -16,6 +17,7 @@ export function ReportsPage() {
     projects,
     filters,
     setFilters,
+    dailyWorkReports,
     isLoading,
   } = useReports();
 
@@ -52,6 +54,13 @@ export function ReportsPage() {
 
         <AppCard sx={{ p: { xs: 2.5, md: 3 } }}>
           <ReportsTable rows={reports} isLoading={isLoading} />
+        </AppCard>
+
+        <AppCard sx={{ p: { xs: 2.5, md: 3 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, textAlign: "start" }}>
+            {t("reports:dailyWorkDetailedReport")}
+          </Typography>
+          <DailyWorkReportTable rows={dailyWorkReports} isLoading={isLoading} />
         </AppCard>
       </Box>
     </PageContainer>

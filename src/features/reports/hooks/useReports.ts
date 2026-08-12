@@ -1,12 +1,19 @@
 import { useEffect, useState, useMemo } from "react";
 import type { Dayjs } from "dayjs";
+import { useTranslation } from "react-i18next";
 import { projectService } from "@/features/settings/projects/services/project.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
 import { paymentService } from "@/features/payments/services/payment.service";
+import { contractorService } from "@/features/contractors/services/contractor.service";
+import { equipmentService } from "@/features/equipment/services/equipment.service";
+import { taskService } from "@/features/settings/task/services/task.service";
 import type { DailyWork } from "@/features/daily-work/types";
 import type { Payment } from "@/features/payments/types";
 import type { Project } from "@/features/settings/projects/types";
-import type { ProjectReportSummary, ReportSummary } from "../types";
+import type { Contractor } from "@/features/contractors/types";
+import type { Equipment } from "@/features/equipment/types";
+import type { Task } from "@/features/settings/task/types";
+import type { ProjectReportSummary, ReportSummary, DailyWorkReport } from "../types";
 
 const filterDailyWork = (
   dailyWork: DailyWork[],
@@ -113,7 +120,54 @@ const calculateSummary = (reports: ProjectReportSummary[]): ReportSummary => {
   );
 };
 
+const mapDailyWorkReports = (
+  filteredRecords: DailyWork[],
+  projects: Project[],
+  contractors: Contractor[],
+  equipment: Equipment[],
+  tasks: Task[],
+  language: string,
+): DailyWorkReport[] => {
+  const projectsMap = new Map(projects.map((p) => [p.id, p.name]));
+  const contractorsMap = new Map(contractors.map((c) => [c.id, c.name]));
+  const equipmentMap = new Map(equipment.map((e) => [e.id, e.equipmentNumber ?? ""]));
+  const tasksMap = new Map(
+    tasks.map((t) => [
+      t.id,
+      language === "ar" ? (t.nameAr ?? t.nameEn ?? "") : (t.nameEn ?? t.nameAr ?? ""),
+    ]),
+  );
+
+  return filteredRecords.map((record) => {
+    const equipmentName = record.equipmentId
+      ? (equipmentMap.get(record.equipmentId) ?? "")
+      : (record.temporaryEquipmentName ?? "");
+
+    const cost = record.cost ?? 0;
+    const deduction = record.deduction ?? 0;
+
+    return {
+      id: record.id,
+      date: record.date,
+      projectId: record.projectId,
+      projectName: projectsMap.get(record.projectId) ?? "",
+      contractorId: record.contractorId,
+      contractorName: contractorsMap.get(record.contractorId) ?? "",
+      equipmentName,
+      taskName: tasksMap.get(record.taskId) ?? "",
+      workingHours: record.workingHours ?? 0,
+      hourRate: record.hourRate ?? 0,
+      fuelConsumption: record.fuelConsumption ?? 0,
+      cost,
+      deduction,
+      deductionReason: record.deductionReason,
+      netAmount: cost - deduction,
+    };
+  });
+};
+
 export function useReports() {
+  const { i18n } = useTranslation();
   const [projectId, setProjectId] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<Dayjs | null>(null);
   const [dateTo, setDateTo] = useState<Dayjs | null>(null);
@@ -121,6 +175,9 @@ export function useReports() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [dailyWork, setDailyWork] = useState<DailyWork[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -128,10 +185,14 @@ export function useReports() {
 
     async function loadReportsData() {
       try {
-        const [projectsData, dailyWorkData] = await Promise.all([
-          projectService.getAll(),
-          dailyWorkService.getAll(),
-        ]);
+        const [projectsData, dailyWorkData, contractorsData, equipmentData, tasksData] =
+          await Promise.all([
+            projectService.getAll(),
+            dailyWorkService.getAll(),
+            contractorService.getAll(),
+            equipmentService.getAll(),
+            taskService.getAll(),
+          ]);
 
         const paymentsData = await paymentService.synchronizeFromDailyWork(dailyWorkData);
 
@@ -140,6 +201,9 @@ export function useReports() {
         setProjects(projectsData);
         setDailyWork(dailyWorkData);
         setPayments(paymentsData);
+        setContractors(contractorsData);
+        setEquipment(equipmentData);
+        setTasks(tasksData);
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading reports data:", err);
@@ -172,6 +236,17 @@ export function useReports() {
     return calculateSummary(reports);
   }, [reports]);
 
+  const dailyWorkReports = useMemo(() => {
+    return mapDailyWorkReports(
+      filteredDailyWork,
+      projects,
+      contractors,
+      equipment,
+      tasks,
+      i18n.language,
+    );
+  }, [filteredDailyWork, projects, contractors, equipment, tasks, i18n.language]);
+
   return {
     reports,
     summary,
@@ -186,6 +261,7 @@ export function useReports() {
       setDateFrom,
       setDateTo,
     },
+    dailyWorkReports,
     isLoading,
   };
 }
