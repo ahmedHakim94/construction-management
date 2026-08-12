@@ -17,6 +17,8 @@ import type {
   ProjectReportSummary,
   ReportSummary,
   DailyWorkReport,
+  ContractorReport,
+  ProjectReport,
 } from "../types";
 
 const filterDailyWork = (
@@ -126,13 +128,157 @@ const calculateSummary = (reports: ProjectReportSummary[]): ReportSummary => {
   );
 };
 
+const aggregateContractorData = (
+  contractors: Contractor[],
+  equipment: Equipment[],
+  filteredDailyWork: DailyWork[],
+  filteredPayments: Payment[],
+): ContractorReport[] => {
+  const summaries: Record<string, {
+    totalWorkingHours: number;
+    totalCost: number;
+    totalDeductions: number;
+    totalPaid: number;
+  }> = {};
+
+  for (const contractor of contractors) {
+    summaries[contractor.id] = {
+      totalWorkingHours: 0,
+      totalCost: 0,
+      totalDeductions: 0,
+      totalPaid: 0,
+    };
+  }
+
+  for (const record of filteredDailyWork) {
+    const summary = summaries[record.contractorId];
+    if (summary) {
+      summary.totalWorkingHours += record.workingHours ?? 0;
+      summary.totalCost += record.cost ?? 0;
+      summary.totalDeductions += record.deduction ?? 0;
+    }
+  }
+
+  for (const payment of filteredPayments) {
+    const summary = summaries[payment.contractorId];
+    if (summary) {
+      summary.totalPaid += payment.paidAmount ?? 0;
+    }
+  }
+
+  const equipmentCounts: Record<string, number> = {};
+  for (const eq of equipment) {
+    equipmentCounts[eq.contractorId] = (equipmentCounts[eq.contractorId] ?? 0) + 1;
+  }
+
+  return contractors.map((contractor) => {
+    const summary = summaries[contractor.id] ?? {
+      totalWorkingHours: 0,
+      totalCost: 0,
+      totalDeductions: 0,
+      totalPaid: 0,
+    };
+    const count = equipmentCounts[contractor.id] ?? 0;
+    const netWorkAmount = summary.totalCost - summary.totalDeductions;
+
+    return {
+      id: contractor.id,
+      contractorId: contractor.id,
+      contractorName: contractor.name,
+      equipmentCount: count,
+      totalWorkingHours: summary.totalWorkingHours,
+      totalCost: summary.totalCost,
+      totalPaid: summary.totalPaid,
+      remaining: netWorkAmount - summary.totalPaid,
+    };
+  });
+};
+
+const aggregateProjectData = (
+  projects: Project[],
+  filteredDailyWork: DailyWork[],
+  filteredPayments: Payment[],
+): ProjectReport[] => {
+  const summaries: Record<string, {
+    contractors: Set<string>;
+    equipments: Set<string>;
+    workRecords: number;
+    totalWorkingHours: number;
+    totalCost: number;
+    totalDeductions: number;
+    totalPaid: number;
+  }> = {};
+
+  for (const project of projects) {
+    summaries[project.id] = {
+      contractors: new Set<string>(),
+      equipments: new Set<string>(),
+      workRecords: 0,
+      totalWorkingHours: 0,
+      totalCost: 0,
+      totalDeductions: 0,
+      totalPaid: 0,
+    };
+  }
+
+  for (const record of filteredDailyWork) {
+    const summary = summaries[record.projectId];
+    if (summary) {
+      summary.workRecords += 1;
+      summary.totalWorkingHours += record.workingHours ?? 0;
+      summary.totalCost += record.cost ?? 0;
+      summary.totalDeductions += record.deduction ?? 0;
+      if (record.contractorId) {
+        summary.contractors.add(record.contractorId);
+      }
+      if (record.equipmentId) {
+        summary.equipments.add(record.equipmentId);
+      }
+    }
+  }
+
+  for (const payment of filteredPayments) {
+    const summary = summaries[payment.projectId];
+    if (summary) {
+      summary.totalPaid += payment.paidAmount ?? 0;
+    }
+  }
+
+  return projects.map((project) => {
+    const summary = summaries[project.id] ?? {
+      contractors: new Set<string>(),
+      equipments: new Set<string>(),
+      workRecords: 0,
+      totalWorkingHours: 0,
+      totalCost: 0,
+      totalDeductions: 0,
+      totalPaid: 0,
+    };
+
+    const netWorkAmount = summary.totalCost - summary.totalDeductions;
+
+    return {
+      id: project.id,
+      projectId: project.id,
+      projectName: project.name,
+      contractorsCount: summary.contractors.size,
+      equipmentCount: summary.equipments.size,
+      workRecords: summary.workRecords,
+      totalWorkingHours: summary.totalWorkingHours,
+      totalCost: summary.totalCost,
+      totalPaid: summary.totalPaid,
+      remaining: netWorkAmount - summary.totalPaid,
+    };
+  });
+};
+
 const mapDailyWorkReports = (
   filteredRecords: DailyWork[],
   projects: Project[],
   contractors: Contractor[],
   equipment: Equipment[],
   tasks: Task[],
-  language: string,
+  _language: string,
 ): DailyWorkReport[] => {
   const projectsMap = new Map(projects.map((p) => [p.id, p.name]));
   const contractorsMap = new Map(contractors.map((c) => [c.id, c.name]));
@@ -266,6 +412,32 @@ export function useReports() {
     i18n.language,
   ]);
 
+  const filteredPaymentsForReports = useMemo(() => {
+    return payments.filter((payment) => {
+      if (projectId && payment.projectId !== projectId) return false;
+      if (dateFrom && payment.endDate < dateFrom.format("YYYY-MM-DD")) return false;
+      if (dateTo && payment.startDate > dateTo.format("YYYY-MM-DD")) return false;
+      return true;
+    });
+  }, [payments, projectId, dateFrom, dateTo]);
+
+  const contractorReports = useMemo(() => {
+    return aggregateContractorData(
+      contractors,
+      equipment,
+      filteredDailyWork,
+      filteredPaymentsForReports,
+    );
+  }, [contractors, equipment, filteredDailyWork, filteredPaymentsForReports]);
+
+  const projectReports = useMemo(() => {
+    return aggregateProjectData(
+      projects,
+      filteredDailyWork,
+      filteredPaymentsForReports,
+    );
+  }, [projects, filteredDailyWork, filteredPaymentsForReports]);
+
   return {
     reports,
     summary,
@@ -281,6 +453,8 @@ export function useReports() {
       setDateTo,
     },
     dailyWorkReports,
+    contractorReports,
+    projectReports,
     isLoading,
   };
 }

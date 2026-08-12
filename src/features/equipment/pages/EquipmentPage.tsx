@@ -17,7 +17,7 @@ import type { EquipmentType } from "@/features/settings/equipment-type/types";
 import type { Equipment, EquipmentFormValues } from "../types";
 
 export function EquipmentPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
@@ -25,7 +25,6 @@ export function EquipmentPage() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const isArabic = i18n.language === "ar";
 
   const dialog = useDialog();
   const deleteDialog = useDialog();

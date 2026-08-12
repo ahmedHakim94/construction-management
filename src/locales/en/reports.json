@@ -16,5 +16,13 @@
   "noReportsFound": "No reports found.",
   "dailyWorkDetailedReport": "Daily Work Detailed Report",
   "totalWorkingHours": "Total Working Hours",
-  "noDailyWorkRecords": "No Daily Work Records"
+  "noDailyWorkRecords": "No Daily Work Records",
+  "contractorsReport": "Contractors Report",
+  "projectsReport": "Projects Report",
+  "contractorsCount": "Contractors",
+  "equipmentCount": "Equipment",
+  "totalPaid": "Total Paid",
+  "remaining": "Remaining",
+  "noContractorsReport": "No contractors found.",
+  "noProjectsReport": "No projects found."
 }

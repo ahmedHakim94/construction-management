@@ -66,7 +66,7 @@ const mapDashboardDailyWork = (
   contractorsData: Contractor[],
   equipmentData: Equipment[],
   tasksData: Task[],
-  language: string,
+  _language: string,
 ): DashboardDailyWork[] => {
   return dailyWorkRecords.map((record) => {
     const project = projectsData.find((p) => p.id === record.projectId);

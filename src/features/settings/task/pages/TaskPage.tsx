@@ -136,7 +136,7 @@ export function TaskPage() {
         message={
           <>
             {t("deleteTask")}
-            <strong>{` ${selectedTask?.nameAr} ?`}</strong>
+            <strong>{` ${selectedTask?.name} ?`}</strong>
           </>
         }
         confirmText={t("delete")}

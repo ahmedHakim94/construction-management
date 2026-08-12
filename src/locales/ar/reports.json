@@ -16,5 +16,13 @@
   "noReportsFound": "لم يتم العثور على تقارير.",
   "dailyWorkDetailedReport": "تقرير تفصيلي للأعمال اليومية",
   "totalWorkingHours": "إجمالي ساعات العمل",
-  "noDailyWorkRecords": "لا توجد سجلات أعمال يومية."
+  "noDailyWorkRecords": "لا توجد سجلات أعمال يومية.",
+  "contractorsReport": "تقرير المقاولين",
+  "projectsReport": "تقرير المشاريع",
+  "contractorsCount": "المقاولين",
+  "equipmentCount": "المعدات",
+  "totalPaid": "إجمالي المدفوع",
+  "remaining": "المتبقي",
+  "noContractorsReport": "لم يتم العثور على مقاولين.",
+  "noProjectsReport": "لم يتم العثور على مشاريع."
 }

@@ -27,7 +27,7 @@ export function ReportsFilters({
   const { t } = useTranslation(["reports"]);
 
   return (
-    <AppFilters sx={{ mb: 2 }}>
+    <AppFilters>
       <AppSelect
         label={t("reports:projectFilter")}
         options={projectOptions}

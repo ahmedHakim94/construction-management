@@ -44,3 +44,28 @@ export interface DailyWorkReport {
   deductionReason?: string;
   netAmount: number;
 }
+
+export interface ContractorReport {
+  id: string; // contractorId, required for AppCustomTable
+  contractorId: string;
+  contractorName: string;
+  equipmentCount: number;
+  totalWorkingHours: number;
+  totalCost: number;
+  totalPaid: number;
+  remaining: number;
+}
+
+export interface ProjectReport {
+  id: string; // projectId, required for AppCustomTable
+  projectId: string;
+  projectName: string;
+  contractorsCount: number;
+  equipmentCount: number;
+  workRecords: number;
+  totalWorkingHours: number;
+  totalCost: number;
+  totalPaid: number;
+  remaining: number;
+}
+
