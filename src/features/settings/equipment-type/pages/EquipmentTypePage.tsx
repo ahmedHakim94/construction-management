@@ -105,11 +105,6 @@ export function EquipmentTypePage() {
           description={t("equipmentTypesDescription")}
           actions={
             <>
-              {/* <AppSearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder={t("searchEquipmentTypes")}
-              /> */}
               <AppButton startIcon={<Category />} onClick={handleOpenCreate}>
                 {t("addEquipmentType")}
               </AppButton>

@@ -45,8 +45,3 @@ export const equipmentTypeService = {
     equipmentTypes = equipmentTypes.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = equipmentTypeService.getAll;
-export const create = equipmentTypeService.create;
-export const update = equipmentTypeService.update;
-export const deleteEquipmentType = equipmentTypeService.delete;

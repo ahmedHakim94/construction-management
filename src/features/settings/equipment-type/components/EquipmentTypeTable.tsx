@@ -25,12 +25,6 @@ export function EquipmentTypeTable({
         flex: 1.5,
         minWidth: 200,
       },
-      // {
-      //   field: "createdAt",
-      //   headerName: t("createdDate"),
-      //   flex: 1,
-      //   minWidth: 140,
-      // },
       {
         field: "actions",
         headerName: t("actions"),
@@ -38,7 +32,7 @@ export function EquipmentTypeTable({
         filterable: false,
         flex: 0.8,
         minWidth: 110,
-        renderCell: ({ row }:any) => (
+        renderCell: ({ row }: { row: EquipmentType }) => (
           <AppActions
             onEdit={() => onEdit(row)}
             onDelete={() => onDelete(row)}

@@ -12,7 +12,7 @@ interface EquipmentTypeDialogProps {
   mode: "create" | "edit";
   equipmentType?: EquipmentType;
   onClose: () => void;
-  onSubmit: (values: EquipmentTypeFormValues) => void;
+  onSubmit: (values: EquipmentTypeFormValues) => Promise<void>;
 }
 
 export function EquipmentTypeDialog({
@@ -39,12 +39,13 @@ export function EquipmentTypeDialog({
     });
   }, [equipmentType, open, reset]);
 
-  const submit = (values: EquipmentTypeFormValues) => {
+  const submit = async (values: EquipmentTypeFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
