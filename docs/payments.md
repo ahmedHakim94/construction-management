@@ -13,7 +13,7 @@ Payment records are derived from Daily Work groups, while Payment Transactions r
 | Layer | Files |
 |---|---|
 | Pages | `PaymentPage.tsx` |
-| Components | `PaymentDetailsDialog.tsx`, `PaymentFilters.tsx`, `PaymentSummary.tsx`, `PaymentTable.tsx`, `RecordPaymentDialog.tsx`, `SettlePaymentDialog.tsx` |
+| Components | `PaymentDetailsDialog.tsx`, `PaymentFilters.tsx`, `PaymentSummary.tsx`, `PaymentTable.tsx`, `RecordPaymentDialog.tsx`, |
 | Hooks | `usePaymentFilters.ts`, `usePayments.ts` |
 | Services | `payment.service.ts` |
 | Schemas | (Zod validation schemas) |

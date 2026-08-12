@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
-import { AppTable } from "@/components/ui";
+import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { Task } from "../types";
 
 interface TaskTableProps {
@@ -13,7 +13,7 @@ interface TaskTableProps {
 export function TaskTable({ rows, onEdit, onDelete }: TaskTableProps) {
   const { t } = useTranslation();
 
-  const columns = useMemo(
+  const columns = useMemo<AppTableColDef[]>(
     () => [
       {
         field: "name",
@@ -28,7 +28,7 @@ export function TaskTable({ rows, onEdit, onDelete }: TaskTableProps) {
         filterable: false,
         flex: 0.8,
         minWidth: 110,
-        renderCell: ({ row }: any) => (
+        renderCell: ({ row }: { row: Task }) => (
           <AppActions onEdit={() => onEdit(row)} onDelete={() => onDelete(row)} />
         ),
       },

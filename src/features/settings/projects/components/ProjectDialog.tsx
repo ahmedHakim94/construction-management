@@ -15,7 +15,13 @@ interface ProjectDialogProps {
   onSubmit: (values: ProjectFormValues) => Promise<void>;
 }
 
-export function ProjectDialog({ open, mode, project, onClose, onSubmit }: ProjectDialogProps) {
+export function ProjectDialog({
+  open,
+  mode,
+  project,
+  onClose,
+  onSubmit,
+}: ProjectDialogProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
   const [loading, setLoading] = useState(false);
@@ -46,12 +52,20 @@ export function ProjectDialog({ open, mode, project, onClose, onSubmit }: Projec
 
   return (
     <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{mode === "create" ? t("addProject") : t("editProject")}</DialogTitle>
+      <DialogTitle>
+        {mode === "create" ? t("addProject") : t("editProject")}
+      </DialogTitle>
 
       <DialogContent>
         <form
           onSubmit={handleSubmit(submit)}
-          style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 8, direction: isArabic ? "rtl" : "ltr" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            paddingTop: 8,
+            direction: isArabic ? "rtl" : "ltr",
+          }}
         >
           <Controller
             name="name"
@@ -84,12 +98,11 @@ export function ProjectDialog({ open, mode, project, onClose, onSubmit }: Projec
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

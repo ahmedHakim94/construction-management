@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
+import { Box, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -37,7 +32,7 @@ export function ContractorDialog({
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   // const statusOptions = useMemo(
   //   () =>
@@ -83,9 +78,8 @@ export function ContractorDialog({
   }, [contractor, open, reset]);
 
   const submit = (values: ContractorFormValues) => {
-    setLoading(true)
+    setLoading(true);
     setTimeout(() => {
-
       onSubmit(values);
       reset({
         name: "",
@@ -95,7 +89,7 @@ export function ContractorDialog({
         notes: "",
         status: "ACTIVE",
       });
-       setLoading(false)
+      setLoading(false);
       onClose();
     }, 1000);
   };
@@ -114,7 +108,9 @@ export function ContractorDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit((values) => submit(values as ContractorFormValues))}
+          onSubmit={handleSubmit((values) =>
+            submit(values as ContractorFormValues),
+          )}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -193,19 +189,24 @@ export function ContractorDialog({
                 onChange={field.onChange}
                 error={fieldState.error?.message}
                 className="react_select_status"
-
               />
             )}
           />
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton
+          loading={loading}
+          onClick={handleSubmit((values) =>
+            submit(values as ContractorFormValues),
+          )}
+          // color="primary"
+          variant="contained"
+        >
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit((values) => submit(values as ContractorFormValues))}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

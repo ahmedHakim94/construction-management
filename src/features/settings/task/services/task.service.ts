@@ -41,8 +41,3 @@ export const taskService = {
     tasks = tasks.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = taskService.getAll;
-export const create = taskService.create;
-export const update = taskService.update;
-export const deleteTask = taskService.delete;

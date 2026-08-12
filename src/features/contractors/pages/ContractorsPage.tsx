@@ -143,6 +143,7 @@ export function ContractorsPage() {
               <AppButton
                 startIcon={<PersonAddAlt1Outlined />}
                 onClick={handleOpenCreate}
+                variant="contained"
               >
                 {t("addContractor")}
               </AppButton>

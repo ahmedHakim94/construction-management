@@ -57,7 +57,12 @@ export function EquipmentTypeDialog({
       <DialogContent>
         <form
           onSubmit={handleSubmit(submit)}
-          style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 8 }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            paddingTop: 8,
+          }}
         >
           <Controller
             name="name"
@@ -76,12 +81,11 @@ export function EquipmentTypeDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

@@ -101,7 +101,7 @@ export function ProjectPage() {
           description={t("projectsDescription")}
           actions={
             <>
-              <AppButton startIcon={<AddBusiness />} onClick={handleOpenCreate}>{t("addProject")}</AppButton>
+              <AppButton variant="contained" startIcon={<AddBusiness />} onClick={handleOpenCreate}>{t("addProject")}</AppButton>
             </>
           }
         />

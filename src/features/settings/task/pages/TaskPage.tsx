@@ -103,7 +103,7 @@ export function TaskPage() {
           description={t("tasksDescription")}
           actions={
             <>
-              <AppButton startIcon={<AddTask />} onClick={handleOpenCreate}>
+              <AppButton variant="contained" startIcon={<AddTask />} onClick={handleOpenCreate}>
                 {t("addTask")}
               </AppButton>
             </>

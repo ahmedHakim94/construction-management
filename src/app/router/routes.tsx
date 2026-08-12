@@ -13,7 +13,6 @@ import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { EquipmentPage } from "@/features/equipment/pages/EquipmentPage";
 import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 import { ReportsPage } from "@/features/reports/pages/ReportsPage";
-import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { EquipmentTypePage } from "@/features/settings/equipment-type/pages/EquipmentTypePage";
 import { TaskPage } from "@/features/settings/task/pages/TaskPage";
 import { ProjectPage } from "@/features/settings/projects/pages/ProjectPage";
@@ -103,10 +102,10 @@ export const router = createBrowserRouter([
             path: "reports",
             element: <ReportsPage />,
           },
-          {
-            path: "settings",
-            element: <SettingsPage />,
-          },
+          // {
+          //   path: "settings",
+          //   element: <SettingsPage />,
+          // },
           {
             path: "*",
             element: <Navigate to={ROUTE_PATHS.dashboard} replace />,

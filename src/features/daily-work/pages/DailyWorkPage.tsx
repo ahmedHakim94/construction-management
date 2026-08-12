@@ -191,7 +191,7 @@ export function DailyWorkPage() {
           actions={
             <>
               {/* <AppSearchInput value={search} onChange={setSearch} placeholder={t("searchDailyWork")} /> */}
-              <AppButton startIcon={<Today />} onClick={handleOpenCreate}>
+              <AppButton variant="contained" startIcon={<Today />} onClick={handleOpenCreate}>
                 {t("addDailyWork")}
               </AppButton>
             </>
@@ -208,6 +208,7 @@ export function DailyWorkPage() {
             value={selectedDate}
             onChange={setSelectedDate}
             label={t("date")}
+            
           />
         </AppFilters>
 

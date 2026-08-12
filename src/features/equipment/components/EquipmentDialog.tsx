@@ -107,7 +107,9 @@ export function EquipmentDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit((values) => submit(values as EquipmentFormValues))}
+          onSubmit={handleSubmit((values) =>
+            submit(values as EquipmentFormValues),
+          )}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -168,9 +170,7 @@ export function EquipmentDialog({
           <Controller
             name="model"
             control={control}
-            render={({ field }) => (
-              <AppInput label={t("model")} {...field} />
-            )}
+            render={({ field }) => <AppInput label={t("model")} {...field} />}
           />
 
           <Controller
@@ -199,11 +199,17 @@ export function EquipmentDialog({
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton
+          loading={loading}
+          onClick={handleSubmit((values) =>
+            submit(values as EquipmentFormValues),
+          )}
+          variant="contained"
+        >
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-        <AppButton loading={loading} onClick={handleSubmit((values) => submit(values as EquipmentFormValues))}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

@@ -316,7 +316,7 @@ export function PaymentDetailsDialog({
           {/* Payment History */}
           <Box>
             {!isPaid && (
-              <AppButton startIcon={<PaymentIcon />} onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
+              <AppButton variant="contained" startIcon={<PaymentIcon />} onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
                 {t("recordPayment")}
               </AppButton>
             )}

@@ -154,7 +154,7 @@ export function EquipmentPage() {
                 onChange={setSearch}
                 placeholder={t("searchEquipment")}
               />
-              <AppButton startIcon={<Construction />} onClick={handleOpenCreate}>{t("addEquipment")}</AppButton>
+              <AppButton variant="contained" startIcon={<Construction />} onClick={handleOpenCreate}>{t("addEquipment")}</AppButton>
             </>
           }
         />

@@ -105,7 +105,7 @@ export function EquipmentTypePage() {
           description={t("equipmentTypesDescription")}
           actions={
             <>
-              <AppButton startIcon={<Category />} onClick={handleOpenCreate}>
+              <AppButton variant="contained" startIcon={<Category />} onClick={handleOpenCreate}>
                 {t("addEquipmentType")}
               </AppButton>
             </>

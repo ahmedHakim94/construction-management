@@ -12,7 +12,7 @@ interface TaskDialogProps {
   mode: "create" | "edit";
   task?: Task;
   onClose: () => void;
-  onSubmit: (values: TaskFormValues) => void;
+  onSubmit: (values: TaskFormValues) => Promise<void>;
 }
 
 export function TaskDialog({
@@ -39,12 +39,13 @@ export function TaskDialog({
     });
   }, [task, open, reset]);
 
-  const submit = (values: TaskFormValues) => {
+  const submit = async (values: TaskFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -81,12 +82,11 @@ export function TaskDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>
