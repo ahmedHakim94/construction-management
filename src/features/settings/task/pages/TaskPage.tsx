@@ -10,7 +10,7 @@ import { TaskTable } from "../components/TaskTable";
 import { TaskDialog } from "../components/TaskDialog";
 import { taskService } from "../services/task.service";
 import type { Task, TaskFormValues } from "../types";
-import { AddCard } from "@mui/icons-material";
+import { AddTask } from "@mui/icons-material";
 
 export function TaskPage() {
   const { t } = useTranslation();
@@ -103,7 +103,7 @@ export function TaskPage() {
           description={t("tasksDescription")}
           actions={
             <>
-              <AppButton startIcon={<AddCard />} onClick={handleOpenCreate}>
+              <AppButton startIcon={<AddTask />} onClick={handleOpenCreate}>
                 {t("addTask")}
               </AppButton>
             </>

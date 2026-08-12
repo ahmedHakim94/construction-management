@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import { Category } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -109,7 +110,7 @@ export function EquipmentTypePage() {
                 onChange={setSearch}
                 placeholder={t("searchEquipmentTypes")}
               /> */}
-              <AppButton onClick={handleOpenCreate}>
+              <AppButton startIcon={<Category />} onClick={handleOpenCreate}>
                 {t("addEquipmentType")}
               </AppButton>
             </>

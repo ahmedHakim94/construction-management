@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
+import { Today } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -190,7 +191,7 @@ export function DailyWorkPage() {
           actions={
             <>
               {/* <AppSearchInput value={search} onChange={setSearch} placeholder={t("searchDailyWork")} /> */}
-              <AppButton onClick={handleOpenCreate}>
+              <AppButton startIcon={<Today />} onClick={handleOpenCreate}>
                 {t("addDailyWork")}
               </AppButton>
             </>

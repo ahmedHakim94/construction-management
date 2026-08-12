@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Payment as PaymentIcon } from "@mui/icons-material";
 import {
   Box,
   Chip,
@@ -315,7 +316,7 @@ export function PaymentDetailsDialog({
           {/* Payment History */}
           <Box>
             {!isPaid && (
-              <AppButton onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
+              <AppButton startIcon={<PaymentIcon />} onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
                 {t("recordPayment")}
               </AppButton>
             )}
