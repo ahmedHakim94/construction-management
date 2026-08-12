@@ -9,9 +9,10 @@ export function AppFilters({ children }: AppFiltersProps) {
     <Box
       sx={{
         display: "flex",
-        // flexWrap: "wrap",
+        flexDirection: { xs: "column", sm: "row" },
+        flexWrap: "wrap",
         gap: 2,
-        alignItems: "end",
+        alignItems: { xs: "stretch", sm: "end" },
         mb: 2,
       }}
     >

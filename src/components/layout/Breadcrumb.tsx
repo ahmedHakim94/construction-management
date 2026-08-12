@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 
 export function Breadcrumb() {
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
 
   const segments = location.pathname.split("/").filter(Boolean);
 
@@ -34,13 +35,27 @@ export function Breadcrumb() {
         borderBottom: "1px solid",
         borderColor: "divider",
         px: { xs: 2, sm: 2.5, md: 3 },
-        py: 1,
+        py: { xs: 1.5, md: 1 },
+        minHeight: { xs: 48, md: 40 },
+        display: "flex",
+        alignItems: "center",
         bgcolor: "background.paper",
+        overflowX: "auto",
+        whiteSpace: "nowrap",
+        msOverflowStyle: "none",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
       }}
     >
       <Breadcrumbs
-        separator={<NavigateNext fontSize="small" />}
+        separator={<NavigateNext fontSize="small" sx={{ transform: isRtl ? "rotate(180deg)" : "none" }} />}
         aria-label="breadcrumb"
+        sx={{
+          "& .MuiBreadcrumbs-ol": {
+            flexWrap: "nowrap",
+            alignItems: "center",
+          },
+        }}
       >
         <Link
           component={RouterLink}

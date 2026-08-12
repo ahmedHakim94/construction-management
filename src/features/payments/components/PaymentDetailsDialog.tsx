@@ -93,13 +93,15 @@ export function PaymentDetailsDialog({
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
           {/* Contractor & Period */}
-          <Box>
-            <Typography variant="subtitle2">{t("contractor")}</Typography>
-            <Typography>{payment?.contractorName ?? ""}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2">{t("period")}</Typography>
-            <Typography>{`${payment?.startDate ?? ""} - ${payment?.endDate ?? ""}`}</Typography>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: { xs: 2, sm: 4 } }}>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">{t("contractor")}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{payment?.contractorName ?? ""}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">{t("period")}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{`${payment?.startDate ?? ""} - ${payment?.endDate ?? ""}`}</Typography>
+            </Box>
           </Box>
 
           <Divider />
@@ -169,7 +171,7 @@ export function PaymentDetailsDialog({
             <Box sx={{ overflowX: "auto" }}>
               <Box
                 component="table"
-                sx={{ width: "100%", borderCollapse: "collapse" }}
+                sx={{ width: "100%", minWidth: 900, borderCollapse: "collapse" }}
               >
                 <Box component="thead" sx={{ bgcolor: "#F8FAFC" }}>
                   <Box component="tr">
@@ -191,7 +193,7 @@ export function PaymentDetailsDialog({
                         sx={{
                           px: 1.5,
                           py: 1,
-                          textAlign: "left",
+                          textAlign: "start",
                           borderBottom: "1px solid #E5E7EB",
                         }}
                       >
@@ -323,7 +325,7 @@ export function PaymentDetailsDialog({
             <Box sx={{ overflowX: "auto" }}>
               <Box
                 component="table"
-                sx={{ width: "100%", borderCollapse: "collapse" }}
+                sx={{ width: "100%", minWidth: 300, borderCollapse: "collapse" }}
               >
                 <Box component="thead" sx={{ bgcolor: "#F8FAFC" }}>
                   <Box component="tr">
@@ -334,7 +336,7 @@ export function PaymentDetailsDialog({
                         sx={{
                           px: 1.5,
                           py: 1,
-                          textAlign: "left",
+                          textAlign: "start",
                           borderBottom: "1px solid #E5E7EB",
                         }}
                       >

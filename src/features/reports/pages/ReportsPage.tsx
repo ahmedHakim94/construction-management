@@ -35,7 +35,14 @@ export function ReportsPage() {
 
   return (
     <PageContainer>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          pt: { xs: 2, sm: 2, md: 0 },
+        }}
+      >
         <AppPageHeader
           title={t("reports")}
           description={t("reportsDescription")}

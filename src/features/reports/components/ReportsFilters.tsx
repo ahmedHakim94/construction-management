@@ -34,7 +34,7 @@ export function ReportsFilters({
         value={projectId}
         onChange={onProjectIdChange}
         placeholder={t("reports:allProjects")}
-        width="260px"
+        width={{ xs: "100%", sm: "260px" }}
       />
       <AppDatePicker
         label={t("reports:dateFrom")}

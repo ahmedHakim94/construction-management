@@ -18,7 +18,7 @@ interface AppSelectProps {
   placeholder?: string;
   error?: string;
   className?: string;
-  width?: string | number;
+  width?: any;
 }
 
 export function AppSelect({

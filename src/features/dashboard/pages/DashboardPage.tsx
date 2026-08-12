@@ -27,7 +27,12 @@ export function DashboardPage() {
   return (
     <PageContainer>
       <AppPageContainer
-        sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3.5,
+          pt: { xs: 2, sm: 2, md: 0 },
+        }}
       >
         <AppPageHeader
           title={t("dashboard")}

@@ -26,7 +26,7 @@ export function MainLayout() {
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, height: "100%" }}>
         <Header locale={locale} onLocaleChange={handleLocaleChange} onSidebarToggle={() => setMobileOpen(true)} />
         <Breadcrumb />
-        <Box component="main" sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0 }}>
+        <Box component="main" sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0, minWidth: 0 }}>
           <Outlet />
         </Box>
       </Box>

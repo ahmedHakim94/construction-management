@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { DataGrid, type DataGridProps, type GridColDef } from "@mui/x-data-grid";
 import { arSD, enUS } from "@mui/x-data-grid/locales";
 import { useTranslation } from "react-i18next";
@@ -82,27 +83,29 @@ export function AppTable({
       : enUS.components.MuiDataGrid.defaultProps.localeText;
 
   return (
-    <DataGrid
-      autoHeight
-      disableRowSelectionOnClick
-      pageSizeOptions={pageSizeOptions}
-      localeText={localeText}
-      pagination
-      hideFooter={!showPagination}
-      hideFooterPagination={!showPagination}
-      initialState={{
-        pagination: {
-          paginationModel: {
-            page: 0,
-            pageSize: 10,
+    <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
+      <DataGrid
+        autoHeight
+        disableRowSelectionOnClick
+        pageSizeOptions={pageSizeOptions}
+        localeText={localeText}
+        pagination
+        hideFooter={!showPagination}
+        hideFooterPagination={!showPagination}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              page: 0,
+              pageSize: 10,
+            },
           },
-        },
-      }}
-      sx={{
-        ...defaultTableStyles,
-        ...sx,
-      }}
-      {...props}
-    />
+        }}
+        sx={{
+          ...defaultTableStyles,
+          ...sx,
+        }}
+        {...props}
+      />
+    </Box>
   );
 }
