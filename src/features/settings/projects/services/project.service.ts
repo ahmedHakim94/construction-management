@@ -43,8 +43,3 @@ export const projectService = {
     projects = projects.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = projectService.getAll;
-export const create = projectService.create;
-export const update = projectService.update;
-export const deleteProject = projectService.delete;

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
-import { AppTable } from "@/components/ui";
+import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { Project } from "../types";
 
 interface ProjectTableProps {
@@ -13,7 +13,7 @@ interface ProjectTableProps {
 export function ProjectTable({ rows, onEdit, onDelete }: ProjectTableProps) {
   const { t } = useTranslation();
 
-  const columns = useMemo(
+  const columns = useMemo<AppTableColDef[]>(
     () => [
       {
         field: "name",
@@ -34,7 +34,7 @@ export function ProjectTable({ rows, onEdit, onDelete }: ProjectTableProps) {
         filterable: false,
         flex: 0.8,
         minWidth: 110,
-        renderCell: ({ row }: any) => (
+        renderCell: ({ row }: { row: Project }) => (
           <AppActions onEdit={() => onEdit(row)} onDelete={() => onDelete(row)} />
         ),
       },

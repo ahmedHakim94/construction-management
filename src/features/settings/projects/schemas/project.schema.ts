@@ -5,4 +5,3 @@ export const projectSchema = z.object({
   address: z.string().trim().min(1, "Address is required"),
 });
 
-export type ProjectSchemaValues = z.infer<typeof projectSchema>;

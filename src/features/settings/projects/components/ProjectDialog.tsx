@@ -12,7 +12,7 @@ interface ProjectDialogProps {
   mode: "create" | "edit";
   project?: Project;
   onClose: () => void;
-  onSubmit: (values: ProjectFormValues) => void;
+  onSubmit: (values: ProjectFormValues) => Promise<void>;
 }
 
 export function ProjectDialog({ open, mode, project, onClose, onSubmit }: ProjectDialogProps) {
@@ -35,12 +35,13 @@ export function ProjectDialog({ open, mode, project, onClose, onSubmit }: Projec
     });
   }, [project, open, reset]);
 
-  const submit = (values: ProjectFormValues) => {
+  const submit = async (values: ProjectFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (

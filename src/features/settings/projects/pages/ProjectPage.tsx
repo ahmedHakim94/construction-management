@@ -101,11 +101,6 @@ export function ProjectPage() {
           description={t("projectsDescription")}
           actions={
             <>
-              {/* <AppSearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder={t("searchProjects")}
-              /> */}
               <AppButton startIcon={<AddBusiness />} onClick={handleOpenCreate}>{t("addProject")}</AppButton>
             </>
           }
