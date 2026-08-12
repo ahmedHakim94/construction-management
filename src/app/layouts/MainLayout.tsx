@@ -1,10 +1,11 @@
 import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { AppLoader } from "@/components/ui";
 
 export function MainLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,7 +28,9 @@ export function MainLayout() {
         <Header locale={locale} onLocaleChange={handleLocaleChange} onSidebarToggle={() => setMobileOpen(true)} />
         <Breadcrumb />
         <Box component="main" sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0, minWidth: 0 }}>
-          <Outlet />
+          <Suspense fallback={<AppLoader />}>
+            <Outlet />
+          </Suspense>
         </Box>
       </Box>
     </Box>
