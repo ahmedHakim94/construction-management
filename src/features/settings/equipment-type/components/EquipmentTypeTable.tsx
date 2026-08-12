@@ -19,36 +19,18 @@ export function EquipmentTypeTable({
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
-    //   {
-    //     field: "code",
-    //     headerName: t("code"),
-    //     flex: 1,
-    //     minWidth: 120,
-    //   },
       {
-        field: "nameAr",
-        headerName: t("arabicName"),
-        flex: 1.2,
-        minWidth: 180,
+        field: "name",
+        headerName: t("equipmentTypeName"),
+        flex: 1.5,
+        minWidth: 200,
       },
-      {
-        field: "nameEn",
-        headerName: t("englishName"),
-        flex: 1.2,
-        minWidth: 180,
-      },
-      {
-        field: "createdAt",
-        headerName: t("createdDate"),
-        flex: 1,
-        minWidth: 140,
-      },
-      {
-        field: "prefix",
-        headerName: t("prefix"),
-        flex: 0.8,
-        minWidth: 110,
-      },
+      // {
+      //   field: "createdAt",
+      //   headerName: t("createdDate"),
+      //   flex: 1,
+      //   minWidth: 140,
+      // },
       {
         field: "actions",
         headerName: t("actions"),

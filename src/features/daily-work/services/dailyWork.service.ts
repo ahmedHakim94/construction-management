@@ -3,6 +3,7 @@ import type { DailyWork, DailyWorkFormValues } from "../types";
 
 let dailyWorkRecords: DailyWork[] = [...dailyWorkMockData];
 
+
 export const dailyWorkService = {
   async getAll(): Promise<DailyWork[]> {
     return [...dailyWorkRecords];

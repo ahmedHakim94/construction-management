@@ -142,7 +142,7 @@ export function EquipmentTypePage() {
         message={
           <>
             {t("deleteEquipmentType")}
-            <strong>{` ${selectedEquipmentType?.nameAr} ?`}</strong>
+            <strong>{` ${selectedEquipmentType?.name} ?`}</strong>
           </>
         }
         confirmText={t("delete")}

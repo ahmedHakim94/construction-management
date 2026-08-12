@@ -68,7 +68,7 @@ export function EquipmentDialog({
       setEquipmentTypeOptions(
         equipmentTypes.map((item) => ({
           value: item.id,
-          label: item.nameEn,
+          label: item.name,
         })),
       );
     }

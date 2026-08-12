@@ -53,9 +53,7 @@ export function EquipmentPage() {
       contractorName:
         contractors.find((contractor) => contractor.id === item.contractorId)?.name ?? "",
       equipmentTypeName:
-        isArabic
-          ? equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.nameAr ?? ""
-          : equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.nameEn ?? "",
+          equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.name ?? "",
     }));
   }, [equipment, contractors, equipmentTypes]);
 

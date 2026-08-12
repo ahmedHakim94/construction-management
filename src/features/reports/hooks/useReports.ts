@@ -13,7 +13,11 @@ import type { Project } from "@/features/settings/projects/types";
 import type { Contractor } from "@/features/contractors/types";
 import type { Equipment } from "@/features/equipment/types";
 import type { Task } from "@/features/settings/task/types";
-import type { ProjectReportSummary, ReportSummary, DailyWorkReport } from "../types";
+import type {
+  ProjectReportSummary,
+  ReportSummary,
+  DailyWorkReport,
+} from "../types";
 
 const filterDailyWork = (
   dailyWork: DailyWork[],
@@ -36,7 +40,9 @@ const filterPayments = (
   const activePaymentKeys = new Set<string>();
   for (const record of filteredDailyWork) {
     const monthKey = record.date.slice(0, 7); // YYYY-MM
-    activePaymentKeys.add(`${record.projectId}|${record.contractorId}|${monthKey}`);
+    activePaymentKeys.add(
+      `${record.projectId}|${record.contractorId}|${monthKey}`,
+    );
   }
 
   return payments.filter((payment) => {
@@ -130,11 +136,13 @@ const mapDailyWorkReports = (
 ): DailyWorkReport[] => {
   const projectsMap = new Map(projects.map((p) => [p.id, p.name]));
   const contractorsMap = new Map(contractors.map((c) => [c.id, c.name]));
-  const equipmentMap = new Map(equipment.map((e) => [e.id, e.equipmentNumber ?? ""]));
+  const equipmentMap = new Map(equipment.map((e) => [e.id, e.name ?? ""]));
   const tasksMap = new Map(
     tasks.map((t) => [
       t.id,
-      language === "ar" ? (t.nameAr ?? t.nameEn ?? "") : (t.nameEn ?? t.nameAr ?? ""),
+      language === "ar"
+        ? (t.nameAr ?? t.nameEn ?? "")
+        : (t.nameEn ?? t.nameAr ?? ""),
     ]),
   );
 
@@ -185,16 +193,22 @@ export function useReports() {
 
     async function loadReportsData() {
       try {
-        const [projectsData, dailyWorkData, contractorsData, equipmentData, tasksData] =
-          await Promise.all([
-            projectService.getAll(),
-            dailyWorkService.getAll(),
-            contractorService.getAll(),
-            equipmentService.getAll(),
-            taskService.getAll(),
-          ]);
+        const [
+          projectsData,
+          dailyWorkData,
+          contractorsData,
+          equipmentData,
+          tasksData,
+        ] = await Promise.all([
+          projectService.getAll(),
+          dailyWorkService.getAll(),
+          contractorService.getAll(),
+          equipmentService.getAll(),
+          taskService.getAll(),
+        ]);
 
-        const paymentsData = await paymentService.synchronizeFromDailyWork(dailyWorkData);
+        const paymentsData =
+          await paymentService.synchronizeFromDailyWork(dailyWorkData);
 
         if (!isMounted) return;
 
@@ -229,7 +243,12 @@ export function useReports() {
   }, [payments, filteredDailyWork]);
 
   const reports = useMemo(() => {
-    return aggregateReportData(projects, filteredDailyWork, filteredPayments, projectId);
+    return aggregateReportData(
+      projects,
+      filteredDailyWork,
+      filteredPayments,
+      projectId,
+    );
   }, [projects, filteredDailyWork, filteredPayments, projectId]);
 
   const summary = useMemo(() => {
@@ -245,7 +264,14 @@ export function useReports() {
       tasks,
       i18n.language,
     );
-  }, [filteredDailyWork, projects, contractors, equipment, tasks, i18n.language]);
+  }, [
+    filteredDailyWork,
+    projects,
+    contractors,
+    equipment,
+    tasks,
+    i18n.language,
+  ]);
 
   return {
     reports,

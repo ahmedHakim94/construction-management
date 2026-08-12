@@ -13,6 +13,8 @@ import type { Contractor } from "@/features/contractors/types";
 import type { DailyWork } from "@/features/daily-work/types";
 import type { Project } from "@/features/settings/projects/types";
 import type { Task } from "@/features/settings/task/types";
+import { equipmentService } from "@/features/equipment/services/equipment.service";
+import type { Equipment } from "@/features/equipment/types";
 
 export function usePayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -20,7 +22,10 @@ export function usePayments() {
   const [dailyWorkRecords, setDailyWorkRecords] = useState<DailyWork[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [paymentTransactions, setPaymentTransactions] = useState<
+    PaymentTransaction[]
+  >([]);
   const [recordLoading, setRecordLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -31,19 +36,23 @@ export function usePayments() {
         dailyWorkData,
         projectData,
         taskData,
+        equipmentData,
       ] = await Promise.all([
         contractorService.getAll(),
         dailyWorkService.getAll(),
         projectService.getAll(),
         taskService.getAll(),
+        equipmentService.getAll(),
       ]);
 
       setContractors(contractorData);
       setDailyWorkRecords(dailyWorkData);
       setProjects(projectData);
       setTasks(taskData);
+      setEquipment(equipmentData);
 
-      const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkData);
+      const syncedPayments =
+        await paymentService.synchronizeFromDailyWork(dailyWorkData);
       setPayments(syncedPayments);
     }
 
@@ -96,7 +105,8 @@ export function usePayments() {
     payment: Payment,
     dailyWorkRecords: DailyWork[],
   ) => {
-    const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkRecords);
+    const syncedPayments =
+      await paymentService.synchronizeFromDailyWork(dailyWorkRecords);
     setPayments(syncedPayments);
     return syncedPayments.find((item) => item.id === payment.id) ?? payment;
   };
@@ -107,6 +117,7 @@ export function usePayments() {
     dailyWorkRecords,
     projects,
     tasks,
+    equipment,
     paymentTransactions,
     recordLoading,
     deleteLoading,

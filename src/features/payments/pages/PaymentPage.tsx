@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppCard, AppPageHeader } from "@/components/ui";
@@ -20,6 +20,7 @@ export function PaymentPage() {
     dailyWorkRecords,
     projects,
     tasks,
+    equipment,
     paymentTransactions,
     recordLoading,
     deleteLoading,
@@ -29,7 +30,11 @@ export function PaymentPage() {
     refreshPaymentFromDailyWork,
   } = usePayments();
 
-  const { control, paymentRows } = usePaymentFilters(payments, contractors,projects);
+  const { control, paymentRows } = usePaymentFilters(
+    payments,
+    contractors,
+    projects,
+  );
 
   const [selectedPayment, setSelectedPayment] = useState<
     (Payment & { contractorName: string }) | undefined
@@ -37,6 +42,12 @@ export function PaymentPage() {
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
+
+  const equipmentMap = useMemo(
+    () =>
+      Object.fromEntries(equipment.map((item) => [item.id, item.name ?? ""])),
+    [equipment],
+  );
 
   const handleView = async (payment: Payment & { contractorName: string }) => {
     try {
@@ -128,6 +139,8 @@ export function PaymentPage() {
           taskMap={Object.fromEntries(
             tasks.map((task) => [task.id, task.nameEn]),
           )}
+          equipmentMap={equipmentMap}
+
           // dailyWorkRecords={dailyWorkRecords.filter((record) =>
           //   selectedPayment
           //     ? record.contractorId === selectedPayment.contractorId &&

@@ -86,7 +86,7 @@ export function DailyWorkDialog({
         .filter((item) => item.contractorId === contractorId)
         .map((item) => ({
           value: item.id,
-          label: `${item.equipmentNumber || item.model || item.id}`,
+          label: `${item.name || item.model || item.id}`,
         })),
     [equipment, contractorId],
   );

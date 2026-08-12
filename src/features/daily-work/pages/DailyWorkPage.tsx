@@ -71,7 +71,7 @@ export function DailyWorkPage() {
           ?.name ?? "",
       equipmentLabel: item.equipmentId
         ? (equipment.find((eq) => eq.id === item.equipmentId)
-            ?.equipmentNumber ?? "")
+            ?.name ?? "")
         : (item.temporaryEquipmentName ?? ""),
       taskName:
         tasks.find((task) => task.id === item.taskId)?.nameEn ??

@@ -10,6 +10,7 @@ export interface Equipment {
   hourRate: number;
   notes?: string;
   createdAt: string;
+  name?: string;
 }
 
 export interface EquipmentFormValues {
@@ -20,4 +21,5 @@ export interface EquipmentFormValues {
   equipmentNumber: string;
   hourRate: number;
   notes: string;
+  name?: string;
 }

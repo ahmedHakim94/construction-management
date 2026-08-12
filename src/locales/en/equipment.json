@@ -20,5 +20,6 @@
   "editEquipmentType": "Edit Equipment Type",
   "deleteEquipmentType": "Delete Equipment Type",
   "arabicName": "Arabic Name",
-  "englishName": "English Name"
+  "englishName": "English Name",
+  "equipmentTypeName": "Equipment Type Name"
 }
