@@ -20,6 +20,8 @@ export interface ReportFilters {
 }
 
 export interface ReportSummary {
+  totalWorkRecords: number;
+  totalWorkingHours: number;
   totalWorkCost: number;
   totalDeductions: number;
   netWorkAmount: number;
@@ -50,19 +52,6 @@ export interface ContractorReport {
   contractorId: string;
   contractorName: string;
   equipmentCount: number;
-  totalWorkingHours: number;
-  totalCost: number;
-  totalPaid: number;
-  remaining: number;
-}
-
-export interface ProjectReport {
-  id: string; // projectId, required for AppCustomTable
-  projectId: string;
-  projectName: string;
-  contractorsCount: number;
-  equipmentCount: number;
-  workRecords: number;
   totalWorkingHours: number;
   totalCost: number;
   totalPaid: number;

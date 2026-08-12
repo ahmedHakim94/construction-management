@@ -18,7 +18,6 @@ import type {
   ReportSummary,
   DailyWorkReport,
   ContractorReport,
-  ProjectReport,
 } from "../types";
 
 const filterDailyWork = (
@@ -111,6 +110,8 @@ const aggregateReportData = (
 const calculateSummary = (reports: ProjectReportSummary[]): ReportSummary => {
   return reports.reduce(
     (acc, row) => {
+      acc.totalWorkRecords += row.totalWorkRecords;
+      acc.totalWorkingHours += row.totalWorkingHours;
       acc.totalWorkCost += row.totalWorkCost;
       acc.totalDeductions += row.totalDeductions;
       acc.netWorkAmount += row.netWorkAmount;
@@ -119,6 +120,8 @@ const calculateSummary = (reports: ProjectReportSummary[]): ReportSummary => {
       return acc;
     },
     {
+      totalWorkRecords: 0,
+      totalWorkingHours: 0,
       totalWorkCost: 0,
       totalDeductions: 0,
       netWorkAmount: 0,
@@ -186,84 +189,6 @@ const aggregateContractorData = (
       contractorId: contractor.id,
       contractorName: contractor.name,
       equipmentCount: count,
-      totalWorkingHours: summary.totalWorkingHours,
-      totalCost: summary.totalCost,
-      totalPaid: summary.totalPaid,
-      remaining: netWorkAmount - summary.totalPaid,
-    };
-  });
-};
-
-const aggregateProjectData = (
-  projects: Project[],
-  filteredDailyWork: DailyWork[],
-  filteredPayments: Payment[],
-): ProjectReport[] => {
-  const summaries: Record<string, {
-    contractors: Set<string>;
-    equipments: Set<string>;
-    workRecords: number;
-    totalWorkingHours: number;
-    totalCost: number;
-    totalDeductions: number;
-    totalPaid: number;
-  }> = {};
-
-  for (const project of projects) {
-    summaries[project.id] = {
-      contractors: new Set<string>(),
-      equipments: new Set<string>(),
-      workRecords: 0,
-      totalWorkingHours: 0,
-      totalCost: 0,
-      totalDeductions: 0,
-      totalPaid: 0,
-    };
-  }
-
-  for (const record of filteredDailyWork) {
-    const summary = summaries[record.projectId];
-    if (summary) {
-      summary.workRecords += 1;
-      summary.totalWorkingHours += record.workingHours ?? 0;
-      summary.totalCost += record.cost ?? 0;
-      summary.totalDeductions += record.deduction ?? 0;
-      if (record.contractorId) {
-        summary.contractors.add(record.contractorId);
-      }
-      if (record.equipmentId) {
-        summary.equipments.add(record.equipmentId);
-      }
-    }
-  }
-
-  for (const payment of filteredPayments) {
-    const summary = summaries[payment.projectId];
-    if (summary) {
-      summary.totalPaid += payment.paidAmount ?? 0;
-    }
-  }
-
-  return projects.map((project) => {
-    const summary = summaries[project.id] ?? {
-      contractors: new Set<string>(),
-      equipments: new Set<string>(),
-      workRecords: 0,
-      totalWorkingHours: 0,
-      totalCost: 0,
-      totalDeductions: 0,
-      totalPaid: 0,
-    };
-
-    const netWorkAmount = summary.totalCost - summary.totalDeductions;
-
-    return {
-      id: project.id,
-      projectId: project.id,
-      projectName: project.name,
-      contractorsCount: summary.contractors.size,
-      equipmentCount: summary.equipments.size,
-      workRecords: summary.workRecords,
       totalWorkingHours: summary.totalWorkingHours,
       totalCost: summary.totalCost,
       totalPaid: summary.totalPaid,
@@ -430,14 +355,6 @@ export function useReports() {
     );
   }, [contractors, equipment, filteredDailyWork, filteredPaymentsForReports]);
 
-  const projectReports = useMemo(() => {
-    return aggregateProjectData(
-      projects,
-      filteredDailyWork,
-      filteredPaymentsForReports,
-    );
-  }, [projects, filteredDailyWork, filteredPaymentsForReports]);
-
   return {
     reports,
     summary,
@@ -454,7 +371,6 @@ export function useReports() {
     },
     dailyWorkReports,
     contractorReports,
-    projectReports,
     isLoading,
   };
 }

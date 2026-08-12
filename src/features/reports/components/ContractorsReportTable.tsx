@@ -20,16 +20,6 @@ export function ContractorsReportTable({ rows, isLoading }: ContractorsReportTab
         minWidth: 150,
       },
       {
-        field: "equipmentCount",
-        headerName: t("reports:equipmentCount"),
-        flex: 1,
-        minWidth: 130,
-        type: "number",
-        headerAlign: "right",
-        align: "right",
-        renderCell: ({ value }: any) => value?.toLocaleString() ?? "0",
-      },
-      {
         field: "totalWorkingHours",
         headerName: t("reports:totalWorkingHours"),
         flex: 1.2,

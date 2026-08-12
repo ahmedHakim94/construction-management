@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { AppCard } from "@/components/ui";
 import {
   AccountBalanceWalletOutlined,
-  TrendingDownOutlined,
-  TrendingUpOutlined,
+  AssignmentOutlined,
+  AccessTimeOutlined,
   PaidOutlined,
   AccountBalanceOutlined,
 } from "@mui/icons-material";
@@ -20,25 +20,25 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
 
   const summaryItems = [
     {
+      label: t("reports:totalWorkRecords"),
+      value: summary.totalWorkRecords,
+      color: "primary.main",
+      bg: "rgba(37, 99, 235, 0.08)",
+      Icon: AssignmentOutlined,
+    },
+    {
+      label: t("reports:totalWorkingHours"),
+      value: summary.totalWorkingHours,
+      color: "info.main",
+      bg: "rgba(2, 136, 209, 0.08)",
+      Icon: AccessTimeOutlined,
+    },
+    {
       label: t("reports:totalWorkCost"),
       value: summary.totalWorkCost,
       color: "primary.main",
       bg: "rgba(37, 99, 235, 0.08)",
       Icon: AccountBalanceWalletOutlined,
-    },
-    {
-      label: t("reports:totalDeductions"),
-      value: summary.totalDeductions,
-      color: "error.main",
-      bg: "rgba(220, 38, 38, 0.08)",
-      Icon: TrendingDownOutlined,
-    },
-    {
-      label: t("reports:netWorkAmount"),
-      value: summary.netWorkAmount,
-      color: "info.main",
-      bg: "rgba(2, 136, 209, 0.08)",
-      Icon: TrendingUpOutlined,
     },
     {
       label: t("reports:totalPaidAmount"),

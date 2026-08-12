@@ -9,7 +9,6 @@ import { ReportsFilters } from "../components/ReportsFilters";
 import { ReportsSummary } from "../components/ReportsSummary";
 import { DailyWorkReportTable } from "../components/DailyWorkReportTable";
 import { ContractorsReportTable } from "../components/ContractorsReportTable";
-import { ProjectsReportTable } from "../components/ProjectsReportTable";
 
 export function ReportsPage() {
   const { t } = useTranslation(["reports"]);
@@ -21,7 +20,6 @@ export function ReportsPage() {
     setFilters,
     dailyWorkReports,
     contractorReports,
-    projectReports,
     isLoading,
   } = useReports();
 
@@ -72,13 +70,6 @@ export function ReportsPage() {
             {t("reports:contractorsReport")}
           </Typography>
           <ContractorsReportTable rows={contractorReports} isLoading={isLoading} />
-        </AppCard>
-
-        <AppCard sx={{ p: { xs: 2.5, md: 3 } }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, textAlign: "start" }}>
-            {t("reports:projectsReport")}
-          </Typography>
-          <ProjectsReportTable rows={projectReports} isLoading={isLoading} />
         </AppCard>
       </Box>
     </PageContainer>
