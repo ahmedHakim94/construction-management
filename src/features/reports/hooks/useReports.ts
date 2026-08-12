@@ -137,14 +137,7 @@ const mapDailyWorkReports = (
   const projectsMap = new Map(projects.map((p) => [p.id, p.name]));
   const contractorsMap = new Map(contractors.map((c) => [c.id, c.name]));
   const equipmentMap = new Map(equipment.map((e) => [e.id, e.name ?? ""]));
-  const tasksMap = new Map(
-    tasks.map((t) => [
-      t.id,
-      language === "ar"
-        ? (t.nameAr ?? t.nameEn ?? "")
-        : (t.nameEn ?? t.nameAr ?? ""),
-    ]),
-  );
+  const tasksMap = new Map(tasks.map((t) => [t.id, t.name ?? ""]));
 
   return filteredRecords.map((record) => {
     const equipmentName = record.equipmentId

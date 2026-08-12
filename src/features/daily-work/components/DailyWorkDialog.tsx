@@ -107,9 +107,9 @@ export function DailyWorkDialog({
     () =>
       tasks.map((item) => ({
         value: item.id,
-        label: isArabic ? item.nameAr : item.nameEn,
+        label: item.name,
       })),
-    [tasks, isArabic],
+    [tasks],
   );
 
   useEffect(() => {

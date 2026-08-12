@@ -3,21 +3,17 @@ import type { Task } from "../types";
 export const tasksMockData: Task[] = [
   {
     id: "task-1",
-    nameAr: "قطع",
-    nameEn: "Cutting",
+    name: "قطع",
   },
   {
     id: "task-2",
-    nameAr: "تسوية",
-    nameEn: "Leveling",
+    name: "تسوية",
   },
   {
     id: "task-3",
-    nameAr: "حفر",
-    nameEn: "Excavation",
+    name: "حفر",
   },{
     id: "task-4",
-    nameAr: "ردم",
-    nameEn: "Pavement",
+    name: "ردم",
   },
 ];

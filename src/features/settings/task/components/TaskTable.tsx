@@ -16,14 +16,8 @@ export function TaskTable({ rows, onEdit, onDelete }: TaskTableProps) {
   const columns = useMemo(
     () => [
       {
-        field: "nameAr",
-        headerName: t("arabicName"),
-        flex: 1.2,
-        minWidth: 180,
-      },
-      {
-        field: "nameEn",
-        headerName: t("englishName"),
+        field: "name",
+        headerName: t("name"),
         flex: 1.2,
         minWidth: 180,
       },

@@ -70,13 +70,9 @@ export function DailyWorkPage() {
         contractors.find((contractor) => contractor.id === item.contractorId)
           ?.name ?? "",
       equipmentLabel: item.equipmentId
-        ? (equipment.find((eq) => eq.id === item.equipmentId)
-            ?.name ?? "")
+        ? (equipment.find((eq) => eq.id === item.equipmentId)?.name ?? "")
         : (item.temporaryEquipmentName ?? ""),
-      taskName:
-        tasks.find((task) => task.id === item.taskId)?.nameEn ??
-        tasks.find((task) => task.id === item.taskId)?.nameAr ??
-        "",
+      taskName: tasks.find((task) => task.id === item.taskId)?.name ?? "",
     }));
   }, [records, projects, contractors, equipment, tasks]);
 

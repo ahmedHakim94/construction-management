@@ -21,5 +21,6 @@
   "deleteEquipmentType": "Delete Equipment Type",
   "arabicName": "Arabic Name",
   "englishName": "English Name",
-  "equipmentTypeName": "Equipment Type Name"
+  "equipmentTypeName": "Equipment Type Name",
+  "name":"Name"
 }

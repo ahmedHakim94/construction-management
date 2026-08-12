@@ -137,7 +137,7 @@ export function PaymentPage() {
             projects.map((project) => [project.id, project.name]),
           )}
           taskMap={Object.fromEntries(
-            tasks.map((task) => [task.id, task.nameEn]),
+            tasks.map((task) => [task.id, task.name]),
           )}
           equipmentMap={equipmentMap}
 

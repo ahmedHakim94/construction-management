@@ -15,8 +15,7 @@ export const taskService = {
   async create(data: TaskFormValues): Promise<Task> {
     const nextTask: Task = {
       id: `task-${Date.now()}`,
-      nameAr: data.nameAr,
-      nameEn: data.nameEn,
+      name: data.name,
     };
 
     tasks = [nextTask, ...tasks];
@@ -31,8 +30,7 @@ export const taskService = {
 
       return {
         ...item,
-        nameAr: data.nameAr,
-        nameEn: data.nameEn,
+        name: data.name,
       };
     });
 

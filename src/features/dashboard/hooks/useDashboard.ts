@@ -70,17 +70,17 @@ const mapDashboardDailyWork = (
 ): DashboardDailyWork[] => {
   return dailyWorkRecords.map((record) => {
     const project = projectsData.find((p) => p.id === record.projectId);
-    const contractor = contractorsData.find((c) => c.id === record.contractorId);
-    
+    const contractor = contractorsData.find(
+      (c) => c.id === record.contractorId,
+    );
+
     const equipment = equipmentData.find((eq) => eq.id === record.equipmentId);
     const equipmentName = record.equipmentId
-      ? (equipment?.equipmentNumber ?? "")
+      ? (equipment?.name ?? "")
       : (record.temporaryEquipmentName ?? "");
 
     const task = tasksData.find((t) => t.id === record.taskId);
-    const taskName = language === "ar"
-      ? (task?.nameAr ?? task?.nameEn ?? "")
-      : (task?.nameEn ?? task?.nameAr ?? "");
+    const taskName = task?.name ?? "";
 
     return {
       id: record.id,
@@ -155,7 +155,9 @@ export function useDashboard() {
   const [rawDailyWork, setRawDailyWork] = useState<DailyWork[]>([]);
   const [rawPayments, setRawPayments] = useState<Payment[]>([]);
 
-  const [workByProject, setWorkByProject] = useState<DashboardProjectWork[]>([]);
+  const [workByProject, setWorkByProject] = useState<DashboardProjectWork[]>(
+    [],
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -231,7 +233,14 @@ export function useDashboard() {
       rawTasks,
       currentLang,
     );
-  }, [rawDailyWork, rawProjects, rawContractors, rawEquipment, rawTasks, currentLang]);
+  }, [
+    rawDailyWork,
+    rawProjects,
+    rawContractors,
+    rawEquipment,
+    rawTasks,
+    currentLang,
+  ]);
 
   const payments = useMemo(() => {
     return mapDashboardPayments(rawPayments, rawProjects, rawContractors);
