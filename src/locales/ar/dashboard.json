@@ -21,5 +21,10 @@
   "workingHoursFormat": "{{hours}} ساعة",
   "workByProject": "العمل حسب المشروع",
   "workRecords": "سجلات العمل",
-  "noProjectWorkFound": "لم يتم العثور على سجلات عمل لأي مشروع."
+  "noProjectWorkFound": "لم يتم العثور على سجلات عمل لأي مشروع.",
+  "recentDailyWork": "أحدث الأعمال اليومية",
+  "viewAll": "عرض الكل",
+  "workingHoursByProject": "ساعات العمل حسب المشروع",
+  "workCostByProject": "تكلفة العمل حسب المشروع",
+  "workOverview": "نظرة عامة على العمل"
 }

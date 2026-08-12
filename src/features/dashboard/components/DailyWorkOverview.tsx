@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   AppCard,
   AppCustomTable,
+  AppButton,
   type AppTableColDef,
 } from "@/components/ui";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { DashboardDailyWork } from "../types";
 
 export interface DailyWorkOverviewProps {
@@ -18,6 +20,14 @@ export function DailyWorkOverview({
   isLoading,
 }: DailyWorkOverviewProps) {
   const { t } = useTranslation(["dashboard", "dailyWork"]);
+  const navigate = useNavigate();
+
+  // Show only the latest 10 records sorted by date descending
+  const recentRecords = useMemo(() => {
+    return [...dailyWork]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 10);
+  }, [dailyWork]);
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
@@ -42,12 +52,6 @@ export function DailyWorkOverview({
       {
         field: "equipmentName",
         headerName: t("dailyWork:equipment"),
-        flex: 1.2,
-        minWidth: 130,
-      },
-      {
-        field: "taskName",
-        headerName: t("dailyWork:task"),
         flex: 1.2,
         minWidth: 130,
       },
@@ -78,24 +82,35 @@ export function DailyWorkOverview({
 
   return (
     <AppCard sx={{ p: { xs: 2.5, md: 3 } }}>
-      <Typography
-        variant="h6"
-        sx={{ fontWeight: 700, mb: 3, textAlign: "start" }}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
       >
-        {t("dailyWork:dailyWork")}
-      </Typography>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 700, textAlign: "start" }}
+        >
+          {t("dashboard:recentDailyWork")}
+        </Typography>
+        <AppButton
+          onClick={() => navigate("/daily-work")}
+          size="small"
+          variant="outlined"
+        >
+          {t("dashboard:viewAll")}
+        </AppButton>
+      </Box>
 
-      {/* <AppTable
-        rows={dailyWork}
+      <AppCustomTable
+        rows={recentRecords}
         columns={columns}
         loading={isLoading}
-        showPagination={false}
-        localeText={{
-          noRowsLabel: t("dashboard:noDailyWorkRecordsFound"),
-        }}
-      /> */}
-
-      <AppCustomTable rows={dailyWork} columns={columns} loading={isLoading} />
+        noRowsLabel={t("dashboard:noDailyWorkRecordsFound")}
+      />
     </AppCard>
   );
 }

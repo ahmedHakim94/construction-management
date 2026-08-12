@@ -21,5 +21,10 @@
   "workingHoursFormat": "{{hours}} hrs",
   "workByProject": "Work by Project",
   "workRecords": "Work Records",
-  "noProjectWorkFound": "No work records found for any project."
+  "noProjectWorkFound": "No work records found for any project.",
+  "recentDailyWork": "Recent Daily Work",
+  "viewAll": "View All",
+  "workingHoursByProject": "Working Hours by Project",
+  "workCostByProject": "Work Cost by Project",
+  "workOverview": "Work Overview"
 }

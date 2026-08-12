@@ -10,7 +10,6 @@ import { AppPageContainer, AppPageHeader } from "@/components/ui";
 import SharedTotalNumber from "../components/SharedTotalNumber";
 import { FinancialOverview } from "../components/FinancialOverview";
 import { useDashboard } from "../hooks/useDashboard";
-import { PaymentsOverview } from "../components/PaymentsOverview";
 import { DailyWorkOverview } from "../components/DailyWorkOverview";
 import { WorkByProject } from "../components/WorkByProject";
 
@@ -19,7 +18,6 @@ export function DashboardPage() {
   const {
     stats,
     financials,
-    payments,
     dailyWork,
     workByProject,
     isLoading,
@@ -98,9 +96,6 @@ export function DashboardPage() {
           remainingAmount={financials.remainingAmount}
           isLoading={isFinancialLoading}
         />
-
-        {/* Payments Overview */}
-        <PaymentsOverview payments={payments} isLoading={isFinancialLoading} />
 
         {/* Work by Project Overview */}
         <WorkByProject
