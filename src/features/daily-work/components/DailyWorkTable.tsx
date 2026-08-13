@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
-import { AppTable } from "@/components/ui";
+import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { DailyWork } from "../types";
 
 interface DailyWorkTableProps {
@@ -13,7 +13,7 @@ interface DailyWorkTableProps {
 export function DailyWorkTable({ rows, onEdit, onDelete }: DailyWorkTableProps) {
   const { t } = useTranslation();
 
-  const columns = useMemo(
+  const columns = useMemo<AppTableColDef[]>(
     () => [
       {
         field: "date",
@@ -80,8 +80,8 @@ export function DailyWorkTable({ rows, onEdit, onDelete }: DailyWorkTableProps) 
         headerName: t("netAmount"),
         flex: 1,
         minWidth: 130,
-        renderCell: (params: any) =>
-          Number(params?.row?.cost ?? 0) - Number(params?.row?.deduction ?? 0),
+        renderCell: ({ row }: { row: DailyWork }) =>
+          Number(row.cost ?? 0) - Number(row.deduction ?? 0),
       },
       {
         field: "notes",
@@ -102,7 +102,7 @@ export function DailyWorkTable({ rows, onEdit, onDelete }: DailyWorkTableProps) 
         filterable: false,
         flex: 0.8,
         minWidth: 110,
-        renderCell: ({ row }: any) => (
+        renderCell: ({ row }: { row: DailyWork }) => (
           <AppActions onEdit={() => onEdit(row)} onDelete={() => onDelete(row)} />
         ),
       },

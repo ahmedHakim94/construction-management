@@ -77,18 +77,7 @@ export function DailyWorkPage() {
     }));
   }, [records, projects, contractors, equipment, tasks]);
 
-  // const filteredRecords = useMemo(() => {
-  //   const term = search.trim().toLowerCase();
 
-  //   if (!term) {
-  //     return displayRows;
-  //   }
-
-  //   return displayRows.filter((item) => {
-  //     const values = [item.projectName, item.contractorName, item.equipmentLabel, item.taskName];
-  //     return values.some((value) => value.toLowerCase().includes(term));
-  //   });
-  // }, [displayRows, search]);
 
   const filteredRecords = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -189,12 +178,9 @@ export function DailyWorkPage() {
           title={t("dailyWork")}
           description={t("dailyWorkDescription")}
           actions={
-            <>
-              {/* <AppSearchInput value={search} onChange={setSearch} placeholder={t("searchDailyWork")} /> */}
-              <AppButton variant="contained" startIcon={<Today />} onClick={handleOpenCreate}>
-                {t("addDailyWork")}
-              </AppButton>
-            </>
+            <AppButton variant="contained" startIcon={<Today />} onClick={handleOpenCreate}>
+              {t("addDailyWork")}
+            </AppButton>
           }
         />
 

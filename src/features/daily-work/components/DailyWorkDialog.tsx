@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -22,7 +22,7 @@ interface DailyWorkDialogProps {
   equipment: Equipment[];
   tasks: Task[];
   onClose: () => void;
-  onSubmit: (values: DailyWorkFormValues) => void;
+  onSubmit: (values: DailyWorkFormValues) => Promise<void>;
 }
 
 export function DailyWorkDialog({
@@ -36,6 +36,7 @@ export function DailyWorkDialog({
   onClose,
   onSubmit,
 }: DailyWorkDialogProps) {
+  const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
@@ -152,7 +153,7 @@ export function DailyWorkDialog({
     });
   }, [workingHours, hourRate, setValue]);
 
-  const handleFormSubmit = (values: DailyWorkFormValues) => {
+  const handleFormSubmit = async (values: DailyWorkFormValues) => {
     if (!selectedContractor) {
       setError("contractorId", {
         type: "manual",
@@ -179,7 +180,14 @@ export function DailyWorkDialog({
       }
     }
 
-    onSubmit(values);
+    setLoading(true);
+    try {
+      await onSubmit(values);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -398,7 +406,7 @@ export function DailyWorkDialog({
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <AppButton
-          loading={false}
+          loading={loading}
           variant="contained"
           onClick={handleSubmit(handleFormSubmit)}
         >
