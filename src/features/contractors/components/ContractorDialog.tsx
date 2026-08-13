@@ -19,7 +19,7 @@ interface ContractorDialogProps {
   mode: "create" | "edit";
   contractor?: Contractor;
   onClose: () => void;
-  onSubmit: (values: ContractorFormValues) => void;
+  onSubmit: (values: ContractorFormValues) => Promise<void>;
 }
 
 export function ContractorDialog({
@@ -34,15 +34,6 @@ export function ContractorDialog({
 
   const [loading, setLoading] = useState(false);
 
-  // const statusOptions = useMemo(
-  //   () =>
-  //     [
-  //       { value: "ACTIVE", label: t("active") },
-  //       { value: "INACTIVE", label: t("inactive") },
-  //     ] as const,
-  //   [t],
-  // );
-
   const statusOptions = [
     {
       value: "ACTIVE",
@@ -55,11 +46,10 @@ export function ContractorDialog({
   ];
 
   const { control, handleSubmit, reset } = useForm<ContractorFormValues>({
-    resolver: zodResolver(contractorSchema) as any,
+    resolver: zodResolver(contractorSchema),
     defaultValues: {
       name: "",
       phone: "",
-      // address: "",
       nationalId: "",
       notes: "",
       status: "ACTIVE",
@@ -70,28 +60,29 @@ export function ContractorDialog({
     reset({
       name: contractor?.name ?? "",
       phone: contractor?.phone ?? "",
-      // address: contractor?.address ?? "",
       nationalId: contractor?.nationalId ?? "",
       notes: contractor?.notes ?? "",
       status: contractor?.status ?? "ACTIVE",
     });
   }, [contractor, open, reset]);
 
-  const submit = (values: ContractorFormValues) => {
+  const submit = async (values: ContractorFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
       reset({
         name: "",
         phone: "",
-        // address: "",
         nationalId: "",
         notes: "",
         status: "ACTIVE",
       });
-      setLoading(false);
       onClose();
-    }, 1000);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,9 +99,7 @@ export function ContractorDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit((values) =>
-            submit(values as ContractorFormValues),
-          )}
+          onSubmit={handleSubmit(submit)}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -145,11 +134,6 @@ export function ContractorDialog({
               />
             )}
           />
-          {/* <Controller
-            name="address"
-            control={control}
-            render={({ field }) => <AppInput label={t("address")} {...field} />}
-          /> */}
           <Controller
             name="nationalId"
             control={control}
@@ -164,19 +148,6 @@ export function ContractorDialog({
               <AppTextarea label={t("notes")} {...field} />
             )}
           />
-          {/* <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <AppInput select label={t("status")} {...field}>
-                {statusOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </AppInput>
-            )}
-          /> */}
           <Controller
             name="status"
             control={control}
@@ -197,10 +168,7 @@ export function ContractorDialog({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <AppButton
           loading={loading}
-          onClick={handleSubmit((values) =>
-            submit(values as ContractorFormValues),
-          )}
-          // color="primary"
+          onClick={handleSubmit(submit)}
           variant="contained"
         >
           {mode === "create" ? t("create") : t("save")}

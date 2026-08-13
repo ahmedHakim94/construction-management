@@ -100,31 +100,23 @@ export function ContractorsPage() {
   };
 
   const handleDelete = async () => {
-    setDeleteLoading(true)
-
-    setTimeout(async () => {
-      try {
-        if (!selectedContractor) {
-          return;
-        }
-
-        await contractorService.delete(selectedContractor.id);
-        setContractors((current) =>
-          current.filter((item) => item.id !== selectedContractor.id),
-        );
-        notify.success(t("deletedSuccessfully"));
-        deleteDialog.closeDialog();
-        setSelectedContractor(undefined);
-        setDeleteLoading(false);
-
-      } catch {
-        notify.error(t("somethingWentWrong"));
-        setDeleteLoading(false);
-
-      }
-    }, 1500);
-
-
+    if (!selectedContractor) {
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      await contractorService.delete(selectedContractor.id);
+      setContractors((current) =>
+        current.filter((item) => item.id !== selectedContractor.id),
+      );
+      notify.success(t("deletedSuccessfully"));
+      deleteDialog.closeDialog();
+      setSelectedContractor(undefined);
+    } catch {
+      notify.error(t("somethingWentWrong"));
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (

@@ -58,9 +58,3 @@ export const contractorService = {
     contractors = contractors.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = contractorService.getAll;
-export const getById = contractorService.getById;
-export const create = contractorService.create;
-export const update = contractorService.update;
-export const deleteContractor = contractorService.delete;

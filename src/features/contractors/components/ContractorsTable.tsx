@@ -39,21 +39,15 @@ export function ContractorsTable({
       flex: 1,
       minWidth: 140,
     },
-    // {
-    //   field: "address",
-    //   headerName: t("address"),
-    //   flex: 1.3,
-    //   minWidth: 200,
-    // },
     {
       field: "status",
       headerName: t("status"),
       flex: 0.8,
       minWidth: 120,
-      renderCell: ({ value }: any) => (
+      renderCell: ({ row }: { row: Contractor }) => (
         <Chip
-          label={t(String(value).toLowerCase())}
-          color={value === "ACTIVE" ? "success" : "default"}
+          label={t(String(row.status).toLowerCase())}
+          color={row.status === "ACTIVE" ? "success" : "default"}
           size="small"
         />
       ),
@@ -71,7 +65,7 @@ export function ContractorsTable({
       filterable: false,
       flex: 0.8,
       minWidth: 110,
-      renderCell: ({ row }: any) => (
+      renderCell: ({ row }: { row: Contractor }) => (
         row.isSystem ? null : <AppActions
           onEdit={() => onEdit(row)}
           onDelete={() => onDelete(row)}
