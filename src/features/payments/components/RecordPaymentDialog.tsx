@@ -19,7 +19,7 @@ interface RecordPaymentDialogProps {
   remainingAmount: number;
   loading?: boolean;
   onClose: () => void;
-  onSubmit: (values: RecordPaymentFormValues) => void;
+  onSubmit: (values: RecordPaymentFormValues) => Promise<void>;
 }
 
 export function RecordPaymentDialog({
@@ -40,7 +40,7 @@ export function RecordPaymentDialog({
     setError,
     formState: { errors },
   } = useForm<RecordPaymentFormValues>({
-    resolver: zodResolver(recordPaymentSchema) as any,
+    resolver: zodResolver(recordPaymentSchema),
     defaultValues: {
       amount: 0,
     },
@@ -50,10 +50,8 @@ export function RecordPaymentDialog({
     reset({ amount: 0 });
   }, [open, reset]);
 
-  const handleFormSubmit = (values: any) => {
-    const parsedValues = values as RecordPaymentFormValues;
-
-    if (parsedValues.amount <= 0) {
+  const handleFormSubmit = async (values: RecordPaymentFormValues) => {
+    if (values.amount <= 0) {
       setError("amount", {
         type: "manual",
         message: t("paymentAmountInvalid"),
@@ -61,7 +59,7 @@ export function RecordPaymentDialog({
       return;
     }
 
-    if (parsedValues.amount > remainingAmount) {
+    if (values.amount > remainingAmount) {
       setError("amount", {
         type: "manual",
         message: t("paymentAmountExceedsRemaining"),
@@ -69,7 +67,7 @@ export function RecordPaymentDialog({
       return;
     }
 
-    onSubmit(parsedValues);
+    await onSubmit(values);
   };
 
   return (
@@ -115,11 +113,7 @@ export function RecordPaymentDialog({
       <DialogActions>
         <AppButton
           loading={loading}
-          onClick={() =>
-            handleSubmit((values) =>
-              handleFormSubmit(values as RecordPaymentFormValues),
-            )()
-          }
+          onClick={handleSubmit(handleFormSubmit)}
           variant="contained"
         >
           {t("recordPayment")}

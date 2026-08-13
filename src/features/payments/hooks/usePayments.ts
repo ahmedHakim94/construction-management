@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  paymentService,
-  getTransactions,
-  recordPayment as recordPaymentService,
-} from "../services/payment.service";
+import { paymentService } from "../services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
 import { projectService } from "@/features/settings/projects/services/project.service";
@@ -60,7 +56,7 @@ export function usePayments() {
   }, []);
 
   const loadTransactions = async (paymentId: string) => {
-    const transactions = await getTransactions(paymentId);
+    const transactions = await paymentService.getTransactions(paymentId);
     setPaymentTransactions(transactions);
     return transactions;
   };
@@ -69,7 +65,7 @@ export function usePayments() {
     setRecordLoading(true);
 
     try {
-      await recordPaymentService(paymentId, amount);
+      await paymentService.recordPayment(paymentId, amount);
       const updatedPayment = await paymentService.getById(paymentId);
 
       if (updatedPayment) {

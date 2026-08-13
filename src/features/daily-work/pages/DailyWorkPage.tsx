@@ -23,7 +23,7 @@ import type { Task } from "@/features/settings/task/types";
 import { AppFilters } from "@/components/ui/AppFilters";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
 import type { Dayjs } from "dayjs";
-import { hasPaidPaymentForDailyWork } from "@/features/payments/services/payment.service";
+import { paymentService } from "@/features/payments/services/payment.service";
 
 export function DailyWorkPage() {
   const { t } = useTranslation();
@@ -150,7 +150,7 @@ export function DailyWorkPage() {
         return;
       }
 
-      const hasPaidPayment = await hasPaidPaymentForDailyWork(selectedRecord);
+      const hasPaidPayment = await paymentService.hasPaidPaymentForDailyWork(selectedRecord);
 
       if (hasPaidPayment) {
         notify.error(t("cannotDeleteDailyWorkWithPayment"));

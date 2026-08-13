@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { recordPaymentSchema } from "./schemas/payment.schema";
+
 export type PaymentStatus = "UNPAID" | "PARTIALLY_PAID" | "PAID";
 
 export interface Payment {
@@ -23,6 +26,4 @@ export interface PaymentTransaction {
   createdAt: string;
 }
 
-export interface RecordPaymentFormValues {
-  amount: number;
-}
+export type RecordPaymentFormValues = z.infer<typeof recordPaymentSchema>;

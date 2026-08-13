@@ -5,7 +5,7 @@ export const paymentSchema = z.object({
 });
 
 export const recordPaymentSchema = z.object({
-  amount: z.coerce.number().positive("paymentAmountInvalid"),
+  amount: z.number().positive("paymentAmountInvalid"),
 });
 
 export type PaymentSchemaValues = z.infer<typeof paymentSchema>;
