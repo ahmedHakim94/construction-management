@@ -23,7 +23,7 @@ export const contractorService = {
       code: generateCode(),
       name: data.name,
       phone: data.phone,
-      address: data.address,
+      address: data.address || "",
       nationalId: data.nationalId || undefined,
       notes: data.notes || undefined,
       status: data.status,
@@ -44,7 +44,7 @@ export const contractorService = {
         ...item,
         name: data.name,
         phone: data.phone,
-        address: data.address,
+        address: data.address || "",
         nationalId: data.nationalId || undefined,
         notes: data.notes || undefined,
         status: data.status,
@@ -58,9 +58,3 @@ export const contractorService = {
     contractors = contractors.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = contractorService.getAll;
-export const getById = contractorService.getById;
-export const create = contractorService.create;
-export const update = contractorService.update;
-export const deleteContractor = contractorService.delete;

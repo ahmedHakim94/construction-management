@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
+import { Construction } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -17,7 +18,7 @@ import type { EquipmentType } from "@/features/settings/equipment-type/types";
 import type { Equipment, EquipmentFormValues } from "../types";
 
 export function EquipmentPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
@@ -25,7 +26,6 @@ export function EquipmentPage() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const isArabic = i18n.language === "ar";
 
   const dialog = useDialog();
   const deleteDialog = useDialog();
@@ -53,9 +53,7 @@ export function EquipmentPage() {
       contractorName:
         contractors.find((contractor) => contractor.id === item.contractorId)?.name ?? "",
       equipmentTypeName:
-        isArabic
-          ? equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.nameAr ?? ""
-          : equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.nameEn ?? "",
+          equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.name ?? "",
     }));
   }, [equipment, contractors, equipmentTypes]);
 
@@ -156,7 +154,7 @@ export function EquipmentPage() {
                 onChange={setSearch}
                 placeholder={t("searchEquipment")}
               />
-              <AppButton onClick={handleOpenCreate}>{t("addEquipment")}</AppButton>
+              <AppButton variant="contained" startIcon={<Construction />} onClick={handleOpenCreate}>{t("addEquipment")}</AppButton>
             </>
           }
         />

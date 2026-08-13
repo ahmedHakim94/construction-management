@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { dailyWorkSchema } from "../schemas/dailyWork.schema";
+
 export interface DailyWork {
   id: string;
   date: string;
@@ -16,18 +19,4 @@ export interface DailyWork {
   createdAt: string;
 }
 
-export interface DailyWorkFormValues {
-  date: string;
-  projectId: string;
-  contractorId: string;
-  equipmentId?: string;
-  temporaryEquipmentName?: string;
-  hourRate: number;
-  workingHours: number;
-  fuelConsumption: number;
-  taskId: string;
-  cost: number;
-  deduction: number;
-  deductionReason?: string;
-  notes?: string;
-}
+export type DailyWorkFormValues = z.infer<typeof dailyWorkSchema>;

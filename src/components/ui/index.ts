@@ -7,6 +7,7 @@ export * from "./AppCard";
 export * from "./AppDialog";
 export * from "./AppDrawer";
 export * from "./AppTable";
+export * from "./AppCustomTable";
 export * from "./AppLoader";
 export * from "./AppBadge";
 export * from "./AppPageHeader";

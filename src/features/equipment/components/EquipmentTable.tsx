@@ -5,87 +5,92 @@ import type { Equipment } from "../types";
 import { AppActions } from "@/components/ui/AppActions";
 
 interface EquipmentTableProps {
-    rows: Equipment[];
-    onEdit: (equipment: Equipment) => void;
-    onDelete: (equipment: Equipment) => void;
+  rows: Equipment[];
+  onEdit: (equipment: Equipment) => void;
+  onDelete: (equipment: Equipment) => void;
 }
 
-export function EquipmentTable({ rows, onEdit, onDelete }: EquipmentTableProps) {
-    const { t } = useTranslation();
+export function EquipmentTable({
+  rows,
+  onEdit,
+  onDelete,
+}: EquipmentTableProps) {
+  const { t } = useTranslation();
 
-    const columns = useMemo<AppTableColDef[]>(
-        () => [
-            {
-                field: "equipmentNumber",
-                headerName: t("equipmentNumber"),
-                flex: 1,
-                minWidth: 140,
-            },
-            {
-                field: "contractorName",
-                headerName: t("contractorName"),
-                flex: 1.2,
-                minWidth: 180,
-            },
-            {
-                field: "equipmentTypeName",
-                headerName: t("equipmentType"),
-                flex: 1.2,
-                minWidth: 180,
-            },
-            {
-                field: "hourRate",
-                headerName: t("hourRate"),
-                flex: 0.8,
-                minWidth: 120,
-            },
-            {
-                field: "model",
-                headerName: t("model"),
-                flex: 1,
-                minWidth: 140,
-            },
-            {
-                field: "plateNumber",
-                headerName: t("plateNumber"),
-                flex: 1,
-                minWidth: 140,
-            },
+  const columns = useMemo<AppTableColDef[]>(
+    () => [
+      {
+        field: "equipmentNumber",
+        headerName: t("equipmentNumber"),
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: "contractorName",
+        headerName: t("contractorName"),
+        flex: 1.2,
+        minWidth: 180,
+      },
+      {
+        field: "equipmentTypeName",
+        headerName: t("equipmentType"),
+        flex: 1.2,
+        minWidth: 180,
+      },
+      {
+        field: "model",
+        headerName: t("model"),
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: "hourRate",
+        headerName: t("hourRate"),
+        flex: 0.8,
+        minWidth: 120,
+      },
 
-            {
-                field: "createdAt",
-                headerName: t("createdDate"),
-                flex: 1,
-                minWidth: 140,
-            },
-            {
-                field: "notes",
-                headerName: t("notes"),
-                flex: 1.2,
-                minWidth: 180,
-            },
-            {
-                field: "actions",
-                headerName: t("actions"),
-                sortable: false,
-                filterable: false,
-                flex: 0.8,
-                minWidth: 110,
-                renderCell: ({ row }) => (
-                    <AppActions
-                        onEdit={() => onEdit(row as Equipment)}
-                        onDelete={() => onDelete(row as Equipment)}
-                    />
-                ),
-            },
-        ],
-        [t],
-    );
+      {
+        field: "plateNumber",
+        headerName: t("plateNumber"),
+        flex: 1,
+        minWidth: 140,
+      },
 
-    const rowsWithId = useMemo(
-        () => rows.map((row) => ({ ...row, id: row.id })),
-        [rows],
-    );
+      {
+        field: "createdAt",
+        headerName: t("createdDate"),
+        flex: 1,
+        minWidth: 140,
+      },
+      {
+        field: "notes",
+        headerName: t("notes"),
+        flex: 1.2,
+        minWidth: 180,
+      },
+      {
+        field: "actions",
+        headerName: t("actions"),
+        sortable: false,
+        filterable: false,
+        flex: 0.8,
+        minWidth: 110,
+        renderCell: ({ row }: { row: Equipment }) => (
+          <AppActions
+            onEdit={() => onEdit(row)}
+            onDelete={() => onDelete(row)}
+          />
+        ),
+      },
+    ],
+    [t],
+  );
 
-    return <AppTable rows={rowsWithId} columns={columns} />;
+  const rowsWithId = useMemo(
+    () => rows.map((row) => ({ ...row, id: row.id })),
+    [rows],
+  );
+
+  return <AppTable rows={rowsWithId} columns={columns} />;
 }

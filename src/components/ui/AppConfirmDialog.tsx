@@ -42,26 +42,15 @@ export function AppConfirmDialog({
       <DialogTitle>{title}</DialogTitle>
 
       <DialogContent>
-        <Typography color="text.secondary">
-          {message}
-        </Typography>
+        <Typography color="text.secondary">{message}</Typography>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <AppButton
-          variant="outlined"
-          onClick={onClose}
-          disabled={loading}
-        >
-          {cancelText ?? t("cancel")}
-        </AppButton>
-
-        <AppButton
-          color="error"
-          loading={loading}
-          onClick={onConfirm}
-        >
+        <AppButton variant="contained" color="error" loading={loading} onClick={onConfirm}>
           {confirmText ?? t("confirm")}
+        </AppButton>
+        <AppButton variant="outlined" onClick={onClose} disabled={loading}>
+          {cancelText ?? t("cancel")}
         </AppButton>
       </DialogActions>
     </AppDialog>

@@ -5,9 +5,6 @@ export const equipmentSchema = z.object({
   equipmentTypeId: z.string().trim().min(1, "Equipment type is required"),
   model: z.string().optional(),
   plateNumber: z.string().optional(),
-  equipmentNumber: z.string().optional(),
-  hourRate: z.coerce.number().min(0, "Hour rate must be positive"),
+  hourRate: z.number().min(0, "Hour rate must be positive"),
   notes: z.string().optional(),
 });
-
-export type EquipmentSchemaValues = z.infer<typeof equipmentSchema>;

@@ -35,7 +35,10 @@ export const dailyWorkService = {
     return nextRecord;
   },
 
-  async update(id: string, data: DailyWorkFormValues): Promise<DailyWork | undefined> {
+  async update(
+    id: string,
+    data: DailyWorkFormValues,
+  ): Promise<DailyWork | undefined> {
     dailyWorkRecords = dailyWorkRecords.map((item) => {
       if (item.id !== id) {
         return item;
@@ -53,6 +56,8 @@ export const dailyWorkService = {
         fuelConsumption: data.fuelConsumption,
         taskId: data.taskId,
         cost: data.cost,
+        deduction: data.deduction,
+        deductionReason: data.deductionReason || undefined,
         notes: data.notes || undefined,
       };
     });
@@ -64,9 +69,3 @@ export const dailyWorkService = {
     dailyWorkRecords = dailyWorkRecords.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = dailyWorkService.getAll;
-export const getById = dailyWorkService.getById;
-export const create = dailyWorkService.create;
-export const update = dailyWorkService.update;
-export const deleteDailyWork = dailyWorkService.delete;

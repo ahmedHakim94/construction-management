@@ -1,6 +1,13 @@
 {
   "dashboard": "الصفحة الرئيسية",
   "dashboardDescription": "نظرة عامة على محفظة المشاريع الحالية.",
+  "totalProjects": "إجمالي المشاريع",
+  "totalContractors": "إجمالي المقاولين",
+  "totalEquipment": "إجمالي المعدات",
+  "financialOverview": "الملخص المالي",
+  "totalCost": "إجمالي التكلفة",
+  "totalPaid": "إجمالي المدفوعات",
+  "remainingAmount": "المبلغ المتبقي",
   "overviewPlaceholder": "مخطط تفصيلي للمعلومات العامة",
   "activityPlaceholder": "مخطط تفصيلي للنشاط",
   "draft": "مسودة",
@@ -9,5 +16,15 @@
   "pending": "معلق",
   "scheduled": "مجدول",
   "budgetReview": "مراجعة الميزانية",
-  "siteInspection": "فحص الموقع"
+  "siteInspection": "فحص الموقع",
+  "noDailyWorkRecordsFound": "لم يتم العثور على سجلات عمل يومية.",
+  "workingHoursFormat": "{{hours}} ساعة",
+  "workByProject": "العمل حسب المشروع",
+  "workRecords": "سجلات العمل",
+  "noProjectWorkFound": "لم يتم العثور على سجلات عمل لأي مشروع.",
+  "recentDailyWork": "أحدث الأعمال اليومية",
+  "viewAll": "عرض الكل",
+  "workingHoursByProject": "ساعات العمل حسب المشروع",
+  "workCostByProject": "تكلفة العمل حسب المشروع",
+  "workOverview": "نظرة عامة على العمل"
 }

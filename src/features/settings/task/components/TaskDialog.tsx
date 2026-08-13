@@ -12,10 +12,16 @@ interface TaskDialogProps {
   mode: "create" | "edit";
   task?: Task;
   onClose: () => void;
-  onSubmit: (values: TaskFormValues) => void;
+  onSubmit: (values: TaskFormValues) => Promise<void>;
 }
 
-export function TaskDialog({ open, mode, task, onClose, onSubmit }: TaskDialogProps) {
+export function TaskDialog({
+  open,
+  mode,
+  task,
+  onClose,
+  onSubmit,
+}: TaskDialogProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
   const [loading, setLoading] = useState(false);
@@ -23,24 +29,23 @@ export function TaskDialog({ open, mode, task, onClose, onSubmit }: TaskDialogPr
   const { control, handleSubmit, reset } = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      nameAr: "",
-      nameEn: "",
+      name: "",
     },
   });
 
   useEffect(() => {
     reset({
-      nameAr: task?.nameAr ?? "",
-      nameEn: task?.nameEn ?? "",
+      name: task?.name ?? "",
     });
   }, [task, open, reset]);
 
-  const submit = (values: TaskFormValues) => {
+  const submit = async (values: TaskFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -52,28 +57,20 @@ export function TaskDialog({ open, mode, task, onClose, onSubmit }: TaskDialogPr
       <DialogContent>
         <form
           onSubmit={handleSubmit(submit)}
-          style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 8, direction: isArabic ? "rtl" : "ltr" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            paddingTop: 8,
+            direction: isArabic ? "rtl" : "ltr",
+          }}
         >
           <Controller
-            name="nameAr"
+            name="name"
             control={control}
             render={({ field, fieldState }) => (
               <AppInput
-                label={t("arabicName")}
-                required
-                {...field}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="nameEn"
-            control={control}
-            render={({ field, fieldState }) => (
-              <AppInput
-                label={t("englishName")}
+                label={t("name")}
                 required
                 {...field}
                 error={Boolean(fieldState.error)}
@@ -85,12 +82,11 @@ export function TaskDialog({ open, mode, task, onClose, onSubmit }: TaskDialogPr
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

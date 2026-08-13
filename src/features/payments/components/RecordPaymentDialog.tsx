@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import {
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +19,7 @@ interface RecordPaymentDialogProps {
   remainingAmount: number;
   loading?: boolean;
   onClose: () => void;
-  onSubmit: (values: RecordPaymentFormValues) => void;
+  onSubmit: (values: RecordPaymentFormValues) => Promise<void>;
 }
 
 export function RecordPaymentDialog({
@@ -35,7 +40,7 @@ export function RecordPaymentDialog({
     setError,
     formState: { errors },
   } = useForm<RecordPaymentFormValues>({
-    resolver: zodResolver(recordPaymentSchema) as any,
+    resolver: zodResolver(recordPaymentSchema),
     defaultValues: {
       amount: 0,
     },
@@ -45,31 +50,49 @@ export function RecordPaymentDialog({
     reset({ amount: 0 });
   }, [open, reset]);
 
-  const handleFormSubmit = (values: any) => {
-    const parsedValues = values as RecordPaymentFormValues;
-
-    if (parsedValues.amount <= 0) {
-      setError("amount", { type: "manual", message: t("paymentAmountInvalid") });
+  const handleFormSubmit = async (values: RecordPaymentFormValues) => {
+    if (values.amount <= 0) {
+      setError("amount", {
+        type: "manual",
+        message: t("paymentAmountInvalid"),
+      });
       return;
     }
 
-    if (parsedValues.amount > remainingAmount) {
-      setError("amount", { type: "manual", message: t("paymentAmountExceedsRemaining") });
+    if (values.amount > remainingAmount) {
+      setError("amount", {
+        type: "manual",
+        message: t("paymentAmountExceedsRemaining"),
+      });
       return;
     }
 
-    onSubmit(parsedValues);
+    await onSubmit(values);
   };
 
   return (
     <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t("recordPayment")}</DialogTitle>
       <DialogContent>
-        <Typography>{t("netDue")}: {netAmount}</Typography>
-        <Typography>{t("paidAmount")}: {paidAmount}</Typography>
-        <Typography>{t("remainingAmount")}: {remainingAmount}</Typography>
+        <Typography>
+          {t("netDue")}: {netAmount}
+        </Typography>
+        <Typography>
+          {t("paidAmount")}: {paidAmount}
+        </Typography>
+        <Typography>
+          {t("remainingAmount")}: {remainingAmount}
+        </Typography>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 16 }}>
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            marginTop: 16,
+          }}
+        >
           <Controller
             name="amount"
             control={control}
@@ -88,10 +111,14 @@ export function RecordPaymentDialog({
         </form>
       </DialogContent>
       <DialogActions>
-        <AppButton onClick={onClose}>{t("cancel")}</AppButton>
-        <AppButton loading={loading} onClick={() => handleSubmit((values) => handleFormSubmit(values as RecordPaymentFormValues))()}>
+        <AppButton
+          loading={loading}
+          onClick={handleSubmit(handleFormSubmit)}
+          variant="contained"
+        >
           {t("recordPayment")}
         </AppButton>
+        <AppButton onClick={onClose}>{t("cancel")}</AppButton>
       </DialogActions>
     </AppDialog>
   );

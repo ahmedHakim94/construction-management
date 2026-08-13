@@ -1,6 +1,13 @@
 {
   "dashboard": "Dashboard",
   "dashboardDescription": "Overview of the current project portfolio.",
+  "totalProjects": "Total Projects",
+  "totalContractors": "Total Contractors",
+  "totalEquipment": "Total Equipment",
+  "financialOverview": "Financial Overview",
+  "totalCost": "Total Cost",
+  "totalPaid": "Total Paid",
+  "remainingAmount": "Remaining Amount",
   "overviewPlaceholder": "Overview placeholder",
   "activityPlaceholder": "Activity placeholder",
   "draft": "Draft",
@@ -9,5 +16,15 @@
   "pending": "Pending",
   "scheduled": "Scheduled",
   "budgetReview": "Budget review",
-  "siteInspection": "Site inspection"
+  "siteInspection": "Site inspection",
+  "noDailyWorkRecordsFound": "No daily work records found.",
+  "workingHoursFormat": "{{hours}} hrs",
+  "workByProject": "Work by Project",
+  "workRecords": "Work Records",
+  "noProjectWorkFound": "No work records found for any project.",
+  "recentDailyWork": "Recent Daily Work",
+  "viewAll": "View All",
+  "workingHoursByProject": "Working Hours by Project",
+  "workCostByProject": "Work Cost by Project",
+  "workOverview": "Work Overview"
 }

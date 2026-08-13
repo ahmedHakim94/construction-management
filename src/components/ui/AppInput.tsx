@@ -28,6 +28,7 @@ export function AppInput({
       sx={{
         ...(props.sx || {}),
       }}
+      
     />
   );
 }

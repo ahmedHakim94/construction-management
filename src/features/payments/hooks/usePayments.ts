@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  paymentService,
-  getTransactions,
-  recordPayment as recordPaymentService,
-} from "../services/payment.service";
+import { paymentService } from "../services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
 import { projectService } from "@/features/settings/projects/services/project.service";
@@ -13,6 +9,8 @@ import type { Contractor } from "@/features/contractors/types";
 import type { DailyWork } from "@/features/daily-work/types";
 import type { Project } from "@/features/settings/projects/types";
 import type { Task } from "@/features/settings/task/types";
+import { equipmentService } from "@/features/equipment/services/equipment.service";
+import type { Equipment } from "@/features/equipment/types";
 
 export function usePayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -20,7 +18,10 @@ export function usePayments() {
   const [dailyWorkRecords, setDailyWorkRecords] = useState<DailyWork[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [paymentTransactions, setPaymentTransactions] = useState<
+    PaymentTransaction[]
+  >([]);
   const [recordLoading, setRecordLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -31,19 +32,23 @@ export function usePayments() {
         dailyWorkData,
         projectData,
         taskData,
+        equipmentData,
       ] = await Promise.all([
         contractorService.getAll(),
         dailyWorkService.getAll(),
         projectService.getAll(),
         taskService.getAll(),
+        equipmentService.getAll(),
       ]);
 
       setContractors(contractorData);
       setDailyWorkRecords(dailyWorkData);
       setProjects(projectData);
       setTasks(taskData);
+      setEquipment(equipmentData);
 
-      const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkData);
+      const syncedPayments =
+        await paymentService.synchronizeFromDailyWork(dailyWorkData);
       setPayments(syncedPayments);
     }
 
@@ -51,7 +56,7 @@ export function usePayments() {
   }, []);
 
   const loadTransactions = async (paymentId: string) => {
-    const transactions = await getTransactions(paymentId);
+    const transactions = await paymentService.getTransactions(paymentId);
     setPaymentTransactions(transactions);
     return transactions;
   };
@@ -60,7 +65,7 @@ export function usePayments() {
     setRecordLoading(true);
 
     try {
-      await recordPaymentService(paymentId, amount);
+      await paymentService.recordPayment(paymentId, amount);
       const updatedPayment = await paymentService.getById(paymentId);
 
       if (updatedPayment) {
@@ -96,7 +101,8 @@ export function usePayments() {
     payment: Payment,
     dailyWorkRecords: DailyWork[],
   ) => {
-    const syncedPayments = await paymentService.synchronizeFromDailyWork(dailyWorkRecords);
+    const syncedPayments =
+      await paymentService.synchronizeFromDailyWork(dailyWorkRecords);
     setPayments(syncedPayments);
     return syncedPayments.find((item) => item.id === payment.id) ?? payment;
   };
@@ -107,6 +113,7 @@ export function usePayments() {
     dailyWorkRecords,
     projects,
     tasks,
+    equipment,
     paymentTransactions,
     recordLoading,
     deleteLoading,

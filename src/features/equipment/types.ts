@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { equipmentSchema } from "./schemas/equipment.schema";
+
 export type EquipmentStatus = "ACTIVE" | "INACTIVE";
 
 export interface Equipment {
@@ -10,14 +13,7 @@ export interface Equipment {
   hourRate: number;
   notes?: string;
   createdAt: string;
+  name?: string;
 }
 
-export interface EquipmentFormValues {
-  contractorId: string;
-  equipmentTypeId: string;
-  model: string;
-  plateNumber: string;
-  equipmentNumber: string;
-  hourRate: number;
-  notes: string;
-}
+export type EquipmentFormValues = z.infer<typeof equipmentSchema>;

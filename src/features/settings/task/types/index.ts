@@ -1,10 +1,8 @@
 export interface Task {
   id: string;
-  nameAr: string;
-  nameEn: string;
+  name: string;
 }
 
 export interface TaskFormValues {
-  nameAr: string;
-  nameEn: string;
+  name: string;
 }

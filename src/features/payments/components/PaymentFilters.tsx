@@ -31,7 +31,7 @@ export function PaymentFilters({ control, onSubmit, projectOptions }: PaymentFil
               value={field.value ?? ""}
               onChange={field.onChange}
               placeholder={t("selectProject")}
-              width="30%"
+              width={{ xs: "100%", sm: "30%" }}
             />
           )}
         />

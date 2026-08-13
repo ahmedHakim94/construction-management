@@ -3,12 +3,6 @@ import type { EquipmentType, EquipmentTypeFormValues } from "../types";
 
 let equipmentTypes: EquipmentType[] = [...equipmentTypesMockData];
 
-const generatePrefix = (name: string) => {
-  const words = name.split(" ");
-  const prefix = words.map((word) => word.charAt(0).toUpperCase()).join("");
-  return prefix;
-}
-
 export const equipmentTypeService = {
   async getAll(): Promise<EquipmentType[]> {
     return [...equipmentTypes];
@@ -21,11 +15,8 @@ export const equipmentTypeService = {
   async create(data: EquipmentTypeFormValues): Promise<EquipmentType> {
     const nextEquipmentType: EquipmentType = {
       id: `et-${Date.now()}`,
-    //   code: data.code,
-      nameAr: data.nameAr,
-      nameEn: data.nameEn,
+      name: data.name,
       createdAt: new Date().toISOString().split("T")[0],
-      prefix: generatePrefix(data.nameEn),
     };
 
     equipmentTypes = [nextEquipmentType, ...equipmentTypes];
@@ -43,9 +34,7 @@ export const equipmentTypeService = {
 
       return {
         ...item,
-        // code: data.code,
-        nameAr: data.nameAr,
-        nameEn: data.nameEn,
+        name: data.name,
       };
     });
 
@@ -56,8 +45,3 @@ export const equipmentTypeService = {
     equipmentTypes = equipmentTypes.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = equipmentTypeService.getAll;
-export const create = equipmentTypeService.create;
-export const update = equipmentTypeService.update;
-export const deleteEquipmentType = equipmentTypeService.delete;

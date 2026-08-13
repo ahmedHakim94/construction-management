@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
+import { Today } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -22,7 +23,7 @@ import type { Task } from "@/features/settings/task/types";
 import { AppFilters } from "@/components/ui/AppFilters";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
 import type { Dayjs } from "dayjs";
-import { hasPaidPaymentForDailyWork } from "@/features/payments/services/payment.service";
+import { paymentService } from "@/features/payments/services/payment.service";
 
 export function DailyWorkPage() {
   const { t } = useTranslation();
@@ -70,28 +71,13 @@ export function DailyWorkPage() {
         contractors.find((contractor) => contractor.id === item.contractorId)
           ?.name ?? "",
       equipmentLabel: item.equipmentId
-        ? (equipment.find((eq) => eq.id === item.equipmentId)
-            ?.equipmentNumber ?? "")
+        ? (equipment.find((eq) => eq.id === item.equipmentId)?.name ?? "")
         : (item.temporaryEquipmentName ?? ""),
-      taskName:
-        tasks.find((task) => task.id === item.taskId)?.nameEn ??
-        tasks.find((task) => task.id === item.taskId)?.nameAr ??
-        "",
+      taskName: tasks.find((task) => task.id === item.taskId)?.name ?? "",
     }));
   }, [records, projects, contractors, equipment, tasks]);
 
-  // const filteredRecords = useMemo(() => {
-  //   const term = search.trim().toLowerCase();
 
-  //   if (!term) {
-  //     return displayRows;
-  //   }
-
-  //   return displayRows.filter((item) => {
-  //     const values = [item.projectName, item.contractorName, item.equipmentLabel, item.taskName];
-  //     return values.some((value) => value.toLowerCase().includes(term));
-  //   });
-  // }, [displayRows, search]);
 
   const filteredRecords = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -164,7 +150,7 @@ export function DailyWorkPage() {
         return;
       }
 
-      const hasPaidPayment = await hasPaidPaymentForDailyWork(selectedRecord);
+      const hasPaidPayment = await paymentService.hasPaidPaymentForDailyWork(selectedRecord);
 
       if (hasPaidPayment) {
         notify.error(t("cannotDeleteDailyWorkWithPayment"));
@@ -192,12 +178,9 @@ export function DailyWorkPage() {
           title={t("dailyWork")}
           description={t("dailyWorkDescription")}
           actions={
-            <>
-              {/* <AppSearchInput value={search} onChange={setSearch} placeholder={t("searchDailyWork")} /> */}
-              <AppButton onClick={handleOpenCreate}>
-                {t("addDailyWork")}
-              </AppButton>
-            </>
+            <AppButton variant="contained" startIcon={<Today />} onClick={handleOpenCreate}>
+              {t("addDailyWork")}
+            </AppButton>
           }
         />
 
@@ -211,6 +194,7 @@ export function DailyWorkPage() {
             value={selectedDate}
             onChange={setSelectedDate}
             label={t("date")}
+            
           />
         </AppFilters>
 

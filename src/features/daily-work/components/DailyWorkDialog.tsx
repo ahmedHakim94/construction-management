@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -22,7 +22,7 @@ interface DailyWorkDialogProps {
   equipment: Equipment[];
   tasks: Task[];
   onClose: () => void;
-  onSubmit: (values: DailyWorkFormValues) => void;
+  onSubmit: (values: DailyWorkFormValues) => Promise<void>;
 }
 
 export function DailyWorkDialog({
@@ -36,34 +36,29 @@ export function DailyWorkDialog({
   onClose,
   onSubmit,
 }: DailyWorkDialogProps) {
+  const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    setError,
-  } = useForm<DailyWorkFormValues>({
-    resolver: zodResolver(dailyWorkSchema),
-    defaultValues: {
-      date: new Date().toISOString().split("T")[0],
-      projectId: "",
-      contractorId: "",
-      equipmentId: "",
-      temporaryEquipmentName: "",
-      hourRate: 0,
-      workingHours: 0,
-      fuelConsumption: 0,
-      taskId: "",
-      cost: 0,
-      deduction: 0,
-      deductionReason: "",
-      notes: "",
-    },
-  });
+  const { control, handleSubmit, reset, setValue, watch, setError } =
+    useForm<DailyWorkFormValues>({
+      resolver: zodResolver(dailyWorkSchema),
+      defaultValues: {
+        date: new Date().toISOString().split("T")[0],
+        projectId: "",
+        contractorId: "",
+        equipmentId: "",
+        temporaryEquipmentName: "",
+        hourRate: 0,
+        workingHours: 0,
+        fuelConsumption: 0,
+        taskId: "",
+        cost: 0,
+        deduction: 0,
+        deductionReason: "",
+        notes: "",
+      },
+    });
 
   const [contractorId] = watch(["contractorId"]);
   const [equipmentId] = watch(["equipmentId"]);
@@ -86,20 +81,18 @@ export function DailyWorkDialog({
         .filter((item) => item.contractorId === contractorId)
         .map((item) => ({
           value: item.id,
-          label: `${item.equipmentNumber || item.model || item.id}`,
+          label: `${item.name || item.model || item.id}`,
         })),
     [equipment, contractorId],
   );
 
   const projectOptions = useMemo(
-    () =>
-      projects.map((item) => ({ value: item.id, label: item.name })),
+    () => projects.map((item) => ({ value: item.id, label: item.name })),
     [projects],
   );
 
   const contractorOptions = useMemo(
-    () =>
-      contractors.map((item) => ({ value: item.id, label: item.name })),
+    () => contractors.map((item) => ({ value: item.id, label: item.name })),
     [contractors],
   );
 
@@ -107,9 +100,9 @@ export function DailyWorkDialog({
     () =>
       tasks.map((item) => ({
         value: item.id,
-        label: isArabic ? item.nameAr : item.nameEn,
+        label: item.name,
       })),
-    [tasks, isArabic],
+    [tasks],
   );
 
   useEffect(() => {
@@ -160,9 +153,12 @@ export function DailyWorkDialog({
     });
   }, [workingHours, hourRate, setValue]);
 
-  const handleFormSubmit = (values: DailyWorkFormValues) => {
+  const handleFormSubmit = async (values: DailyWorkFormValues) => {
     if (!selectedContractor) {
-      setError("contractorId", { type: "manual", message: t("contractorRequired") });
+      setError("contractorId", {
+        type: "manual",
+        message: t("contractorRequired"),
+      });
       return;
     }
 
@@ -184,7 +180,14 @@ export function DailyWorkDialog({
       }
     }
 
-    onSubmit(values);
+    setLoading(true);
+    try {
+      await onSubmit(values);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -196,7 +199,13 @@ export function DailyWorkDialog({
       <DialogContent>
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
-          style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 8, direction: isArabic ? "rtl" : "ltr" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            paddingTop: 8,
+            direction: isArabic ? "rtl" : "ltr",
+          }}
         >
           <Controller
             name="date"
@@ -205,7 +214,9 @@ export function DailyWorkDialog({
               <AppDatePicker
                 label={t("date")}
                 value={field.value ? dayjs(field.value) : null}
-                onChange={(value) => field.onChange(value ? value.format("YYYY-MM-DD") : "")}
+                onChange={(value) =>
+                  field.onChange(value ? value.format("YYYY-MM-DD") : "")
+                }
                 format="DD/MM/YYYY"
                 disabled={false}
               />
@@ -306,7 +317,10 @@ export function DailyWorkDialog({
                 onChange={(event) => field.onChange(Number(event.target.value))}
                 error={Boolean(fieldState.error)}
                 helperText={fieldState.error?.message}
-                InputProps={{ readOnly: !selectedContractor?.isSystem && Boolean(selectedEquipment) }}
+                InputProps={{
+                  readOnly:
+                    !selectedContractor?.isSystem && Boolean(selectedEquipment),
+                }}
               />
             )}
           />
@@ -360,10 +374,7 @@ export function DailyWorkDialog({
             name="deductionReason"
             control={control}
             render={({ field }) => (
-              <AppInput
-                label={t("deductionReason")}
-                {...field}
-              />
+              <AppInput label={t("deductionReason")} {...field} />
             )}
           />
 
@@ -387,24 +398,22 @@ export function DailyWorkDialog({
             name="notes"
             control={control}
             render={({ field }) => (
-              <AppInput
-                label={t("notes")}
-                multiline
-                minRows={3}
-                {...field}
-              />
+              <AppInput label={t("notes")} multiline minRows={3} {...field} />
             )}
           />
         </form>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton
+          loading={loading}
+          variant="contained"
+          onClick={handleSubmit(handleFormSubmit)}
+        >
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={false} onClick={handleSubmit(handleFormSubmit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

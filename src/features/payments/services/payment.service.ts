@@ -243,9 +243,3 @@ export const paymentService = {
     );
   },
 };
-
-export const getTransactions = paymentService.getTransactions;
-export const recordPayment = paymentService.recordPayment;
-
-export const hasPaidPaymentForDailyWork =
-  paymentService.hasPaidPaymentForDailyWork;

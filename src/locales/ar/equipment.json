@@ -20,5 +20,7 @@
   "editEquipmentType": "تعديل نوع معدات",
   "deleteEquipmentType": "حذف نوع معدات",
   "arabicName": "الاسم العربي",
-  "englishName": "الاسم الإنجليزي"
+  "englishName": "الاسم الإنجليزي",
+  "equipmentTypeName": "اسم نوع المعدات",
+  "name":"الاسم"
 }

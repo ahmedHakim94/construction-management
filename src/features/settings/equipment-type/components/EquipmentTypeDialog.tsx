@@ -12,7 +12,7 @@ interface EquipmentTypeDialogProps {
   mode: "create" | "edit";
   equipmentType?: EquipmentType;
   onClose: () => void;
-  onSubmit: (values: EquipmentTypeFormValues) => void;
+  onSubmit: (values: EquipmentTypeFormValues) => Promise<void>;
 }
 
 export function EquipmentTypeDialog({
@@ -22,34 +22,30 @@ export function EquipmentTypeDialog({
   onClose,
   onSubmit,
 }: EquipmentTypeDialogProps) {
-  const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === "ar";
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<EquipmentTypeFormValues>({
     resolver: zodResolver(equipmentTypeSchema),
     defaultValues: {
-    //   code: "",
-      nameAr: "",
-      nameEn: "",
+      name: "",
     },
   });
 
   useEffect(() => {
     reset({
-    //   code: equipmentType?.code ?? "",
-      nameAr: equipmentType?.nameAr ?? "",
-      nameEn: equipmentType?.nameEn ?? "",
+      name: equipmentType?.name ?? "",
     });
   }, [equipmentType, open, reset]);
 
-  const submit = (values: EquipmentTypeFormValues) => {
+  const submit = async (values: EquipmentTypeFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
+    try {
+      await onSubmit(values);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -61,42 +57,19 @@ export function EquipmentTypeDialog({
       <DialogContent>
         <form
           onSubmit={handleSubmit(submit)}
-          style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 8, direction: isArabic ? "rtl" : "ltr" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            paddingTop: 8,
+          }}
         >
-          {/* <Controller
-            name="code"
-            control={control}
-            render={({ field, fieldState }) => (
-              <AppInput
-                label={t("code")}
-                required
-                {...field}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          /> */}
-
           <Controller
-            name="nameAr"
+            name="name"
             control={control}
             render={({ field, fieldState }) => (
               <AppInput
-                label={t("arabicName")}
-                required
-                {...field}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="nameEn"
-            control={control}
-            render={({ field, fieldState }) => (
-              <AppInput
-                label={t("englishName")}
+                label={t("equipmentTypeName")}
                 required
                 {...field}
                 error={Boolean(fieldState.error)}
@@ -108,12 +81,11 @@ export function EquipmentTypeDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
+        <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
+          {mode === "create" ? t("create") : t("save")}
+        </AppButton>
         <AppButton variant="outlined" color="error" onClick={onClose}>
           {t("cancel")}
-        </AppButton>
-
-        <AppButton loading={loading} onClick={handleSubmit(submit)}>
-          {mode === "create" ? t("create") : t("save")}
         </AppButton>
       </DialogActions>
     </AppDialog>

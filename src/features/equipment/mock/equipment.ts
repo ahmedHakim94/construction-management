@@ -8,8 +8,9 @@ export const equipmentMockData: Equipment[] = [
     model: "ZX200",
     plateNumber: "PL-4521",
     equipmentNumber: "EX-1001",
-    hourRate: 150,
+    hourRate: 450,
     notes: "ملاحظات",
     createdAt: "2025-06-10",
+    name:"حفار"
   },
 ];

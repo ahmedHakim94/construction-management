@@ -1,5 +1,14 @@
 import { useMemo } from "react";
-import { Box, Chip, DialogActions, DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
+import { Payment as PaymentIcon } from "@mui/icons-material";
+import {
+  Box,
+  Chip,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Typography,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppButton, AppDialog } from "@/components/ui";
 import type { Payment, PaymentTransaction } from "../types";
@@ -11,15 +20,31 @@ interface PaymentDetailsDialogProps {
   dailyWorkRecords: DailyWork[];
   projectMap: Record<string, string>;
   taskMap: Record<string, string>;
+  equipmentMap: Record<string, string>;
   transactions: PaymentTransaction[];
   onClose: () => void;
   onRecordPayment: () => void;
 }
 
 const statusChipProps = {
-  PAID: { label: "statusPaid", color: "#f0fdf4", textColor: "#16a34a", border: "#bbf7d0" },
-  PARTIALLY_PAID: { label: "statusPartiallyPaid", color: "#fffbeb", textColor: "#d97706", border: "#fde68a" },
-  UNPAID: { label: "statusUnpaid", color: "#fff5f5", textColor: "#dc2626", border: "#fecaca" },
+  PAID: {
+    label: "statusPaid",
+    color: "#f0fdf4",
+    textColor: "#16a34a",
+    border: "#bbf7d0",
+  },
+  PARTIALLY_PAID: {
+    label: "statusPartiallyPaid",
+    color: "#fffbeb",
+    textColor: "#d97706",
+    border: "#fde68a",
+  },
+  UNPAID: {
+    label: "statusUnpaid",
+    color: "#fff5f5",
+    textColor: "#dc2626",
+    border: "#fecaca",
+  },
 } as const;
 
 export function PaymentDetailsDialog({
@@ -28,6 +53,7 @@ export function PaymentDetailsDialog({
   dailyWorkRecords,
   projectMap,
   taskMap,
+  equipmentMap,
   transactions,
   onClose,
   onRecordPayment,
@@ -39,7 +65,10 @@ export function PaymentDetailsDialog({
       dailyWorkRecords.map((record) => ({
         ...record,
         projectName: projectMap[record.projectId] ?? record.projectId,
-        equipmentLabel: record.equipmentId ?? record.temporaryEquipmentName ?? "",
+        // equipmentLabel: record.equipmentId ?? record.temporaryEquipmentName ?? "",
+        equipmentLabel: record.equipmentId
+          ? (equipmentMap[record.equipmentId] ?? "")
+          : (record.temporaryEquipmentName ?? ""),
         taskName: taskMap[record.taskId] ?? record.taskId,
         netAmount: record.cost - record.deduction,
       })),
@@ -64,22 +93,25 @@ export function PaymentDetailsDialog({
       <DialogTitle>{t("paymentDetails")}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-
           {/* Contractor & Period */}
-          <Box>
-            <Typography variant="subtitle2">{t("contractor")}</Typography>
-            <Typography>{payment?.contractorName ?? ""}</Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2">{t("period")}</Typography>
-            <Typography>{`${payment?.startDate ?? ""} - ${payment?.endDate ?? ""}`}</Typography>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: { xs: 2, sm: 4 } }}>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">{t("contractor")}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{payment?.contractorName ?? ""}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">{t("period")}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{`${payment?.startDate ?? ""} - ${payment?.endDate ?? ""}`}</Typography>
+            </Box>
           </Box>
 
           <Divider />
 
           {/* Payment Summary */}
           <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}
+            >
               <Typography variant="h6">{t("paymentPreview")}</Typography>
               {chipProps && (
                 <Chip
@@ -113,10 +145,16 @@ export function PaymentDetailsDialog({
                     border: "1px solid #E5E7EB",
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: "#64748B", display: "block", mb: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#64748B", display: "block", mb: 0.5 }}
+                  >
                     {label}
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700, color: "#1E293B" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 700, color: "#1E293B" }}
+                  >
                     {value}
                   </Typography>
                 </Box>
@@ -132,7 +170,10 @@ export function PaymentDetailsDialog({
               {t("dailyWorkRecords")}
             </Typography>
             <Box sx={{ overflowX: "auto" }}>
-              <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
+              <Box
+                component="table"
+                sx={{ width: "100%", minWidth: 900, borderCollapse: "collapse" }}
+              >
                 <Box component="thead" sx={{ bgcolor: "#F8FAFC" }}>
                   <Box component="tr">
                     {[
@@ -150,7 +191,12 @@ export function PaymentDetailsDialog({
                       <Box
                         component="th"
                         key={heading}
-                        sx={{ px: 1.5, py: 1, textAlign: "left", borderBottom: "1px solid #E5E7EB" }}
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          textAlign: "start",
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
                       >
                         {heading}
                       </Box>
@@ -160,34 +206,104 @@ export function PaymentDetailsDialog({
                 <Box component="tbody">
                   {displayRecords.map((record) => (
                     <Box component="tr" key={record.id}>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.date}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.projectName}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.equipmentLabel}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.taskName}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.workingHours}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.hourRate}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.cost}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.deduction}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.deductionReason ?? "-"}
                       </Box>
-                      <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {record.netAmount}
                       </Box>
                     </Box>
@@ -200,7 +316,7 @@ export function PaymentDetailsDialog({
           {/* Payment History */}
           <Box>
             {!isPaid && (
-              <AppButton onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
+              <AppButton variant="contained" startIcon={<PaymentIcon />} onClick={onRecordPayment} sx={{ mt: 2, mb: 2 }}>
                 {t("recordPayment")}
               </AppButton>
             )}
@@ -208,14 +324,22 @@ export function PaymentDetailsDialog({
               {t("paymentHistory")}
             </Typography>
             <Box sx={{ overflowX: "auto" }}>
-              <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
+              <Box
+                component="table"
+                sx={{ width: "100%", minWidth: 300, borderCollapse: "collapse" }}
+              >
                 <Box component="thead" sx={{ bgcolor: "#F8FAFC" }}>
                   <Box component="tr">
                     {[t("date"), t("paymentAmount")].map((heading) => (
                       <Box
                         component="th"
                         key={heading}
-                        sx={{ px: 1.5, py: 1, textAlign: "left", borderBottom: "1px solid #E5E7EB" }}
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          textAlign: "start",
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
                       >
                         {heading}
                       </Box>
@@ -225,17 +349,40 @@ export function PaymentDetailsDialog({
                 <Box component="tbody">
                   {transactions.length === 0 ? (
                     <Box component="tr">
-                      <Box component="td" colSpan={2} sx={{ px: 1.5, py: 1, textAlign: "center", borderBottom: "1px solid #E5E7EB" }}>
+                      <Box
+                        component="td"
+                        colSpan={2}
+                        sx={{
+                          px: 1.5,
+                          py: 1,
+                          textAlign: "center",
+                          borderBottom: "1px solid #E5E7EB",
+                        }}
+                      >
                         {t("noPaymentsRecorded")}
                       </Box>
                     </Box>
                   ) : (
                     transactions.map((transaction) => (
                       <Box component="tr" key={transaction.id}>
-                        <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                        <Box
+                          component="td"
+                          sx={{
+                            px: 1.5,
+                            py: 1,
+                            borderBottom: "1px solid #E5E7EB",
+                          }}
+                        >
                           {transaction.date}
                         </Box>
-                        <Box component="td" sx={{ px: 1.5, py: 1, borderBottom: "1px solid #E5E7EB" }}>
+                        <Box
+                          component="td"
+                          sx={{
+                            px: 1.5,
+                            py: 1,
+                            borderBottom: "1px solid #E5E7EB",
+                          }}
+                        >
                           {transaction.amount}
                         </Box>
                       </Box>

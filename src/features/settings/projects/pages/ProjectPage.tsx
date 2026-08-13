@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import { AddBusiness } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -100,12 +101,7 @@ export function ProjectPage() {
           description={t("projectsDescription")}
           actions={
             <>
-              {/* <AppSearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder={t("searchProjects")}
-              /> */}
-              <AppButton onClick={handleOpenCreate}>{t("addProject")}</AppButton>
+              <AppButton variant="contained" startIcon={<AddBusiness />} onClick={handleOpenCreate}>{t("addProject")}</AppButton>
             </>
           }
         />

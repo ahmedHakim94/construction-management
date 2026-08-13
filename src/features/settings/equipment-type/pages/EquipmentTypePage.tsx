@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import { Category } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -104,12 +105,7 @@ export function EquipmentTypePage() {
           description={t("equipmentTypesDescription")}
           actions={
             <>
-              {/* <AppSearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder={t("searchEquipmentTypes")}
-              /> */}
-              <AppButton onClick={handleOpenCreate}>
+              <AppButton variant="contained" startIcon={<Category />} onClick={handleOpenCreate}>
                 {t("addEquipmentType")}
               </AppButton>
             </>
@@ -142,7 +138,7 @@ export function EquipmentTypePage() {
         message={
           <>
             {t("deleteEquipmentType")}
-            <strong>{` ${selectedEquipmentType?.nameAr} ?`}</strong>
+            <strong>{` ${selectedEquipmentType?.name} ?`}</strong>
           </>
         }
         confirmText={t("delete")}
