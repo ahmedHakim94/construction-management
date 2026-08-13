@@ -14,6 +14,7 @@ import { useDialog } from "@/hooks/useDialog";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
 import { notify } from "@/shared/utils/notify";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
+import { equipmentService } from "@/features/equipment/services/equipment.service";
 
 export function ContractorsPage() {
   const { t } = useTranslation();
@@ -69,34 +70,86 @@ export function ContractorsPage() {
 
   const handleSubmit = async (values: ContractorFormValues) => {
     try {
+      const contractorData = {
+        name: values.name,
+        phone: values.phone,
+        address: values.address || "",
+        nationalId: values.nationalId,
+        notes: values.notes,
+        status: values.status,
+      };
+
       if (mode === "edit" && selectedContractor) {
         const updated = await contractorService.update(
           selectedContractor.id,
-          values,
+          contractorData,
         );
 
         if (updated) {
-          setContractors((current) =>
-            current.map((item) =>
-              item.id === updated.id ? updated : item,
-            ),
+          // Get existing equipment for this contractor
+          const allEquipment = await equipmentService.getAll();
+          const existingEq = allEquipment.filter(
+            (item) => item.contractorId === selectedContractor.id,
           );
 
+          // 1. Delete equipment that are no longer in values.equipment
+          const incomingEqIds = new Set(
+            (values.equipment || []).map((e) => e.id).filter(Boolean),
+          );
+          for (const eq of existingEq) {
+            if (!incomingEqIds.has(eq.id)) {
+              await equipmentService.delete(eq.id);
+            }
+          }
+
+          // 2. Create or Update incoming equipment list
+          for (const eq of values.equipment || []) {
+            const eqFormValues = {
+              contractorId: selectedContractor.id,
+              equipmentTypeId: eq.equipmentTypeId,
+              model: eq.model ?? "",
+              plateNumber: eq.plateNumber ?? "",
+              hourRate: eq.hourRate,
+              notes: eq.notes ?? "",
+            };
+
+            if (eq.id) {
+              await equipmentService.update(eq.id, eqFormValues);
+            } else {
+              await equipmentService.create(eqFormValues);
+            }
+          }
+
+          setContractors((current) =>
+            current.map((item) => (item.id === updated.id ? updated : item)),
+          );
           notify.success(t("updatedSuccessfully"));
         }
       } else {
-        const created = await contractorService.create(values);
+        const created = await contractorService.create(contractorData);
+
+        // Create equipment linked to this new contractor
+        for (const eq of values.equipment || []) {
+          const eqFormValues = {
+            contractorId: created.id,
+            equipmentTypeId: eq.equipmentTypeId,
+            model: eq.model ?? "",
+            plateNumber: eq.plateNumber ?? "",
+            hourRate: eq.hourRate,
+            notes: eq.notes ?? "",
+          };
+          await equipmentService.create(eqFormValues);
+        }
 
         setContractors((current) => [created, ...current]);
-
         notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
-    } catch {
+    } catch (error) {
+      console.error(error);
       notify.error(t("somethingWentWrong"));
     }
-
   };
 
   const handleDelete = async () => {
@@ -105,7 +158,18 @@ export function ContractorsPage() {
     }
     setDeleteLoading(true);
     try {
+      // 1. Delete associated equipment first
+      const allEquipment = await equipmentService.getAll();
+      const contractorEq = allEquipment.filter(
+        (item) => item.contractorId === selectedContractor.id,
+      );
+      for (const eq of contractorEq) {
+        await equipmentService.delete(eq.id);
+      }
+
+      // 2. Delete contractor only after equipment deletion succeeds
       await contractorService.delete(selectedContractor.id);
+
       setContractors((current) =>
         current.filter((item) => item.id !== selectedContractor.id),
       );

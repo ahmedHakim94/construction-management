@@ -13,5 +13,10 @@
   "nationalId": "National ID",
   "notes": "Notes",
   "deleteConfirmation": "Are you sure you want to delete <strong>{{name}}</strong>?",
-  "thisContractor": "this contractor"
+  "thisContractor": "this contractor",
+  "contractorInfo": "Contractor Info",
+  "selectEquipmentTypes": "Select Equipment Types",
+  "selectEquipmentTypesDescription": "Select the equipment types owned by the contractor *",
+  "equipmentData": "Equipment Data",
+  "addAnotherEquipment": "+ Add Another Equipment"
 }

@@ -38,7 +38,7 @@ export const equipmentService = {
 
   async create(data: EquipmentFormValues): Promise<Equipment> {
     const nextEquipment: Equipment = {
-      id: `e-${Date.now()}`,
+      id: `e-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       contractorId: data.contractorId,
       equipmentTypeId: data.equipmentTypeId,
       model: data.model || undefined,

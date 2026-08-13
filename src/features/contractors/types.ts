@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { contractorSchema } from "./schemas/contractor.schema";
+
 export type ContractorStatus = "ACTIVE" | "INACTIVE";
 
 export interface Contractor {
@@ -13,11 +16,4 @@ export interface Contractor {
   isSystem?: boolean;
 }
 
-export interface ContractorFormValues {
-  name: string;
-  phone: string;
-  address: string;
-  nationalId: string;
-  notes: string;
-  status: ContractorStatus;
-}
+export type ContractorFormValues = z.infer<typeof contractorSchema>;

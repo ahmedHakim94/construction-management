@@ -13,5 +13,10 @@
   "nationalId": "الرقم القومي",
   "notes": "ملاحظات",
   "deleteConfirmation": "هل أنت متأكد من رغبتك في حذف <strong>{{name}}</strong>؟",
-  "thisContractor": "هذا المقاول"
+  "thisContractor": "هذا المقاول",
+  "contractorInfo": "بيانات المقاول",
+  "selectEquipmentTypes": "اختيار أنواع المعدات",
+  "selectEquipmentTypesDescription": "اختر أنواع المعدات التي يمتلكها المقاول *",
+  "equipmentData": "بيانات المعدات",
+  "addAnotherEquipment": "+ إضافة معدة أخرى"
 }
