@@ -43,7 +43,7 @@ export const equipmentService = {
       equipmentTypeId: data.equipmentTypeId,
       model: data.model || undefined,
       plateNumber: data.plateNumber || undefined,
-      equipmentNumber: data.equipmentNumber || generateEquipmentNumber(),
+      equipmentNumber: generateEquipmentNumber(),
       hourRate: data.hourRate,
       notes: data.notes || undefined,
       createdAt: new Date().toISOString().split("T")[0],
@@ -85,9 +85,3 @@ export const equipmentService = {
     equipment = equipment.filter((item) => item.id !== id);
   },
 };
-
-export const getAll = equipmentService.getAll;
-export const getById = equipmentService.getById;
-export const create = equipmentService.create;
-export const update = equipmentService.update;
-export const deleteEquipment = equipmentService.delete;

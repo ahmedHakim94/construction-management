@@ -20,7 +20,7 @@ interface EquipmentDialogProps {
   mode: "create" | "edit";
   equipment?: Equipment;
   onClose: () => void;
-  onSubmit: (values: EquipmentFormValues) => void;
+  onSubmit: (values: EquipmentFormValues) => Promise<void>;
 }
 
 export function EquipmentDialog({
@@ -41,13 +41,12 @@ export function EquipmentDialog({
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<EquipmentFormValues>({
-    resolver: zodResolver(equipmentSchema) as any,
+    resolver: zodResolver(equipmentSchema),
     defaultValues: {
       contractorId: "",
       equipmentTypeId: "",
       model: "",
       plateNumber: "",
-      // equipmentNumber: "",
       hourRate: 0,
       notes: "",
     },
@@ -82,19 +81,21 @@ export function EquipmentDialog({
       equipmentTypeId: equipment?.equipmentTypeId ?? "",
       model: equipment?.model ?? "",
       plateNumber: equipment?.plateNumber ?? "",
-      // equipmentNumber: equipment?.equipmentNumber ?? "",
       hourRate: equipment?.hourRate ?? 0,
       notes: equipment?.notes ?? "",
     });
   }, [equipment, open, reset]);
 
-  const submit = (values: EquipmentFormValues) => {
+  const submit = async (values: EquipmentFormValues) => {
     setLoading(true);
-    setTimeout(() => {
-      onSubmit(values);
-      setLoading(false);
+    try {
+      await onSubmit(values);
       onClose();
-    }, 500);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectPlaceholder = t("selectPlaceholder");
@@ -107,9 +108,7 @@ export function EquipmentDialog({
       <DialogContent>
         <Box
           component="form"
-          onSubmit={handleSubmit((values) =>
-            submit(values as EquipmentFormValues),
-          )}
+          onSubmit={handleSubmit(submit)}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -181,14 +180,6 @@ export function EquipmentDialog({
             )}
           />
 
-          {/* <Controller
-            name="equipmentNumber"
-            control={control}
-            render={({ field }) => (
-              <AppInput label={t("equipmentNumber")} {...field} />
-            )}
-          /> */}
-
           <Controller
             name="notes"
             control={control}
@@ -201,9 +192,7 @@ export function EquipmentDialog({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <AppButton
           loading={loading}
-          onClick={handleSubmit((values) =>
-            submit(values as EquipmentFormValues),
-          )}
+          onClick={handleSubmit(submit)}
           variant="contained"
         >
           {mode === "create" ? t("create") : t("save")}

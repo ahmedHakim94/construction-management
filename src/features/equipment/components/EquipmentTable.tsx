@@ -76,10 +76,10 @@ export function EquipmentTable({
         filterable: false,
         flex: 0.8,
         minWidth: 110,
-        renderCell: ({ row }) => (
+        renderCell: ({ row }: { row: Equipment }) => (
           <AppActions
-            onEdit={() => onEdit(row as Equipment)}
-            onDelete={() => onDelete(row as Equipment)}
+            onEdit={() => onEdit(row)}
+            onDelete={() => onDelete(row)}
           />
         ),
       },
