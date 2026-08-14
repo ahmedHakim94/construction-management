@@ -2,9 +2,7 @@ import { Box, Typography, InputAdornment, Collapse } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  DeleteOutline as DeleteIcon,
   MonetizationOnOutlined as MoneyIcon,
-  LocalShippingOutlined as ShippingIcon,
   ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { AppButton, AppInput, AppSelect } from "@/components/ui";
@@ -90,17 +88,17 @@ export function EquipmentSection({
               flexShrink: 0,
             }}
           />
-          <ShippingIcon
+          {/* <ShippingIcon
             sx={{
               color: isExpanded ? "#8B5CF6" : "#64748B",
               flexShrink: 0,
             }}
-          />
+          /> */}
           <Typography
             sx={{
               fontWeight: 600,
               color: isExpanded ? "#7C3AED" : "#1E293B",
-              fontSize: "0.95rem",
+              fontSize: "0.80rem",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -118,7 +116,7 @@ export function EquipmentSection({
             e.stopPropagation();
             onDelete();
           }}
-          startIcon={<DeleteIcon />}
+          // startIcon={<DeleteIcon />}
           sx={{
             textTransform: "none",
             bgcolor: "#FFFFFF",

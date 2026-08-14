@@ -153,6 +153,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
                     display: "flex",
                     alignItems: "center",
                     gap: 1.2,
+                    fontSize:"0.80rem"
                   }}
                 >
                   <GearIcon />
@@ -160,7 +161,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
                 </Typography>
 
                 <AppButton
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   onClick={() =>
                     append({
@@ -175,12 +176,12 @@ export function ContractorDialog(props: ContractorDialogProps) {
                   sx={{
                     textTransform: "none",
                     borderColor: "#8B5CF6",
-                    color: "#8B5CF6",
+                    // color: "#8B5CF6",
                     fontWeight: 600,
-                    "&:hover": {
-                      borderColor: "#7C3AED",
-                      bgcolor: "#F5F3FF",
-                    },
+                    // "&:hover": {
+                    //   borderColor: "#7C3AED",
+                    //   bgcolor: "#F5F3FF",
+                    // },
                   }}
                 >
                   {t("addAnotherEquipment")}
