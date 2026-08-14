@@ -53,13 +53,17 @@ export function ContractorInfoSection() {
 
       <Box
         sx={{
-          display: "flex",
-          alignItems: "end",
-          justifyContent: "space-between",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+          },
           gap: 2.5,
+          alignItems: "start",
         }}
       >
-        <Box sx={{ width: "35%" }}>
+        <Box>
           <Controller
             name="name"
             control={control}
@@ -82,7 +86,7 @@ export function ContractorInfoSection() {
           />
         </Box>
 
-        <Box sx={{ width: "35%" }}>
+        <Box>
           <Controller
             name="phone"
             control={control}
@@ -105,13 +109,32 @@ export function ContractorInfoSection() {
           />
         </Box>
 
-        <Box sx={{ width: "25%" }}>
+        <Box sx={{ position: "relative" }}>
+          <Typography
+            component="label"
+            sx={{
+              position: "absolute",
+              top: "-9px",
+              left: isArabic ? "auto" : "12px",
+              right: isArabic ? "12px" : "auto",
+              bgcolor: "#FFFFFF",
+              px: 0.8,
+              fontSize: "0.75rem",
+              fontWeight: 500,
+              color: "#64748B",
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+          >
+            {isArabic ? `* ${t("status")}` : `${t("status")} *`}
+          </Typography>
+
           <Controller
             name="status"
             control={control}
             render={({ field, fieldState }) => (
               <AppSelect
-                label={t("status")}
+                label=""
                 required
                 options={statusOptions}
                 value={field.value}
