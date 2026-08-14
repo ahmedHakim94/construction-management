@@ -2,9 +2,7 @@ import { Box, Typography, InputAdornment, Collapse } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-  DeleteOutline as DeleteIcon,
   MonetizationOnOutlined as MoneyIcon,
-  LocalShippingOutlined as ShippingIcon,
   ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { AppButton, AppInput, AppSelect } from "@/components/ui";
