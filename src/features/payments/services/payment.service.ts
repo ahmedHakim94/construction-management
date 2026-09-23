@@ -1,12 +1,19 @@
+import { storage } from "@/core/storage/localStorage";
 import { paymentsMockData } from "../mock/payments";
 import { paymentTransactionsMockData } from "../mock/paymentTransactions";
 import type { DailyWork } from "../../daily-work/types";
 import type { Payment, PaymentTransaction } from "../types";
 
-let paymentRecords: Payment[] = [...paymentsMockData];
-let paymentTransactions: PaymentTransaction[] = [
-  ...paymentTransactionsMockData,
-];
+const STORAGE_KEY_PAYMENTS = "construction_payments";
+const STORAGE_KEY_TRANSACTIONS = "construction_payment_transactions";
+
+let paymentRecords: Payment[] = storage.get<Payment[]>(
+  STORAGE_KEY_PAYMENTS,
+  paymentsMockData,
+);
+let paymentTransactions: PaymentTransaction[] = storage.get<
+  PaymentTransaction[]
+>(STORAGE_KEY_TRANSACTIONS, paymentTransactionsMockData);
 
 function calculateStatus(netAmount: number, paidAmount: number) {
   if (paidAmount <= 0) {
@@ -79,6 +86,8 @@ export const paymentService = {
     paymentTransactions = paymentTransactions.filter(
       (item) => item.paymentId !== id,
     );
+    storage.set(STORAGE_KEY_PAYMENTS, paymentRecords);
+    storage.set(STORAGE_KEY_TRANSACTIONS, paymentTransactions);
   },
 
   async recordPayment(
@@ -127,6 +136,9 @@ export const paymentService = {
         ? { ...item, paidAmount, remainingAmount, status }
         : item,
     );
+
+    storage.set(STORAGE_KEY_TRANSACTIONS, paymentTransactions);
+    storage.set(STORAGE_KEY_PAYMENTS, paymentRecords);
 
     return transaction;
   },
@@ -228,6 +240,7 @@ export const paymentService = {
     }
 
     paymentRecords = syncedPayments;
+    storage.set(STORAGE_KEY_PAYMENTS, paymentRecords);
     return [...paymentRecords];
   },
 
@@ -243,3 +256,4 @@ export const paymentService = {
     );
   },
 };
+

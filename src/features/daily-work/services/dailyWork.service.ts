@@ -1,7 +1,13 @@
+import { storage } from "@/core/storage/localStorage";
 import { dailyWorkMockData } from "../mock/dailyWork";
 import type { DailyWork, DailyWorkFormValues } from "../types";
 
-let dailyWorkRecords: DailyWork[] = [...dailyWorkMockData];
+const STORAGE_KEY = "construction_daily_work";
+
+let dailyWorkRecords: DailyWork[] = storage.get<DailyWork[]>(
+  STORAGE_KEY,
+  [],
+);
 
 export const dailyWorkService = {
   async getAll(): Promise<DailyWork[]> {
@@ -32,6 +38,7 @@ export const dailyWorkService = {
     };
 
     dailyWorkRecords = [nextRecord, ...dailyWorkRecords];
+    storage.set(STORAGE_KEY, dailyWorkRecords);
     return nextRecord;
   },
 
@@ -62,10 +69,13 @@ export const dailyWorkService = {
       };
     });
 
+    storage.set(STORAGE_KEY, dailyWorkRecords);
     return dailyWorkRecords.find((item) => item.id === id);
   },
 
   async delete(id: string): Promise<void> {
     dailyWorkRecords = dailyWorkRecords.filter((item) => item.id !== id);
+    storage.set(STORAGE_KEY, dailyWorkRecords);
   },
 };
+

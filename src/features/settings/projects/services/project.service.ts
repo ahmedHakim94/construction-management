@@ -1,7 +1,13 @@
+import { storage } from "@/core/storage/localStorage";
 import { projectsMockData } from "../mock/projects";
 import type { Project, ProjectFormValues } from "../types";
 
-let projects: Project[] = [...projectsMockData];
+const STORAGE_KEY = "construction_projects";
+
+let projects: Project[] = storage.get<Project[]>(
+  STORAGE_KEY,
+  [],
+);
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
@@ -20,6 +26,7 @@ export const projectService = {
     };
 
     projects = [nextProject, ...projects];
+    storage.set(STORAGE_KEY, projects);
     return nextProject;
   },
 
@@ -36,10 +43,13 @@ export const projectService = {
       };
     });
 
+    storage.set(STORAGE_KEY, projects);
     return projects.find((item) => item.id === id);
   },
 
   async delete(id: string): Promise<void> {
     projects = projects.filter((item) => item.id !== id);
+    storage.set(STORAGE_KEY, projects);
   },
 };
+

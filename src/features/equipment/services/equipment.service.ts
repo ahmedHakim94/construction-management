@@ -1,14 +1,19 @@
+import { storage } from "@/core/storage/localStorage";
 import { equipmentMockData } from "../mock/equipment";
 import type { Equipment, EquipmentFormValues } from "../types";
-import {equipmentTypeService} from '@/features/settings/equipment-type/services/equipmentType.service'
-let equipment: Equipment[] = [...equipmentMockData];
+import { equipmentTypeService } from "@/features/settings/equipment-type/services/equipmentType.service";
 
+const STORAGE_KEY = "construction_equipment";
+
+let equipment: Equipment[] = storage.get<Equipment[]>(
+  STORAGE_KEY,
+  [],
+);
 
 async function getEquipmentName(equipmentTypeId: string): Promise<string> {
   const equipmentType = await equipmentTypeService.getById(equipmentTypeId);
   return equipmentType?.name || "";
 }
-
 
 function generateEquipmentNumber() {
   const existingNumbers = new Set(
@@ -34,7 +39,6 @@ export const equipmentService = {
   async getById(id: string): Promise<Equipment | undefined> {
     return equipment.find((item) => item.id === id);
   },
-  
 
   async create(data: EquipmentFormValues): Promise<Equipment> {
     const nextEquipment: Equipment = {
@@ -51,6 +55,7 @@ export const equipmentService = {
     };
 
     equipment = [nextEquipment, ...equipment];
+    storage.set(STORAGE_KEY, equipment);
     return nextEquipment;
   },
 
@@ -74,14 +79,17 @@ export const equipmentService = {
         // equipmentNumber: data.equipmentNumber || undefined,
         hourRate: data.hourRate,
         notes: data.notes || undefined,
-         name: equipmentName
+        name: equipmentName,
       };
     });
 
+    storage.set(STORAGE_KEY, equipment);
     return equipment.find((item) => item.id === id);
   },
 
   async delete(id: string): Promise<void> {
     equipment = equipment.filter((item) => item.id !== id);
+    storage.set(STORAGE_KEY, equipment);
   },
 };
+

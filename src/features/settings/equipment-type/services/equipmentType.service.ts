@@ -1,7 +1,15 @@
+import { storage } from "@/core/storage/localStorage";
 import { equipmentTypesMockData } from "../mock/equipmentTypes";
 import type { EquipmentType, EquipmentTypeFormValues } from "../types";
 
-let equipmentTypes: EquipmentType[] = [...equipmentTypesMockData];
+// let equipmentTypes: EquipmentType[] = [...equipmentTypesMockData];
+
+const STORAGE_KEY = "construction_equipment_types";
+
+let equipmentTypes = storage.get<EquipmentType[]>(
+  STORAGE_KEY,
+  equipmentTypesMockData,
+);
 
 export const equipmentTypeService = {
   async getAll(): Promise<EquipmentType[]> {
@@ -20,6 +28,7 @@ export const equipmentTypeService = {
     };
 
     equipmentTypes = [nextEquipmentType, ...equipmentTypes];
+    storage.set(STORAGE_KEY, equipmentTypes);
     return nextEquipmentType;
   },
 
@@ -37,11 +46,12 @@ export const equipmentTypeService = {
         name: data.name,
       };
     });
-
+    storage.set(STORAGE_KEY, equipmentTypes);
     return equipmentTypes.find((item) => item.id === id);
   },
 
   async delete(id: string): Promise<void> {
     equipmentTypes = equipmentTypes.filter((item) => item.id !== id);
+    storage.set(STORAGE_KEY, equipmentTypes);
   },
 };

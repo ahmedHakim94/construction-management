@@ -1,7 +1,13 @@
+import { storage } from "@/core/storage/localStorage";
 import { tasksMockData } from "../mock/tasks";
 import type { Task, TaskFormValues } from "../types";
 
-let tasks: Task[] = [...tasksMockData];
+const STORAGE_KEY = "construction_tasks";
+
+let tasks: Task[] = storage.get<Task[]>(
+  STORAGE_KEY,
+  [],
+);
 
 export const taskService = {
   async getAll(): Promise<Task[]> {
@@ -19,6 +25,7 @@ export const taskService = {
     };
 
     tasks = [nextTask, ...tasks];
+    storage.set(STORAGE_KEY, tasks);
     return nextTask;
   },
 
@@ -34,10 +41,13 @@ export const taskService = {
       };
     });
 
+    storage.set(STORAGE_KEY, tasks);
     return tasks.find((item) => item.id === id);
   },
 
   async delete(id: string): Promise<void> {
     tasks = tasks.filter((item) => item.id !== id);
+    storage.set(STORAGE_KEY, tasks);
   },
 };
+
