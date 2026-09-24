@@ -157,9 +157,10 @@ export function Sidebar({
           aria-expanded={hasChildren ? isExpanded : undefined}
           sx={{
             position: "relative",
-            borderRadius: 2,
-            minHeight: nested ? 38 : 44,
+            borderRadius: 1.5,
+            minHeight: nested ? 34 : 38,
             px: 1.5,
+            py: 0.5,
             pl: nested ? 4 : 1.5,
             color: isActive ? "primary.contrastText" : "text.secondary",
             bgcolor: isActive ? "primary.main" : "transparent",
@@ -173,12 +174,12 @@ export function Sidebar({
         >
           <ListItemIcon
             sx={{
-              minWidth: open ? 38 : 0,
+              minWidth: open ? 34 : 0,
               color: "inherit",
               justifyContent: "center",
             }}
           >
-            <Icon fontSize={nested ? "small" : "medium"} />
+            <Icon sx={{ fontSize: nested ? 18 : 20 }} />
           </ListItemIcon>
 
           {open && (
@@ -186,7 +187,7 @@ export function Sidebar({
               primary={t(item.key)}
               primaryTypographyProps={{
                 fontWeight: isActive ? 600 : 500,
-                fontSize: nested ? 13.5 : 14.5,
+                fontSize: nested ? "0.8125rem" : "0.875rem",
               }}
             />
           )}
@@ -205,10 +206,10 @@ export function Sidebar({
             <List
               disablePadding
               sx={{
-                mt: 0.5,
+                mt: 0.25,
                 display: "flex",
                 flexDirection: "column",
-                gap: 0.5,
+                gap: 0.25,
               }}
             >
               {item.children!.map((child) => renderItem(child, true))}
@@ -231,12 +232,12 @@ export function Sidebar({
         borderInlineEnd: "1px solid",
         borderColor: "divider",
         px: { xs: 2, md: 1.5 },
-        py: { xs: 2, md: 2.5 },
+        py: { xs: 2, md: 2 },
         transition: "width 0.2s ease",
         overflow: "hidden",
       }}
     >
-      <Stack spacing={2.25} sx={{ height: "100%" }}>
+      <Stack spacing={2} sx={{ height: "100%" }}>
         <Box
           sx={{
             px: 1.5,
@@ -248,7 +249,9 @@ export function Sidebar({
           <Typography
             variant="h6"
             sx={{
-              fontWeight: 800,
+              fontWeight: 700,
+              fontSize: "1.125rem",
+              color: "primary.main",
               letterSpacing: "-0.02em",
               whiteSpace: "nowrap",
             }}
@@ -261,7 +264,7 @@ export function Sidebar({
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 0.6,
+            gap: 0.4,
           }}
         >
           {navigationItems.map((item) => renderItem(item))}

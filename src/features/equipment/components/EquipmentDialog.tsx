@@ -189,7 +189,7 @@ export function EquipmentDialog({
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
+      <DialogActions>
         <AppButton
           loading={loading}
           onClick={handleSubmit(submit)}
@@ -197,7 +197,7 @@ export function EquipmentDialog({
         >
           {mode === "create" ? t("create") : t("save")}
         </AppButton>
-        <AppButton variant="outlined" color="error" onClick={onClose}>
+        <AppButton variant="outlined" color="inherit" onClick={onClose}>
           {t("cancel")}
         </AppButton>
       </DialogActions>

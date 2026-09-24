@@ -85,29 +85,38 @@ export const getTheme = (direction: "rtl" | "ltr") => {
     },
 
     shape: {
-      borderRadius: 12,
+      borderRadius: 10,
     },
 
     typography: {
       fontFamily,
-      h1: { fontWeight: 700, letterSpacing: "-0.02em" },
-      h2: { fontWeight: 700, letterSpacing: "-0.02em" },
-      h3: { fontWeight: 700, letterSpacing: "-0.02em" },
-      h4: { fontWeight: 700, letterSpacing: "-0.01em" },
-      h5: { fontWeight: 700, letterSpacing: "-0.01em" },
-      h6: { fontWeight: 600, letterSpacing: "-0.01em" },
-      subtitle1: { fontWeight: 600, fontSize: "1rem" },
-      subtitle2: { fontWeight: 500, fontSize: "0.875rem" },
+      h1: { fontWeight: 700, fontSize: "2rem", letterSpacing: "-0.02em", lineHeight: 1.25 },
+      h2: { fontWeight: 700, fontSize: "1.75rem", letterSpacing: "-0.02em", lineHeight: 1.25 },
+      h3: { fontWeight: 700, fontSize: "1.5rem", letterSpacing: "-0.015em", lineHeight: 1.3 },
+      h4: { fontWeight: 700, fontSize: "1.35rem", letterSpacing: "-0.01em", lineHeight: 1.35 },
+      h5: { fontWeight: 700, fontSize: "1.15rem", letterSpacing: "-0.01em", lineHeight: 1.4 },
+      h6: { fontWeight: 600, fontSize: "1.05rem", letterSpacing: "-0.005em", lineHeight: 1.4 },
+      subtitle1: { fontWeight: 600, fontSize: "0.9375rem", lineHeight: 1.5 },
+      subtitle2: { fontWeight: 500, fontSize: "0.875rem", lineHeight: 1.5 },
       body1: { fontWeight: 400, fontSize: "0.9375rem", lineHeight: 1.5 },
       body2: { fontWeight: 400, fontSize: "0.875rem", lineHeight: 1.5 },
       button: {
         textTransform: "none",
         fontWeight: 600,
         fontSize: "0.875rem",
+        lineHeight: 1.4,
       },
       caption: {
         fontWeight: 500,
         fontSize: "0.75rem",
+        lineHeight: 1.4,
+      },
+      overline: {
+        fontWeight: 600,
+        fontSize: "0.75rem",
+        letterSpacing: "0.05em",
+        textTransform: "uppercase",
+        lineHeight: 1.4,
       },
     },
 
@@ -132,6 +141,8 @@ export const getTheme = (direction: "rtl" | "ltr") => {
             backgroundColor: p.background.default,
             color: p.text.primary,
             fontFamily,
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
           },
           "*, *::before, *::after": {
             boxSizing: "border-box",
@@ -148,10 +159,10 @@ export const getTheme = (direction: "rtl" | "ltr") => {
         },
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 10,
             backgroundColor: p.background.paper,
             border: `1px solid ${p.divider}`,
-            boxShadow: "0 1px 3px 0 rgba(15, 23, 42, 0.05)",
+            boxShadow: "0 1px 3px 0 rgba(15, 23, 42, 0.04)",
             overflow: "hidden",
           },
         },
@@ -163,7 +174,7 @@ export const getTheme = (direction: "rtl" | "ltr") => {
         },
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 10,
           },
         },
       },
@@ -174,12 +185,23 @@ export const getTheme = (direction: "rtl" | "ltr") => {
         },
         styleOverrides: {
           root: {
-            borderRadius: 10,
-            minHeight: 42,
+            borderRadius: 8,
+            minHeight: 38,
             textTransform: "none",
             fontWeight: 600,
-            padding: "8px 16px",
+            fontSize: "0.875rem",
+            padding: "6px 16px",
             transition: "all 0.15s ease-in-out",
+          },
+          sizeSmall: {
+            minHeight: 32,
+            fontSize: "0.8125rem",
+            padding: "4px 12px",
+          },
+          sizeLarge: {
+            minHeight: 44,
+            fontSize: "0.9375rem",
+            padding: "8px 20px",
           },
           containedPrimary: {
             backgroundColor: p.primary.main,
@@ -209,18 +231,59 @@ export const getTheme = (direction: "rtl" | "ltr") => {
         },
       },
 
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            color: p.text.secondary,
+            "&.Mui-focused": {
+              color: p.primary.main,
+            },
+            "&.Mui-error": {
+              color: p.error.main,
+            },
+          },
+        },
+      },
+
+      MuiFormLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            color: p.text.secondary,
+            "&.Mui-focused": {
+              color: p.primary.main,
+            },
+          },
+        },
+      },
+
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.75rem",
+            marginTop: 4,
+            lineHeight: 1.3,
+          },
+        },
+      },
+
       MuiTextField: {
         defaultProps: {
           fullWidth: true,
           variant: "outlined",
+          size: "small",
         },
       },
 
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
-            minHeight: 44,
+            borderRadius: 8,
+            minHeight: 40,
+            fontSize: "0.875rem",
             backgroundColor: p.background.paper,
             "& fieldset": {
               borderColor: p.inputBorder,
@@ -239,6 +302,16 @@ export const getTheme = (direction: "rtl" | "ltr") => {
             },
           },
           input: {
+            padding: "8.5px 14px",
+            fontSize: "0.875rem",
+          },
+          sizeSmall: {
+            minHeight: 36,
+            "& .MuiOutlinedInput-input": {
+              padding: "6.5px 12px",
+            },
+          },
+          multiline: {
             padding: "10px 14px",
           },
         },
@@ -247,7 +320,7 @@ export const getTheme = (direction: "rtl" | "ltr") => {
       MuiDialog: {
         styleOverrides: {
           paper: {
-            borderRadius: 14,
+            borderRadius: 12,
             border: `1px solid ${p.divider}`,
             boxShadow:
               "0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.08)",
@@ -259,10 +332,23 @@ export const getTheme = (direction: "rtl" | "ltr") => {
       MuiDialogTitle: {
         styleOverrides: {
           root: {
-            fontWeight: 700,
-            fontSize: "1.125rem",
+            fontWeight: 600,
+            fontSize: "1.0625rem",
             color: p.text.primary,
-            padding: "16px 24px",
+            padding: "16px 20px",
+            borderBottom: `1px solid ${p.divider}`,
+          },
+        },
+      },
+
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            padding: "20px",
+          },
+          dividers: {
+            padding: "20px",
+            borderTop: `1px solid ${p.divider}`,
             borderBottom: `1px solid ${p.divider}`,
           },
         },
@@ -271,10 +357,10 @@ export const getTheme = (direction: "rtl" | "ltr") => {
       MuiDialogActions: {
         styleOverrides: {
           root: {
-            padding: "14px 24px",
+            padding: "12px 20px",
             borderTop: `1px solid ${p.divider}`,
             backgroundColor: p.background.default,
-            gap: 8,
+            gap: 10,
           },
         },
       },
@@ -282,8 +368,13 @@ export const getTheme = (direction: "rtl" | "ltr") => {
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
-            fontWeight: 600,
+            borderRadius: 6,
+            fontWeight: 500,
+            fontSize: "0.75rem",
+            height: 24,
+          },
+          sizeMedium: {
+            height: 26,
             fontSize: "0.8125rem",
           },
           colorSuccess: {
@@ -317,13 +408,16 @@ export const getTheme = (direction: "rtl" | "ltr") => {
             fontWeight: 600,
             fontSize: "0.8125rem",
             borderBottom: `1px solid ${p.divider}`,
-            padding: "12px 16px",
+            padding: "10px 16px",
+            lineHeight: 1.4,
           },
           body: {
             color: p.text.primary,
             fontSize: "0.875rem",
+            fontWeight: 400,
             borderBottom: `1px solid ${p.divider}`,
-            padding: "14px 16px",
+            padding: "11px 16px",
+            lineHeight: 1.45,
           },
         },
       },
@@ -332,7 +426,13 @@ export const getTheme = (direction: "rtl" | "ltr") => {
         styleOverrides: {
           root: {
             "&:hover": {
-              backgroundColor: p.background.default,
+              backgroundColor: "rgba(15, 30, 54, 0.02)",
+            },
+            "&.Mui-selected": {
+              backgroundColor: "rgba(36, 74, 100, 0.06)",
+              "&:hover": {
+                backgroundColor: "rgba(36, 74, 100, 0.1)",
+              },
             },
           },
         },
@@ -341,12 +441,12 @@ export const getTheme = (direction: "rtl" | "ltr") => {
       MuiLinearProgress: {
         styleOverrides: {
           root: {
-            borderRadius: 6,
+            borderRadius: 4,
             backgroundColor: p.divider,
-            height: 8,
+            height: 6,
           },
           bar: {
-            borderRadius: 6,
+            borderRadius: 4,
           },
         },
       },

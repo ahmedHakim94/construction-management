@@ -23,8 +23,7 @@ export function AppPageHeader({
           variant="h4"
           sx={{
             fontWeight: 700,
-            fontSize: { xs: "1.35rem", md: "1.65rem" },
-            letterSpacing: "-0.01em",
+            fontSize: { xs: "1.25rem", sm: "1.35rem", md: "1.5rem" },
             color: "text.primary",
           }}
         >
@@ -35,7 +34,7 @@ export function AppPageHeader({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mt: 0.5, fontWeight: 400 }}
+            sx={{ mt: 0.5 }}
           >
             {description}
           </Typography>

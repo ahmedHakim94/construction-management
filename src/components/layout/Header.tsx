@@ -1,5 +1,5 @@
-import { Avatar, Box, IconButton, Menu, MenuItem, Stack, Switch, Typography } from "@mui/material";
-import { Language, Logout, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
+import { Avatar, Box, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import { Logout, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -13,12 +13,11 @@ interface HeaderProps {
   onSidebarToggle?: () => void;
 }
 
-export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: HeaderProps) {
+export function Header({ onSidebarToggle }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const isArabic = locale === "ar";
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -38,7 +37,7 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
     <Box
       component="header"
       sx={{
-        height: 60,
+        height: 56,
         borderBottom: "1px solid",
         borderColor: "divider",
         bgcolor: "background.paper",
@@ -49,13 +48,13 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
       }}
     >
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-        <IconButton onClick={onSidebarToggle} sx={{ display: { md: "none" }, color: "text.primary" }}>
+        <IconButton onClick={onSidebarToggle} sx={{ display: { md: "none" }, color: "text.primary", p: 0.75 }}>
           <MenuIcon />
         </IconButton>
         <Typography
           variant="h6"
           sx={{
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: { xs: "0.95rem", md: "1.05rem" },
             letterSpacing: "-0.01em",
             color: "text.primary",
@@ -67,41 +66,8 @@ export function Header({ locale = "ar", onLocaleChange, onSidebarToggle }: Heade
       </Stack>
 
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        {/* <Stack
-          direction="row"
-          spacing={0.75}
-          sx={{
-            alignItems: "center",
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            px: 1.25,
-            py: 0.35,
-            bgcolor: "background.default",
-          }}
-        >
-          <Language fontSize="small" sx={{ color: "text.secondary", fontSize: 18 }} />
-          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem", color: "text.secondary" }}>
-            {t("language")}
-          </Typography>
-          <Switch
-            size="small"
-            checked={!isArabic}
-            onChange={() => onLocaleChange?.(isArabic ? "en" : "ar")}
-            slotProps={{ input: { "aria-label": "language toggle" } }}
-            sx={{
-              "& .MuiSwitch-switchBase.Mui-checked": {
-                color: "secondary.main",
-              },
-              "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                backgroundColor: "secondary.main",
-              },
-            }}
-          />
-        </Stack> */}
-
         <IconButton onClick={handleOpenMenu} sx={{ p: 0.5 }}>
-          <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", width: 34, height: 34, fontSize: "0.875rem", fontWeight: 600 }}>
+          <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", width: 32, height: 32, fontSize: "0.8125rem", fontWeight: 600 }}>
             <PersonOutlined fontSize="small" />
           </Avatar>
         </IconButton>

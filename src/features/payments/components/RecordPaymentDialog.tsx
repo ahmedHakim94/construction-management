@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import {
+  Box,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -31,7 +32,8 @@ export function RecordPaymentDialog({
   onClose,
   onSubmit,
 }: RecordPaymentDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
 
   const {
     control,
@@ -70,45 +72,81 @@ export function RecordPaymentDialog({
     await onSubmit(values);
   };
 
+  const summaryItems = [
+    { label: t("netDue"), value: netAmount, color: "text.primary" },
+    { label: t("paidAmount"), value: paidAmount, color: "success.main" },
+    { label: t("remainingAmount"), value: remainingAmount, color: "warning.main" },
+  ];
+
   return (
     <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t("recordPayment")}</DialogTitle>
       <DialogContent>
-        <Typography>
-          {t("netDue")}: {netAmount}
-        </Typography>
-        <Typography>
-          {t("paidAmount")}: {paidAmount}
-        </Typography>
-        <Typography>
-          {t("remainingAmount")}: {remainingAmount}
-        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }} dir={isArabic ? "rtl" : "ltr"}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 1.5,
+            }}
+          >
+            {summaryItems.map((item) => (
+              <Box
+                key={item.label}
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1.5,
+                  bgcolor: "background.default",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", fontWeight: 500, display: "block", mb: 0.5 }}
+                >
+                  {item.label}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 600,
+                    color: item.color,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {item.value.toLocaleString()}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
 
-        <form
-          onSubmit={handleSubmit(handleFormSubmit)}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            marginTop: 16,
-          }}
-        >
-          <Controller
-            name="amount"
-            control={control}
-            render={({ field }) => (
-              <AppInput
-                label={t("paymentAmount")}
-                type="number"
-                inputProps={{ min: 0, step: 0.01 }}
-                value={field.value}
-                onChange={(event) => field.onChange(Number(event.target.value))}
-                error={!!errors.amount}
-                helperText={errors.amount?.message}
-              />
-            )}
-          />
-        </form>
+          <form
+            onSubmit={handleSubmit(handleFormSubmit)}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <Controller
+              name="amount"
+              control={control}
+              render={({ field }) => (
+                <AppInput
+                  label={t("paymentAmount")}
+                  type="number"
+                  inputProps={{ min: 0, step: 0.01 }}
+                  value={field.value}
+                  onChange={(event) => field.onChange(Number(event.target.value))}
+                  error={!!errors.amount}
+                  helperText={errors.amount?.message}
+                />
+              )}
+            />
+          </form>
+        </Box>
       </DialogContent>
       <DialogActions>
         <AppButton
@@ -118,7 +156,9 @@ export function RecordPaymentDialog({
         >
           {t("recordPayment")}
         </AppButton>
-        <AppButton onClick={onClose}>{t("cancel")}</AppButton>
+        <AppButton variant="outlined" color="inherit" onClick={onClose}>
+          {t("cancel")}
+        </AppButton>
       </DialogActions>
     </AppDialog>
   );

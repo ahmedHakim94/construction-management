@@ -83,7 +83,14 @@ export function AppCustomTable({
                 {columns.map((col) => {
                   const val = row[col.field];
                   return (
-                    <TableCell key={col.field} align={col.align || "left"}>
+                    <TableCell
+                      key={col.field}
+                      align={col.align || "left"}
+                      sx={{
+                        fontVariantNumeric: "tabular-nums",
+                        fontSize: "0.875rem",
+                      }}
+                    >
                       {col.renderCell ? (col.renderCell as any)({ value: val, row, field: col.field }) : (val?.toLocaleString() ?? "")}
                     </TableCell>
                   );

@@ -45,11 +45,11 @@ export function AppConfirmDialog({
         <Typography color="text.secondary">{message}</Typography>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2 }}>
+      <DialogActions>
         <AppButton variant="contained" color="error" loading={loading} onClick={onConfirm}>
           {confirmText ?? t("confirm")}
         </AppButton>
-        <AppButton variant="outlined" onClick={onClose} disabled={loading}>
+        <AppButton variant="outlined" color="inherit" onClick={onClose} disabled={loading}>
           {cancelText ?? t("cancel")}
         </AppButton>
       </DialogActions>

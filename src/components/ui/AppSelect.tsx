@@ -19,6 +19,8 @@ interface AppSelectProps {
   error?: string;
   className?: string;
   width?: any;
+  menuPlacement?: "auto" | "bottom" | "top";
+  maxMenuHeight?: number;
 }
 
 export function AppSelect({
@@ -31,6 +33,8 @@ export function AppSelect({
   error,
   className,
   width = "100%",
+  menuPlacement = "auto",
+  maxMenuHeight,
 }: AppSelectProps) {
   const { i18n } = useTranslation();
   const theme = useTheme();
@@ -59,6 +63,8 @@ export function AppSelect({
           onChange={(option) => onChange?.(option?.value ?? "")}
           placeholder={placeholder}
           isRtl={isRtl}
+          menuPlacement={menuPlacement}
+          maxMenuHeight={maxMenuHeight}
           styles={reactSelectStyles(theme, error)}
           classNamePrefix="shared_Select"
           className={className}

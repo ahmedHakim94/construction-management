@@ -141,7 +141,6 @@ export function ContractorInfoSection() {
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
-                className="react_select_status"
               />
             )}
           />

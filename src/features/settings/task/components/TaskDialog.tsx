@@ -81,11 +81,11 @@ export function TaskDialog({
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2 }}>
+      <DialogActions>
         <AppButton variant="contained" loading={loading} onClick={handleSubmit(submit)}>
           {mode === "create" ? t("create") : t("save")}
         </AppButton>
-        <AppButton variant="outlined" color="error" onClick={onClose}>
+        <AppButton variant="outlined" color="inherit" onClick={onClose}>
           {t("cancel")}
         </AppButton>
       </DialogActions>

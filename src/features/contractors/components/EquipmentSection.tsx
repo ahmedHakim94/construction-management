@@ -43,8 +43,9 @@ export function EquipmentSection({
         borderColor: isExpanded ? "primary.main" : "divider",
         borderRadius: 2,
         bgcolor: "background.paper",
-        overflow: "hidden",
+        overflow: isExpanded ? "visible" : "hidden",
         transition: "border-color 0.15s ease",
+        padding:"10px"
       }}
       dir={isArabic ? "rtl" : "ltr"}
     >
@@ -65,6 +66,7 @@ export function EquipmentSection({
           "&:hover": {
             bgcolor: "background.default",
           },
+          borderRadius: 2
         }}
       >
         <Box
@@ -118,6 +120,7 @@ export function EquipmentSection({
         in={isExpanded}
         timeout="auto"
         unmountOnExit={false}
+        sx={{ overflow: isExpanded ? "visible" : "hidden" }}
       >
         <Box
           sx={{
@@ -142,6 +145,8 @@ export function EquipmentSection({
                   onChange={field.onChange}
                   error={fieldState.error?.message}
                   placeholder={t("selectPlaceholder")}
+                  menuPlacement="top"
+                  maxMenuHeight={180}
                 />
               )}
             />

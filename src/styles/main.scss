@@ -21,9 +21,10 @@ html[dir="rtl"] {
 
 .app-select-label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
 }
 
 html[dir="rtl"] {

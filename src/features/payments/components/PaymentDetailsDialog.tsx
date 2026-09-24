@@ -86,7 +86,7 @@ export function PaymentDetailsDialog({
     <AppDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
             {t("paymentDetails")}
           </Typography>
           <Chip
