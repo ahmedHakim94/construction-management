@@ -19,9 +19,10 @@
   "noData": "لا توجد بيانات",
   "noDataDesc": "لا توجد سجلات لعرضها.",
   "appTitle": "نظام إدارة البناء",
-  "somethingWentWrong":"حدث خطأ!",
- "deletedSuccessfully": "تم الحذف بنجاح",
-"createdSuccessfully": "تم الإنشاء بنجاح",
-"updatedSuccessfully": "تم التحديث بنجاح",
-"home":"الصفحه الرئيسية"
+  "somethingWentWrong": "حدث خطأ!",
+  "deletedSuccessfully": "تم الحذف بنجاح",
+  "createdSuccessfully": "تم الإنشاء بنجاح",
+  "updatedSuccessfully": "تم التحديث بنجاح",
+  "home": "الصفحه الرئيسية",
+  "external": "خارجي"
 }

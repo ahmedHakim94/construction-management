@@ -1,11 +1,19 @@
 import { useMemo } from "react";
+import { Box, Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { DailyWork } from "../types";
 
+export type DailyWorkRow = DailyWork & {
+  contractorName?: string;
+  projectName?: string;
+  equipmentLabel?: string;
+  taskName?: string;
+};
+
 interface DailyWorkTableProps {
-  rows: DailyWork[];
+  rows: DailyWorkRow[];
   onEdit: (record: DailyWork) => void;
   onDelete: (record: DailyWork) => void;
 }
@@ -32,6 +40,26 @@ export function DailyWorkTable({ rows, onEdit, onDelete }: DailyWorkTableProps) 
         headerName: t("contractor"),
         flex: 1.4,
         minWidth: 180,
+        renderCell: ({ row }: { row: DailyWorkRow }) => (
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+            <span>{row.contractorName}</span>
+            {row.contractorId?.startsWith("external-") && (
+              <Chip
+                label={t("external")}
+                size="small"
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  height: 20,
+                  fontSize: "0.7rem",
+                  fontWeight: 500,
+                  px: 0.25,
+                  "& .MuiChip-label": { px: 0.6 },
+                }}
+              />
+            )}
+          </Box>
+        ),
       },
       {
         field: "equipmentLabel",

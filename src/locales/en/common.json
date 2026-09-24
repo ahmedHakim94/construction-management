@@ -23,6 +23,6 @@
   "deletedSuccessfully": "Deleted successfully",
   "createdSuccessfully": "Created successfully",
   "updatedSuccessfully": "Updated successfully",
-  "home":"Dashboard"
-
+  "home": "Dashboard",
+  "external": "External"
 }

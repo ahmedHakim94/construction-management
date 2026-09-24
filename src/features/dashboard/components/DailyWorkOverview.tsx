@@ -7,7 +7,7 @@ import {
   AppButton,
   type AppTableColDef,
 } from "@/components/ui";
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import type { DashboardDailyWork } from "../types";
 
 export interface DailyWorkOverviewProps {
@@ -48,6 +48,26 @@ export function DailyWorkOverview({
         headerName: t("dailyWork:contractor"),
         flex: 1.5,
         minWidth: 150,
+        renderCell: ({ row }: { row: DashboardDailyWork }) => (
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+            <span>{row.contractorName}</span>
+            {row.contractorId?.startsWith("external-") && (
+              <Chip
+                label={t("dailyWork:external")}
+                size="small"
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  height: 20,
+                  fontSize: "0.7rem",
+                  fontWeight: 500,
+                  px: 0.25,
+                  "& .MuiChip-label": { px: 0.6 },
+                }}
+              />
+            )}
+          </Box>
+        ),
       },
       {
         field: "equipmentName",

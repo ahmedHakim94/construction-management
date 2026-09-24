@@ -27,6 +27,8 @@ export interface DashboardPayment {
 export interface DashboardDailyWork {
   id: string;
   date: string;
+  projectId?: string;
+  contractorId?: string;
   projectName: string;
   contractorName: string;
   equipmentName: string;

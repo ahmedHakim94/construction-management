@@ -99,6 +99,8 @@ const mapDashboardDailyWork = (
     return {
       id: record.id,
       date: record.date,
+      projectId: record.projectId,
+      contractorId: record.contractorId,
       projectName: project?.name ?? record.projectId,
       contractorName,
       equipmentName,

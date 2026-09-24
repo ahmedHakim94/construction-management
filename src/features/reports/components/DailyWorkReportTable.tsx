@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Box, Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppCustomTable, type AppTableColDef } from "@/components/ui";
 import type { DailyWorkReport } from "../types";
@@ -30,6 +31,26 @@ export function DailyWorkReportTable({ rows, isLoading }: DailyWorkReportTablePr
         headerName: t("dailyWork:contractor"),
         flex: 1.2,
         minWidth: 130,
+        renderCell: ({ row }: { row: DailyWorkReport }) => (
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+            <span>{row.contractorName}</span>
+            {row.contractorId?.startsWith("external-") && (
+              <Chip
+                label={t("dailyWork:external")}
+                size="small"
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  height: 20,
+                  fontSize: "0.7rem",
+                  fontWeight: 500,
+                  px: 0.25,
+                  "& .MuiChip-label": { px: 0.6 },
+                }}
+              />
+            )}
+          </Box>
+        ),
       },
       {
         field: "equipmentName",
