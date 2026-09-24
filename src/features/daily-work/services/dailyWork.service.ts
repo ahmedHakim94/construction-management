@@ -1,5 +1,4 @@
 import { storage } from "@/core/storage/localStorage";
-import { dailyWorkMockData } from "../mock/dailyWork";
 import type { DailyWork, DailyWorkFormValues } from "../types";
 
 const STORAGE_KEY = "construction_daily_work";
@@ -23,7 +22,7 @@ export const dailyWorkService = {
       id: `dw-${Date.now()}`,
       date: data.date,
       projectId: data.projectId,
-      contractorId: data.contractorId,
+      contractorId: data.contractorId ?? "",
       equipmentId: data.equipmentId || undefined,
       temporaryEquipmentName: data.temporaryEquipmentName || undefined,
       hourRate: data.hourRate,
@@ -55,7 +54,7 @@ export const dailyWorkService = {
         ...item,
         date: data.date,
         projectId: data.projectId,
-        contractorId: data.contractorId,
+        contractorId: data.contractorId ?? item.contractorId,
         equipmentId: data.equipmentId || undefined,
         temporaryEquipmentName: data.temporaryEquipmentName || undefined,
         hourRate: data.hourRate,

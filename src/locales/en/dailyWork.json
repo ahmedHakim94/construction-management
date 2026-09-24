@@ -26,5 +26,12 @@
   "selectTask": "Select task",
   "contractorRequired": "Contractor is required",
   "temporaryEquipmentNameRequired": "Temporary equipment name is required",
-  "equipmentRequired": "Equipment is required"
+  "equipmentRequired": "Equipment is required",
+  "externalContractor": "External Contractor",
+  "selectExternalContractor": "Select external contractor",
+  "addExternalContractor": "Add New External Contractor",
+  "externalContractorRequired": "External contractor is required",
+  "externalContractorName": "External Contractor Name",
+  "externalContractorNamePlaceholder": "Enter contractor name"
 }
+

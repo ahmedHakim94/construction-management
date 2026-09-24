@@ -3,7 +3,9 @@ import { z } from "zod";
 export const dailyWorkSchema = z.object({
   date: z.string().trim().min(1, "Date is required"),
   projectId: z.string().trim().min(1, "Project is required"),
-  contractorId: z.string().trim().min(1, "Contractor is required"),
+  contractorId: z.string().optional(),
+  isExternal: z.boolean().optional(),
+  externalContractorId: z.string().optional(),
   equipmentId: z.string().optional(),
   temporaryEquipmentName: z.string().optional(),
   hourRate: z.number().min(0, "Hour rate is required"),
@@ -17,3 +19,4 @@ export const dailyWorkSchema = z.object({
 });
 
 export type DailyWorkSchemaValues = z.infer<typeof dailyWorkSchema>;
+

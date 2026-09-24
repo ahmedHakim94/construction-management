@@ -13,7 +13,16 @@ export interface Contractor {
   notes?: string;
   status: ContractorStatus;
   createdAt: string;
-  isSystem?: boolean;
 }
 
 export type ContractorFormValues = z.infer<typeof contractorSchema>;
+
+export interface ExternalContractor {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface ExternalContractorFormValues {
+  name: string;
+}

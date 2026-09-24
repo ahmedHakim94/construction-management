@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { paymentService } from "../services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
+import { externalContractorService } from "@/features/contractors/services/externalContractor.service";
 import { projectService } from "@/features/settings/projects/services/project.service";
 import { taskService } from "@/features/settings/task/services/task.service";
 import type { Payment, PaymentTransaction } from "../types";
-import type { Contractor } from "@/features/contractors/types";
+import type { Contractor, ExternalContractor } from "@/features/contractors/types";
 import type { DailyWork } from "@/features/daily-work/types";
 import type { Project } from "@/features/settings/projects/types";
 import type { Task } from "@/features/settings/task/types";
@@ -15,6 +16,9 @@ import type { Equipment } from "@/features/equipment/types";
 export function usePayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [externalContractors, setExternalContractors] = useState<
+    ExternalContractor[]
+  >([]);
   const [dailyWorkRecords, setDailyWorkRecords] = useState<DailyWork[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -29,12 +33,14 @@ export function usePayments() {
     async function loadData() {
       const [
         contractorData,
+        externalContractorData,
         dailyWorkData,
         projectData,
         taskData,
         equipmentData,
       ] = await Promise.all([
         contractorService.getAll(),
+        externalContractorService.getAll(),
         dailyWorkService.getAll(),
         projectService.getAll(),
         taskService.getAll(),
@@ -42,6 +48,7 @@ export function usePayments() {
       ]);
 
       setContractors(contractorData);
+      setExternalContractors(externalContractorData);
       setDailyWorkRecords(dailyWorkData);
       setProjects(projectData);
       setTasks(taskData);
@@ -110,6 +117,7 @@ export function usePayments() {
   return {
     payments,
     contractors,
+    externalContractors,
     dailyWorkRecords,
     projects,
     tasks,

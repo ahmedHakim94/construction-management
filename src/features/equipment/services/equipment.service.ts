@@ -1,5 +1,4 @@
 import { storage } from "@/core/storage/localStorage";
-import { equipmentMockData } from "../mock/equipment";
 import type { Equipment, EquipmentFormValues } from "../types";
 import { equipmentTypeService } from "@/features/settings/equipment-type/services/equipmentType.service";
 

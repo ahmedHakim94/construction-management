@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { projectService } from "@/features/settings/projects/services/project.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
+import { externalContractorService } from "@/features/contractors/services/externalContractor.service";
 import { equipmentService } from "@/features/equipment/services/equipment.service";
 import { paymentService } from "@/features/payments/services/payment.service";
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
@@ -15,7 +16,7 @@ import type {
 } from "../types";
 import type { Payment } from "@/features/payments/types";
 import type { Project } from "@/features/settings/projects/types";
-import type { Contractor } from "@/features/contractors/types";
+import type { Contractor, ExternalContractor } from "@/features/contractors/types";
 import type { Equipment } from "@/features/equipment/types";
 import type { Task } from "@/features/settings/task/types";
 import type { DailyWork } from "@/features/daily-work/types";
@@ -40,16 +41,23 @@ const mapDashboardPayments = (
   paymentsData: Payment[],
   projectsData: Project[],
   contractorsData: Contractor[],
+  externalContractorsData: ExternalContractor[],
 ): DashboardPayment[] => {
   return paymentsData.map((payment) => {
     const project = projectsData.find((p) => p.id === payment.projectId);
     const contractor = contractorsData.find(
       (c) => c.id === payment.contractorId,
     );
+    const externalContractor = externalContractorsData.find(
+      (c) => c.id === payment.contractorId,
+    );
+    const contractorName =
+      contractor?.name ?? externalContractor?.name ?? "";
+
     return {
       id: payment.id,
       projectName: project?.name ?? payment.projectId,
-      contractorName: contractor?.name ?? payment.contractorId,
+      contractorName,
       startDate: payment.startDate,
       endDate: payment.endDate,
       netAmount: payment.netAmount,
@@ -64,6 +72,7 @@ const mapDashboardDailyWork = (
   dailyWorkRecords: DailyWork[],
   projectsData: Project[],
   contractorsData: Contractor[],
+  externalContractorsData: ExternalContractor[],
   equipmentData: Equipment[],
   tasksData: Task[],
   _language: string,
@@ -73,6 +82,11 @@ const mapDashboardDailyWork = (
     const contractor = contractorsData.find(
       (c) => c.id === record.contractorId,
     );
+    const externalContractor = externalContractorsData.find(
+      (c) => c.id === record.contractorId,
+    );
+    const contractorName =
+      contractor?.name ?? externalContractor?.name ?? "";
 
     const equipment = equipmentData.find((eq) => eq.id === record.equipmentId);
     const equipmentName = record.equipmentId
@@ -86,7 +100,7 @@ const mapDashboardDailyWork = (
       id: record.id,
       date: record.date,
       projectName: project?.name ?? record.projectId,
-      contractorName: contractor?.name ?? record.contractorId,
+      contractorName,
       equipmentName,
       taskName,
       workingHours: record.workingHours,
@@ -150,6 +164,9 @@ export function useDashboard() {
 
   const [rawProjects, setRawProjects] = useState<Project[]>([]);
   const [rawContractors, setRawContractors] = useState<Contractor[]>([]);
+  const [rawExternalContractors, setRawExternalContractors] = useState<
+    ExternalContractor[]
+  >([]);
   const [rawEquipment, setRawEquipment] = useState<Equipment[]>([]);
   const [rawTasks, setRawTasks] = useState<Task[]>([]);
   const [rawDailyWork, setRawDailyWork] = useState<DailyWork[]>([]);
@@ -167,12 +184,14 @@ export function useDashboard() {
         const [
           projectsData,
           contractorsData,
+          externalContractorsData,
           equipmentData,
           dailyWorkData,
           tasksData,
         ] = await Promise.all([
           projectService.getAll(),
           contractorService.getAll(),
+          externalContractorService.getAll(),
           equipmentService.getAll(),
           dailyWorkService.getAll(),
           taskService.getAll(),
@@ -183,6 +202,7 @@ export function useDashboard() {
         // Set raw data to trigger useMemos
         setRawProjects(projectsData);
         setRawContractors(contractorsData);
+        setRawExternalContractors(externalContractorsData);
         setRawEquipment(equipmentData);
         setRawTasks(tasksData);
         setRawDailyWork(dailyWorkData);
@@ -229,6 +249,7 @@ export function useDashboard() {
       rawDailyWork,
       rawProjects,
       rawContractors,
+      rawExternalContractors,
       rawEquipment,
       rawTasks,
       currentLang,
@@ -237,14 +258,20 @@ export function useDashboard() {
     rawDailyWork,
     rawProjects,
     rawContractors,
+    rawExternalContractors,
     rawEquipment,
     rawTasks,
     currentLang,
   ]);
 
   const payments = useMemo(() => {
-    return mapDashboardPayments(rawPayments, rawProjects, rawContractors);
-  }, [rawPayments, rawProjects, rawContractors]);
+    return mapDashboardPayments(
+      rawPayments,
+      rawProjects,
+      rawContractors,
+      rawExternalContractors,
+    );
+  }, [rawPayments, rawProjects, rawContractors, rawExternalContractors]);
 
   return {
     stats,

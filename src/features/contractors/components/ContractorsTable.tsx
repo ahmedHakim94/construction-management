@@ -66,7 +66,7 @@ export function ContractorsTable({
       flex: 0.8,
       minWidth: 110,
       renderCell: ({ row }: { row: Contractor }) => (
-        row.isSystem ? null : <AppActions
+        <AppActions
           onEdit={() => onEdit(row)}
           onDelete={() => onDelete(row)}
         />

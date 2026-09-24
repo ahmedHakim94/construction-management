@@ -17,6 +17,7 @@ export function PaymentPage() {
   const {
     payments,
     contractors,
+    externalContractors,
     dailyWorkRecords,
     projects,
     tasks,
@@ -33,6 +34,7 @@ export function PaymentPage() {
   const { control, paymentRows } = usePaymentFilters(
     payments,
     contractors,
+    externalContractors,
     projects,
   );
 

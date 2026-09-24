@@ -1,5 +1,4 @@
 import { storage } from "@/core/storage/localStorage";
-import { projectsMockData } from "../mock/projects";
 import type { Project, ProjectFormValues } from "../types";
 
 const STORAGE_KEY = "construction_projects";

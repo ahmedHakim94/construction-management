@@ -1,5 +1,4 @@
 import { storage } from "@/core/storage/localStorage";
-import { tasksMockData } from "../mock/tasks";
 import type { Task, TaskFormValues } from "../types";
 
 const STORAGE_KEY = "construction_tasks";

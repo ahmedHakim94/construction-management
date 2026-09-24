@@ -26,5 +26,12 @@
   "selectTask": "اختر المهمة",
   "contractorRequired": "المقاول مطلوب",
   "temporaryEquipmentNameRequired": "اسم المعدات المؤقتة مطلوب",
-  "equipmentRequired": "المعدة مطلوبة"
+  "equipmentRequired": "المعدة مطلوبة",
+  "externalContractor": "مقاول خارجي",
+  "selectExternalContractor": "اختر المقاول الخارجي",
+  "addExternalContractor": "إضافة مقاول خارجي جديد",
+  "externalContractorRequired": "المقاول الخارجي مطلوب",
+  "externalContractorName": "اسم المقاول الخارجي",
+  "externalContractorNamePlaceholder": "اكتب اسم المقاول"
 }
+

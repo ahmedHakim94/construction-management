@@ -5,12 +5,13 @@ import { projectService } from "@/features/settings/projects/services/project.se
 import { dailyWorkService } from "@/features/daily-work/services/dailyWork.service";
 import { paymentService } from "@/features/payments/services/payment.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
+import { externalContractorService } from "@/features/contractors/services/externalContractor.service";
 import { equipmentService } from "@/features/equipment/services/equipment.service";
 import { taskService } from "@/features/settings/task/services/task.service";
 import type { DailyWork } from "@/features/daily-work/types";
 import type { Payment } from "@/features/payments/types";
 import type { Project } from "@/features/settings/projects/types";
-import type { Contractor } from "@/features/contractors/types";
+import type { Contractor, ExternalContractor } from "@/features/contractors/types";
 import type { Equipment } from "@/features/equipment/types";
 import type { Task } from "@/features/settings/task/types";
 import type {
@@ -133,10 +134,16 @@ const calculateSummary = (reports: ProjectReportSummary[]): ReportSummary => {
 
 const aggregateContractorData = (
   contractors: Contractor[],
+  externalContractors: ExternalContractor[],
   equipment: Equipment[],
   filteredDailyWork: DailyWork[],
   filteredPayments: Payment[],
 ): ContractorReport[] => {
+  const allContractors: { id: string; name: string }[] = [
+    ...contractors.map((c) => ({ id: c.id, name: c.name })),
+    ...externalContractors.map((c) => ({ id: c.id, name: c.name })),
+  ];
+
   const summaries: Record<string, {
     totalWorkingHours: number;
     totalCost: number;
@@ -144,7 +151,7 @@ const aggregateContractorData = (
     totalPaid: number;
   }> = {};
 
-  for (const contractor of contractors) {
+  for (const contractor of allContractors) {
     summaries[contractor.id] = {
       totalWorkingHours: 0,
       totalCost: 0,
@@ -174,7 +181,7 @@ const aggregateContractorData = (
     equipmentCounts[eq.contractorId] = (equipmentCounts[eq.contractorId] ?? 0) + 1;
   }
 
-  return contractors.map((contractor) => {
+  return allContractors.map((contractor) => {
     const summary = summaries[contractor.id] ?? {
       totalWorkingHours: 0,
       totalCost: 0,
@@ -201,12 +208,16 @@ const mapDailyWorkReports = (
   filteredRecords: DailyWork[],
   projects: Project[],
   contractors: Contractor[],
+  externalContractors: ExternalContractor[],
   equipment: Equipment[],
   tasks: Task[],
   _language: string,
 ): DailyWorkReport[] => {
   const projectsMap = new Map(projects.map((p) => [p.id, p.name]));
   const contractorsMap = new Map(contractors.map((c) => [c.id, c.name]));
+  const externalContractorsMap = new Map(
+    externalContractors.map((c) => [c.id, c.name]),
+  );
   const equipmentMap = new Map(equipment.map((e) => [e.id, e.name ?? ""]));
   const tasksMap = new Map(tasks.map((t) => [t.id, t.name ?? ""]));
 
@@ -218,13 +229,18 @@ const mapDailyWorkReports = (
     const cost = record.cost ?? 0;
     const deduction = record.deduction ?? 0;
 
+    const contractorName =
+      contractorsMap.get(record.contractorId) ??
+      externalContractorsMap.get(record.contractorId) ??
+      "";
+
     return {
       id: record.id,
       date: record.date,
       projectId: record.projectId,
       projectName: projectsMap.get(record.projectId) ?? "",
       contractorId: record.contractorId,
-      contractorName: contractorsMap.get(record.contractorId) ?? "",
+      contractorName,
       equipmentName,
       taskName: tasksMap.get(record.taskId) ?? "",
       workingHours: record.workingHours ?? 0,
@@ -248,6 +264,9 @@ export function useReports() {
   const [dailyWork, setDailyWork] = useState<DailyWork[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [externalContractors, setExternalContractors] = useState<
+    ExternalContractor[]
+  >([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -261,12 +280,14 @@ export function useReports() {
           projectsData,
           dailyWorkData,
           contractorsData,
+          externalContractorsData,
           equipmentData,
           tasksData,
         ] = await Promise.all([
           projectService.getAll(),
           dailyWorkService.getAll(),
           contractorService.getAll(),
+          externalContractorService.getAll(),
           equipmentService.getAll(),
           taskService.getAll(),
         ]);
@@ -280,6 +301,7 @@ export function useReports() {
         setDailyWork(dailyWorkData);
         setPayments(paymentsData);
         setContractors(contractorsData);
+        setExternalContractors(externalContractorsData);
         setEquipment(equipmentData);
         setTasks(tasksData);
         setIsLoading(false);
@@ -324,6 +346,7 @@ export function useReports() {
       filteredDailyWork,
       projects,
       contractors,
+      externalContractors,
       equipment,
       tasks,
       i18n.language,
@@ -332,6 +355,7 @@ export function useReports() {
     filteredDailyWork,
     projects,
     contractors,
+    externalContractors,
     equipment,
     tasks,
     i18n.language,
@@ -349,11 +373,18 @@ export function useReports() {
   const contractorReports = useMemo(() => {
     return aggregateContractorData(
       contractors,
+      externalContractors,
       equipment,
       filteredDailyWork,
       filteredPaymentsForReports,
     );
-  }, [contractors, equipment, filteredDailyWork, filteredPaymentsForReports]);
+  }, [
+    contractors,
+    externalContractors,
+    equipment,
+    filteredDailyWork,
+    filteredPaymentsForReports,
+  ]);
 
   return {
     reports,

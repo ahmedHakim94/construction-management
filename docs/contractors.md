@@ -40,7 +40,6 @@ Represents a subcontractor or vendor that performs work on construction projects
 | `notes`      | `string?`          | Additional notes (optional)                 |
 | `status`     | `ContractorStatus` | `"ACTIVE"` or `"INACTIVE"`                  |
 | `createdAt`  | `string`           | Creation timestamp                          |
-| `isSystem`   | `boolean?`         | Whether this is a system-managed contractor |
 
 ## Form Values: ContractorFormValues
 

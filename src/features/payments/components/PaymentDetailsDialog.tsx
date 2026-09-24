@@ -72,7 +72,7 @@ export function PaymentDetailsDialog({
         taskName: taskMap[record.taskId] ?? record.taskId,
         netAmount: record.cost - record.deduction,
       })),
-    [dailyWorkRecords, projectMap, taskMap],
+    [dailyWorkRecords, projectMap, taskMap, equipmentMap],
   );
 
   const isPaid = payment?.status === "PAID";

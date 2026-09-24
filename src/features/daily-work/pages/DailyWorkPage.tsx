@@ -12,11 +12,12 @@ import { DailyWorkTable } from "../components/DailyWorkTable";
 import { DailyWorkDialog } from "../components/DailyWorkDialog";
 import { dailyWorkService } from "../services/dailyWork.service";
 import { contractorService } from "@/features/contractors/services/contractor.service";
+import { externalContractorService } from "@/features/contractors/services/externalContractor.service";
 import { projectService } from "@/features/settings/projects/services/project.service";
 import { equipmentService } from "@/features/equipment/services/equipment.service";
 import { taskService } from "@/features/settings/task/services/task.service";
 import type { DailyWork, DailyWorkFormValues } from "../types";
-import type { Contractor } from "@/features/contractors/types";
+import type { Contractor, ExternalContractor } from "@/features/contractors/types";
 import type { Project } from "@/features/settings/projects/types";
 import type { Equipment } from "@/features/equipment/types";
 import type { Task } from "@/features/settings/task/types";
@@ -30,6 +31,7 @@ export function DailyWorkPage() {
   const [records, setRecords] = useState<DailyWork[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [externalContractors, setExternalContractors] = useState<ExternalContractor[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [search, setSearch] = useState("");
@@ -43,18 +45,26 @@ export function DailyWorkPage() {
 
   useEffect(() => {
     async function loadData() {
-      const [recordData, projectData, contractorData, equipmentData, taskData] =
-        await Promise.all([
-          dailyWorkService.getAll(),
-          projectService.getAll(),
-          contractorService.getAll(),
-          equipmentService.getAll(),
-          taskService.getAll(),
-        ]);
+      const [
+        recordData,
+        projectData,
+        contractorData,
+        externalContractorData,
+        equipmentData,
+        taskData,
+      ] = await Promise.all([
+        dailyWorkService.getAll(),
+        projectService.getAll(),
+        contractorService.getAll(),
+        externalContractorService.getAll(),
+        equipmentService.getAll(),
+        taskService.getAll(),
+      ]);
 
       setRecords(recordData);
       setProjects(projectData);
       setContractors(contractorData);
+      setExternalContractors(externalContractorData);
       setEquipment(equipmentData);
       setTasks(taskData);
     }
@@ -63,21 +73,28 @@ export function DailyWorkPage() {
   }, []);
 
   const displayRows = useMemo(() => {
-    return records.map((item) => ({
-      ...item,
-      projectName:
-        projects.find((project) => project.id === item.projectId)?.name ?? "",
-      contractorName:
-        contractors.find((contractor) => contractor.id === item.contractorId)
-          ?.name ?? "",
-      equipmentLabel: item.equipmentId
-        ? (equipment.find((eq) => eq.id === item.equipmentId)?.name ?? "")
-        : (item.temporaryEquipmentName ?? ""),
-      taskName: tasks.find((task) => task.id === item.taskId)?.name ?? "",
-    }));
-  }, [records, projects, contractors, equipment, tasks]);
+    return records.map((item) => {
+      const normalContractor = contractors.find(
+        (contractor) => contractor.id === item.contractorId,
+      );
+      const externalContractor = externalContractors.find(
+        (contractor) => contractor.id === item.contractorId,
+      );
+      const contractorName =
+        normalContractor?.name ?? externalContractor?.name ?? "";
 
-
+      return {
+        ...item,
+        projectName:
+          projects.find((project) => project.id === item.projectId)?.name ?? "",
+        contractorName,
+        equipmentLabel: item.equipmentId
+          ? (equipment.find((eq) => eq.id === item.equipmentId)?.name ?? "")
+          : (item.temporaryEquipmentName ?? ""),
+        taskName: tasks.find((task) => task.id === item.taskId)?.name ?? "",
+      };
+    });
+  }, [records, projects, contractors, externalContractors, equipment, tasks]);
 
   const filteredRecords = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -128,11 +145,17 @@ export function DailyWorkPage() {
           setRecords((current) =>
             current.map((item) => (item.id === updated.id ? updated : item)),
           );
+          const updatedExternalContractors =
+            await externalContractorService.getAll();
+          setExternalContractors(updatedExternalContractors);
           notify.success(t("updatedSuccessfully"));
         }
       } else {
         const created = await dailyWorkService.create(values);
         setRecords((current) => [created, ...current]);
+        const updatedExternalContractors =
+          await externalContractorService.getAll();
+        setExternalContractors(updatedExternalContractors);
         notify.success(t("createdSuccessfully"));
       }
 
@@ -141,6 +164,7 @@ export function DailyWorkPage() {
       notify.error(t("somethingWentWrong"));
     }
   };
+
 
   const handleDelete = async () => {
     setDeleteLoading(true);
