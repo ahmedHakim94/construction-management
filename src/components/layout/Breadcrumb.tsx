@@ -61,7 +61,12 @@ export function Breadcrumb() {
           component={RouterLink}
           to="/dashboard"
           underline="hover"
-          color="inherit"
+          sx={{
+            color: "text.secondary",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            "&:hover": { color: "primary.main" },
+          }}
         >
           {t("home")}
         </Link>
@@ -75,8 +80,7 @@ export function Breadcrumb() {
           return isLast ? (
             <Typography
               key={path}
-              color="text.primary"
-              sx={{ fontWeight: 600 }}
+              sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "text.primary" }}
             >
               {label}
             </Typography>
@@ -86,7 +90,12 @@ export function Breadcrumb() {
               component={RouterLink}
               to={path}
               underline="hover"
-              color="inherit"
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                "&:hover": { color: "primary.main" },
+              }}
             >
               {label}
             </Link>

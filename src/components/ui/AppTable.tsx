@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme, type Theme } from "@mui/material";
 import { DataGrid, type DataGridProps, type GridColDef } from "@mui/x-data-grid";
 import { arSD, enUS } from "@mui/x-data-grid/locales";
 import { useTranslation } from "react-i18next";
@@ -9,15 +9,17 @@ type AppTableProps = DataGridProps & {
   showPagination?: boolean;
 };
 
-const defaultTableStyles = {
-  border: 0,
-  borderRadius: 4,
-  backgroundColor: "#fff",
+const getTableStyles = (theme: Theme) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  // borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
+  overflow: "hidden",
 
   // Header
   "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: "#F8FAFC",
-    borderBottom: "1px solid #E5E7EB",
+    backgroundColor: theme.palette.background.default,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    minHeight: "44px !important",
   },
 
   "& .MuiDataGrid-columnHeader": {
@@ -27,47 +29,62 @@ const defaultTableStyles = {
   "& .MuiDataGrid-columnHeaderTitle": {
     width: "100%",
     textAlign: "center",
-    fontWeight: 700,
-    fontSize: "14px",
-    color: "#334155",
-    marginInlineStart: "10px",
+    fontWeight: 600,
+    fontSize: "0.8125rem",
+    color: theme.palette.text.secondary,
+    marginInlineStart: "8px",
+    letterSpacing: "0.01em",
   },
 
   // Cells
   "& .MuiDataGrid-cell": {
     display: "flex",
     alignItems: "center",
-    borderBottom: "1px solid #F1F5F9",
-    fontSize: "14px",
-    color: "#1E293B",
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    fontSize: "0.875rem",
+    color: theme.palette.text.primary,
+    fontVariantNumeric: "tabular-nums",
   },
 
-  // Hover
+  // Hover & selection
   "& .MuiDataGrid-row:hover": {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: theme.palette.background.default,
   },
 
-  // Remove focus
+  "& .MuiDataGrid-row.Mui-selected": {
+    backgroundColor: theme.palette.action.hover,
+    "&:hover": {
+      backgroundColor: theme.palette.action.selected,
+    },
+  },
+
+  // Focus cleanup
   "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
     outline: "none",
   },
 
-  "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
-  {
+  "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
     outline: "none",
   },
 
   // Footer
   "& .MuiDataGrid-footerContainer": {
-    borderTop: "1px solid #E5E7EB",
+    borderTop: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    minHeight: 48,
   },
 
-  // Pagination arrows
+  // Pagination
   "& .MuiTablePagination-actions": {
     direction: "ltr",
   },
-};
 
+  "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel": {
+    fontSize: "0.8125rem",
+    color: theme.palette.text.secondary,
+    fontVariantNumeric: "tabular-nums",
+  },
+});
 
 export function AppTable({
   sx,
@@ -76,6 +93,7 @@ export function AppTable({
   ...props
 }: AppTableProps) {
   const { i18n } = useTranslation();
+  const theme = useTheme();
 
   const localeText =
     i18n.language === "ar"
@@ -101,7 +119,7 @@ export function AppTable({
           },
         }}
         sx={{
-          ...defaultTableStyles,
+          ...getTableStyles(theme),
           ...sx,
         }}
         {...props}

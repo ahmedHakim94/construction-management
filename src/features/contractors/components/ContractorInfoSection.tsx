@@ -28,19 +28,20 @@ export function ContractorInfoSection() {
   return (
     <Box
       sx={{
-        border: "1px solid #E2E8F0",
-        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
         p: 3,
-        bgcolor: "#FFFFFF",
-        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+        bgcolor: "background.paper",
       }}
       dir={isArabic ? "rtl" : "ltr"}
     >
       <Typography
         variant="subtitle1"
         sx={{
-          color: "#2563EB",
-          fontWeight: 700,
+          color: "primary.main",
+          fontWeight: 600,
+          fontSize: "0.875rem",
           display: "flex",
           alignItems: "center",
           gap: 1.2,
@@ -77,7 +78,7 @@ export function ContractorInfoSection() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonIcon sx={{ color: "#94A3B8" }} />
+                      <PersonIcon sx={{ color: "text.disabled", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 }}
@@ -100,7 +101,7 @@ export function ContractorInfoSection() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneIcon sx={{ color: "#94A3B8" }} />
+                      <PhoneIcon sx={{ color: "text.disabled", fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 }}
@@ -117,11 +118,11 @@ export function ContractorInfoSection() {
               top: "-9px",
               left: isArabic ? "auto" : "12px",
               right: isArabic ? "12px" : "auto",
-              bgcolor: "#FFFFFF",
+              bgcolor: "background.paper",
               px: 0.8,
               fontSize: "0.75rem",
               fontWeight: 500,
-              color: "#64748B",
+              color: "text.secondary",
               zIndex: 10,
               pointerEvents: "none",
             }}

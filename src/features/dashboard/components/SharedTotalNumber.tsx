@@ -40,23 +40,28 @@ function SharedTotalNumber({
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ fontWeight: 600, mb: 1 }}
+              sx={{ fontWeight: 500, mb: 0.75 }}
             >
               {label}
             </Typography>
             {isLoading ? (
-              <Skeleton width={80} height={40} />
+              <Skeleton width={80} height={36} />
             ) : (
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 800, color: "text.primary" }}
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  fontVariantNumeric: "tabular-nums",
+                  letterSpacing: "-0.01em",
+                }}
               >
                 {number}
               </Typography>
             )}
           </Box>
           <Avatar sx={style}>
-            <Icon sx={{ fontSize: 28 }} />
+            <Icon sx={{ fontSize: 26 }} />
           </Avatar>
         </Box>
       </AppCard>

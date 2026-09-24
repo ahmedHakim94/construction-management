@@ -81,7 +81,8 @@ export function ContractorDialog(props: ContractorDialogProps) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid #E2E8F0",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           px: 3,
           py: 2,
         }}
@@ -93,16 +94,16 @@ export function ContractorDialog(props: ContractorDialogProps) {
             display: "flex",
             alignItems: "center",
             gap: 1.5,
-            color: "#1E293B",
+            color: "text.primary",
           }}
         >
-          <AddContractorIcon sx={{ color: "#3B82F6" }} />
+          <AddContractorIcon sx={{ color: "primary.main" }} />
           {mode === "create" ? t("addContractor") : t("editContractor")}
         </Typography>
         <AppButton
           variant="text"
           onClick={onClose}
-          sx={{ minWidth: 0, p: 0.5, color: "#64748B" }}
+          sx={{ minWidth: 0, p: 0.5, color: "text.secondary" }}
         >
           <CloseIcon />
         </AppButton>
@@ -111,7 +112,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
       <FormProvider {...methods}>
         <DialogContent
           dir={isArabic ? "rtl" : "ltr"}
-          sx={{ p: 3, bgcolor: "#F8FAFC" }}
+          sx={{ p: 3, bgcolor: "background.default" }}
         >
           <Box
             component="form"
@@ -128,11 +129,11 @@ export function ContractorDialog(props: ContractorDialogProps) {
             {/* Equipment Data Section Wrapper */}
             <Box
               sx={{
-                border: "1px solid #E2E8F0",
-                borderRadius: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
                 p: 3,
-                bgcolor: "#FFFFFF",
-                boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+                bgcolor: "background.paper",
                 display: "flex",
                 flexDirection: "column",
                 gap: 2.5,
@@ -148,12 +149,12 @@ export function ContractorDialog(props: ContractorDialogProps) {
                 <Typography
                   variant="subtitle1"
                   sx={{
-                    color: "#8B5CF6",
-                    fontWeight: 700,
+                    color: "primary.main",
+                    fontWeight: 600,
                     display: "flex",
                     alignItems: "center",
                     gap: 1.2,
-                    fontSize:"0.80rem"
+                    fontSize: "0.875rem",
                   }}
                 >
                   <GearIcon />
@@ -173,16 +174,6 @@ export function ContractorDialog(props: ContractorDialogProps) {
                     })
                   }
                   startIcon={<AddIcon />}
-                  sx={{
-                    textTransform: "none",
-                    borderColor: "#8B5CF6",
-                    // color: "#8B5CF6",
-                    fontWeight: 600,
-                    // "&:hover": {
-                    //   borderColor: "#7C3AED",
-                    //   bgcolor: "#F5F3FF",
-                    // },
-                  }}
                 >
                   {t("addAnotherEquipment")}
                 </AppButton>
@@ -216,17 +207,13 @@ export function ContractorDialog(props: ContractorDialogProps) {
 
       <DialogActions
         dir={isArabic ? "rtl" : "ltr"}
-        sx={{ px: 3, pb: 2, pt: 1.5, borderTop: "1px solid #E2E8F0" }}
+        sx={{ px: 3, pb: 2, pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}
       >
         <AppButton
           loading={loading}
           onClick={handleSubmit(submit)}
           variant="contained"
-          sx={{
-            px: 4,
-            bgcolor: "#2563EB",
-            "&:hover": { bgcolor: "#1D4ED8" },
-          }}
+          sx={{ px: 4 }}
         >
           {isArabic ? "حفظ المقاول والمعدات" : t("save")}
         </AppButton>

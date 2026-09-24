@@ -157,22 +157,23 @@ export function Sidebar({
           aria-expanded={hasChildren ? isExpanded : undefined}
           sx={{
             position: "relative",
-            borderRadius: 2.5,
-            minHeight: nested ? 40 : 46,
+            borderRadius: 2,
+            minHeight: nested ? 38 : 44,
             px: 1.5,
-            pl: nested ? 5 : 1.5,
+            pl: nested ? 4 : 1.5,
             color: isActive ? "primary.contrastText" : "text.secondary",
             bgcolor: isActive ? "primary.main" : "transparent",
             justifyContent: open ? "flex-start" : "center",
-            transition: "all 0.2s ease",
+            transition: "all 0.15s ease",
             "&:hover": {
               bgcolor: isActive ? "primary.main" : "action.hover",
+              color: isActive ? "primary.contrastText" : "text.primary",
             },
           }}
         >
           <ListItemIcon
             sx={{
-              minWidth: open ? 40 : 0,
+              minWidth: open ? 38 : 0,
               color: "inherit",
               justifyContent: "center",
             }}
@@ -184,8 +185,8 @@ export function Sidebar({
             <ListItemText
               primary={t(item.key)}
               primaryTypographyProps={{
-                fontWeight: isActive ? 700 : 600,
-                fontSize: nested ? 14 : 15,
+                fontWeight: isActive ? 600 : 500,
+                fontSize: nested ? 13.5 : 14.5,
               }}
             />
           )}
@@ -227,7 +228,7 @@ export function Sidebar({
         },
         height: "100%",
         bgcolor: "background.paper",
-        borderRight: "1px solid",
+        borderInlineEnd: "1px solid",
         borderColor: "divider",
         px: { xs: 2, md: 1.5 },
         py: { xs: 2, md: 2.5 },

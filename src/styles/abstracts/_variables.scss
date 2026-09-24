@@ -1,8 +1,15 @@
-$color-primary: #0f172a;
-$color-secondary: #2563eb;
-$color-background: #f8fafc;
-$color-text: #111827;
-$color-muted: #64748b;
+// Design Tokens mapped to MUI Theme root variables
+$color-primary: var(--color-primary, #0F1E36);
+$color-primary-light: var(--color-primary-light, #1E293B);
+$color-primary-dark: var(--color-primary-dark, #09111E);
+$color-secondary: var(--color-secondary, #0D9488);
+$color-secondary-dark: var(--color-secondary-dark, #0F766E);
+$color-background: var(--color-background, #F4F6F9);
+$color-surface: var(--color-surface, #FFFFFF);
+$color-border: var(--color-border, #E2E8F0);
+$color-text: var(--color-text, #0F172A);
+$color-muted: var(--color-muted, #64748B);
+$font-family: var(--font-family, '"IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif');
 
 $spacing-xs: 0.25rem;
 $spacing-sm: 0.5rem;

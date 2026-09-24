@@ -95,9 +95,9 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
                   <Box
                     sx={{
                       width: "100%",
-                      height: 10,
-                      bgcolor: "rgba(37, 99, 235, 0.08)",
-                      borderRadius: 5,
+                      height: 8,
+                      bgcolor: "action.hover",
+                      borderRadius: 4,
                       overflow: "hidden",
                     }}
                   >
@@ -106,7 +106,7 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
                         width: `${percentage}%`,
                         height: "100%",
                         bgcolor: "primary.main",
-                        borderRadius: 5,
+                        borderRadius: 4,
                         transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                     />
@@ -121,7 +121,7 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, mb: 2.5, color: "text.primary", textAlign: "start" }}
+            sx={{ fontWeight: 600, mb: 2.5, color: "text.primary", textAlign: "start" }}
           >
             {t("dashboard:workCostByProject")}
           </Typography>
@@ -143,10 +143,10 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
                       alignItems: "center",
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "text.secondary" }}>
                       {project.projectName}
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: "success.main" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: "text.primary" }}>
                       {project.totalCost.toLocaleString()}
                     </Typography>
                   </Box>
@@ -155,9 +155,9 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
                   <Box
                     sx={{
                       width: "100%",
-                      height: 10,
-                      bgcolor: "rgba(22, 163, 74, 0.08)",
-                      borderRadius: 5,
+                      height: 8,
+                      bgcolor: "secondary.light",
+                      borderRadius: 4,
                       overflow: "hidden",
                     }}
                   >
@@ -165,8 +165,8 @@ export function WorkByProject({ workByProject, isLoading }: WorkByProjectProps) 
                       sx={{
                         width: `${percentage}%`,
                         height: "100%",
-                        bgcolor: "success.main",
-                        borderRadius: 5,
+                        bgcolor: "secondary.main",
+                        borderRadius: 4,
                         transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                     />

@@ -55,11 +55,11 @@ export function DashboardPage() {
             label={t("totalProjects")}
             Icon={BusinessIcon}
             style={{
-              bgcolor: "rgba(37, 99, 235, 0.08)",
+              bgcolor: "action.hover",
               color: "primary.main",
-              width: 56,
-              height: 56,
-              borderRadius: 3,
+              width: 52,
+              height: 52,
+              borderRadius: 2.5,
             }}
           />
 
@@ -70,11 +70,11 @@ export function DashboardPage() {
             label={t("totalContractors")}
             Icon={PeopleIcon}
             style={{
-              bgcolor: "rgba(22, 163, 74, 0.08)",
-              color: "success.main",
-              width: 56,
-              height: 56,
-              borderRadius: 3,
+              bgcolor: "secondary.light",
+              color: "secondary.main",
+              width: 52,
+              height: 52,
+              borderRadius: 2.5,
             }}
           />
 
@@ -85,11 +85,11 @@ export function DashboardPage() {
             label={t("totalEquipment")}
             Icon={ConstructionIcon}
             style={{
-              bgcolor: "rgba(220, 38, 38, 0.08)",
-              color: "error.main",
-              width: 56,
-              height: 56,
-              borderRadius: 3,
+              bgcolor: "action.hover",
+              color: "primary.light",
+              width: 52,
+              height: 52,
+              borderRadius: 2.5,
             }}
           />
         </Box>

@@ -36,15 +36,16 @@ export function AppCustomTable({
       }}
     >
       <Table sx={{ minWidth: 650 }}>
-        <TableHead sx={{ bgcolor: "#F8FAFC" }}>
+        <TableHead sx={{ bgcolor: "background.default" }}>
           <TableRow>
             {columns.map((col) => (
               <TableCell
                 key={col.field}
                 align={col.headerAlign || col.align || "left"}
                 sx={{
-                  fontWeight: 700,
-                  color: "#334155",
+                  fontWeight: 600,
+                  fontSize: "0.8125rem",
+                  color: "text.secondary",
                   minWidth: col.minWidth,
                 }}
               >

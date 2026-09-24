@@ -22,8 +22,10 @@ export function AppPageHeader({
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
+            fontWeight: 700,
+            fontSize: { xs: "1.35rem", md: "1.65rem" },
+            letterSpacing: "-0.01em",
+            color: "text.primary",
           }}
         >
           {title}
@@ -33,7 +35,7 @@ export function AppPageHeader({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mt: 0.75 }}
+            sx={{ mt: 0.5, fontWeight: 400 }}
           >
             {description}
           </Typography>
@@ -45,14 +47,12 @@ export function AppPageHeader({
           sx={{
             display: "flex",
             gap: 1.25,
-            
             flexWrap: "wrap",
             justifyContent: {
               xs: "stretch",
               md: "flex-end",
             },
             alignItems: "center",
-            // backgroundColor: "#000",
           }}
         >
           {actions}

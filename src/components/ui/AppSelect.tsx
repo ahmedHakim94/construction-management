@@ -1,4 +1,4 @@
-import { Box, FormHelperText } from "@mui/material";
+import { Box, FormHelperText, useTheme } from "@mui/material";
 import Select from "react-select";
 import { useTranslation } from "react-i18next";
 
@@ -33,6 +33,7 @@ export function AppSelect({
   width = "100%",
 }: AppSelectProps) {
   const { i18n } = useTranslation();
+  const theme = useTheme();
 
   const isRtl = i18n.language === "ar";
 
@@ -58,7 +59,7 @@ export function AppSelect({
           onChange={(option) => onChange?.(option?.value ?? "")}
           placeholder={placeholder}
           isRtl={isRtl}
-          styles={reactSelectStyles(error)}
+          styles={reactSelectStyles(theme, error)}
           classNamePrefix="shared_Select"
           className={className}
         />

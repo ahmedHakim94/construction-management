@@ -31,21 +31,21 @@ export function FinancialOverview({
       label: t("totalCost"),
       value: totalCost,
       color: "primary.main",
-      bg: "rgba(37, 99, 235, 0.08)",
+      bg: "action.hover",
       Icon: AccountBalanceWalletOutlined,
     },
     {
       label: t("totalPaid"),
       value: totalPaid,
       color: "success.main",
-      bg: "rgba(22, 163, 74, 0.08)",
+      bg: "success.light",
       Icon: PaidOutlined,
     },
     {
       label: t("remainingAmount"),
       value: remainingAmount,
       color: "warning.main",
-      bg: "rgba(237, 108, 2, 0.08)",
+      bg: "warning.light",
       Icon: TrendingDownOutlined,
     },
   ];
@@ -96,13 +96,13 @@ export function FinancialOverview({
               </Box>
 
               <Box sx={{ textAlign: "start" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                   {item.label}
                 </Typography>
                 {isLoading ? (
                   <Skeleton width={100} height={32} />
                 ) : (
-                  <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "text.primary" }}>
                     {formatNumber(item.value)}
                   </Typography>
                 )}

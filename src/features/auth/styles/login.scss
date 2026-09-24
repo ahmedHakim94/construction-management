@@ -1,7 +1,9 @@
+@use "@/styles/abstracts/variables" as *;
+
 .login-page {
   width: 100%;
   display: flex;
-  background: #f5f7fb;
+  background: $color-background;
   overflow: hidden;
   box-sizing: border-box;
   padding: 24px 48px;
@@ -19,7 +21,7 @@
     background-position: center;
     color: #fff;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: 16px;
     box-sizing: border-box;
     max-width: 45%;
   }
@@ -30,8 +32,8 @@
 
     background: linear-gradient(
       180deg,
-      rgba(37, 99, 235, 0.88) 0%,
-      rgba(30, 90, 220, 0.94) 100%
+      $color-primary 0%,
+      $color-primary-light 100%
     );
 
     z-index: 1;
@@ -251,7 +253,7 @@
 
     box-sizing: border-box;
 
-    background: #f7f9fc;
+    background: $color-background;
     max-width: 45%;
   }
 
@@ -273,9 +275,10 @@
 
     box-sizing: border-box;
 
-    background: #fff;
+    background: $color-surface;
 
-    border-radius: 24px;
+    border-radius: 16px;
+    border: 1px solid $color-border;
 
     box-shadow:
       0 10px 40px rgba(15, 23, 42, 0.04),
@@ -285,7 +288,7 @@
   &__copyright {
     margin-top: 70px !important;
 
-    color: #94a3b8 !important;
+    color: $color-muted !important;
 
     text-align: center;
 
@@ -308,7 +311,7 @@
   }
 
   &__title {
-    color: #0f172a !important;
+    color: $color-text !important;
 
     font-size: clamp(2rem, 3vw, 2.8rem) !important;
     font-weight: 800 !important;
@@ -318,7 +321,7 @@
   &__subtitle {
     margin-top: 8px !important;
 
-    color: #64748b !important;
+    color: $color-muted !important;
 
     font-size: 1rem !important;
     line-height: 1.8 !important;
@@ -351,7 +354,7 @@
     padding: 0;
 
     background: transparent;
-    color: #2563eb;
+    color: $color-secondary;
 
     font-family: inherit;
     font-size: 0.9rem;
@@ -361,7 +364,7 @@
     transition: color 0.2s ease;
 
     &:hover {
-      color: #1d4ed8;
+      color: $color-secondary-dark;
     }
   }
 
@@ -372,8 +375,8 @@
   &__submit {
     margin-top: 8px !important;
 
-    border-radius: 14px !important;
-    background: #2563eb !important;
+    border-radius: 10px !important;
+    background: $color-primary !important;
     box-shadow: none !important;
 
     color: #fff !important;
@@ -386,12 +389,12 @@
       transform 0.2s ease !important;
 
     &:hover {
-      background: #1d4ed8 !important;
+      background: $color-primary-light !important;
       transform: translateY(-1px);
     }
 
     &:disabled {
-      background: #93b4f5 !important;
+      background: $color-muted !important;
       color: #fff !important;
     }
   }
@@ -543,7 +546,7 @@
 
       padding: 0;
 
-      background: #f7f9fc;
+      background: $color-background;
       box-sizing: border-box;
     }
 

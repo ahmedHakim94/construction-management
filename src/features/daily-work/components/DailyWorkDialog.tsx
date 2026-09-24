@@ -466,11 +466,7 @@ export function DailyWorkDialog({
                     borderRadius: 2,
                     border: "1px solid",
                     borderColor: "divider",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "background.paper"
-                        : "grey.50",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                    bgcolor: "background.default",
                   }}
                 >
                   <Typography

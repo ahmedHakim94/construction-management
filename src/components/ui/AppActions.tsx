@@ -23,19 +23,41 @@ export function AppActions({
   deleteTooltip = "Delete",
 }: AppActionsProps) {
   return (
-    <Stack direction="row" spacing={0.5}>
+    <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center">
       {onView && (
         <Tooltip title={viewTooltip}>
-          <IconButton size="small" onClick={onView}>
-            <VisibilityOutlined fontSize="small" />
+          <IconButton
+            size="small"
+            onClick={onView}
+            sx={{
+              color: "text.secondary",
+              p: 0.75,
+              "&:hover": {
+                color: "primary.main",
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <VisibilityOutlined sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
       )}
 
       {onEdit && (
         <Tooltip title={editTooltip}>
-          <IconButton size="small" onClick={onEdit}>
-            <EditOutlined fontSize="small" />
+          <IconButton
+            size="small"
+            onClick={onEdit}
+            sx={{
+              color: "text.secondary",
+              p: 0.75,
+              "&:hover": {
+                color: "secondary.main",
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <EditOutlined sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
       )}
@@ -44,10 +66,16 @@ export function AppActions({
         <Tooltip title={deleteTooltip}>
           <IconButton
             size="small"
-            color="error"
             onClick={onDelete}
+            sx={{
+              color: "error.main",
+              p: 0.75,
+              "&:hover": {
+                bgcolor: "error.light",
+              },
+            }}
           >
-            <DeleteOutlined fontSize="small" />
+            <DeleteOutlined sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
       )}

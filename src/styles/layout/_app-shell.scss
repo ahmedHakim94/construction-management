@@ -1,3 +1,5 @@
+@use "../abstracts/variables" as *;
+
 .app-shell {
   min-height: 100vh;
   display: flex;
@@ -19,23 +21,23 @@
 .header,
 .breadcrumb,
 .auth-layout {
-  background-color: #fff;
+  background-color: $color-surface;
 }
 
 .sidebar {
   width: 260px;
   padding: $spacing-lg;
-  border-right: 1px solid rgba(15, 23, 42, 0.08);
+  border-right: 1px solid $color-border;
 }
 
 .header {
   padding: $spacing-lg $spacing-xl;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid $color-border;
 }
 
 .breadcrumb {
   padding: $spacing-md $spacing-xl;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid $color-border;
 }
 
 .auth-layout {

@@ -114,12 +114,12 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
         return "row-unpaid";
       }}
       sx={{
-        "& .row-paid": { backgroundColor: "#f0fdf4" },
-        "& .row-paid:hover": { backgroundColor: "#dcfce7" },
-        "& .row-partially-paid": { backgroundColor: "#fffbeb" },
-        "& .row-partially-paid:hover": { backgroundColor: "#fef3c7" },
-        "& .row-unpaid": { backgroundColor: "#fff5f5" },
-        "& .row-unpaid:hover": { backgroundColor: "#fee2e2" },
+        "& .row-paid": { bgcolor: "success.light" },
+        "& .row-paid:hover": { bgcolor: "success.light", filter: "brightness(0.97)" },
+        "& .row-partially-paid": { bgcolor: "warning.light" },
+        "& .row-partially-paid:hover": { bgcolor: "warning.light", filter: "brightness(0.97)" },
+        "& .row-unpaid": { bgcolor: "error.light" },
+        "& .row-unpaid:hover": { bgcolor: "error.light", filter: "brightness(0.97)" },
       }}
     />
   );

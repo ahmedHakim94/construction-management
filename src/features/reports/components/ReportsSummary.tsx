@@ -23,35 +23,35 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
       label: t("reports:totalWorkRecords"),
       value: summary.totalWorkRecords,
       color: "primary.main",
-      bg: "rgba(37, 99, 235, 0.08)",
+      bg: "action.hover",
       Icon: AssignmentOutlined,
     },
     {
       label: t("reports:totalWorkingHours"),
       value: summary.totalWorkingHours,
-      color: "info.main",
-      bg: "rgba(2, 136, 209, 0.08)",
+      color: "secondary.main",
+      bg: "secondary.light",
       Icon: AccessTimeOutlined,
     },
     {
       label: t("reports:totalWorkCost"),
       value: summary.totalWorkCost,
-      color: "primary.main",
-      bg: "rgba(37, 99, 235, 0.08)",
+      color: "primary.light",
+      bg: "action.hover",
       Icon: AccountBalanceWalletOutlined,
     },
     {
       label: t("reports:totalPaidAmount"),
       value: summary.totalPaidAmount,
       color: "success.main",
-      bg: "rgba(22, 163, 74, 0.08)",
+      bg: "success.light",
       Icon: PaidOutlined,
     },
     {
       label: t("reports:remainingBalance"),
       value: summary.remainingBalance,
       color: "warning.main",
-      bg: "rgba(237, 108, 2, 0.08)",
+      bg: "warning.light",
       Icon: AccountBalanceOutlined,
     },
   ];
@@ -102,13 +102,20 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
               </Box>
 
               <Box sx={{ textAlign: "start" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                   {item.label}
                 </Typography>
                 {isLoading ? (
                   <Skeleton width={100} height={32} />
                 ) : (
-                  <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: "text.primary",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
                     {item.value.toLocaleString()}
                   </Typography>
                 )}

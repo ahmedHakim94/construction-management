@@ -1,7 +1,7 @@
-@import "./abstracts/variables";
-@import "./base/reset";
-@import "./layout/app-shell";
-@import "./components/login";
+@use "./abstracts/variables";
+@use "./base/reset";
+@use "./layout/app-shell";
+@use "./components/login";
 
 html[dir="rtl"] {
   .shared_Select__control {
@@ -22,7 +22,8 @@ html[dir="rtl"] {
 .app-select-label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 0.875rem;
 }
 
 html[dir="rtl"] {
@@ -45,18 +46,18 @@ html[dir="rtl"] {
 
 html[dir="ltr"] {
   .app-select-label {
-     text-align: right;
-    direction: rtl;
+    text-align: left;
+    direction: ltr;
   }
 
   .shared_Select__control,
   .shared_Select__menu {
-    direction: rtl;
+    direction: ltr;
   }
 
   .shared_Select__single-value,
   .shared_Select__placeholder,
   .shared_Select__option {
-    text-align: right;
+    text-align: left;
   }
 }
