@@ -3,3 +3,6 @@ export type AppRoute = {
   name: string;
   protected?: boolean;
 };
+
+export * from "./pagination";
+

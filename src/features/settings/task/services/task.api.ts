@@ -1,4 +1,5 @@
 import { baseApi } from "@/core/api/baseApi";
+import type { PaginationParams } from "@/types";
 import type { Task, TaskFormValues } from "../types";
 
 type TasksResponse = {
@@ -23,13 +24,30 @@ type DeleteTaskResponse = {
   message: string;
 };
 
+export type TasksResult = {
+  data: Task[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export const taskApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET ALL
-    getTasks: builder.query<Task[], void>({
-      query: () => "/tasks?page=1&limit=100",
+    getTasks: builder.query<TasksResult, PaginationParams | void>({
+      query: (params) => {
+        const page = params?.page ?? 1;
+        const limit = params?.limit ?? 10;
+        return `/tasks?page=${page}&limit=${limit}`;
+      },
 
-      transformResponse: (response: TasksResponse) => response.data,
+      transformResponse: (response: TasksResponse) => ({
+        data: response.data,
+        pagination: response.pagination,
+      }),
 
       providesTags: ["Tasks"],
     }),
@@ -42,10 +60,7 @@ export const taskApi = baseApi.injectEndpoints({
     }),
 
     // CREATE
-    createTask: builder.mutation<
-      Task,
-      TaskFormValues
-    >({
+    createTask: builder.mutation<Task, TaskFormValues>({
       query: (data) => ({
         url: "/tasks/add",
         method: "POST",
@@ -78,10 +93,7 @@ export const taskApi = baseApi.injectEndpoints({
     }),
 
     // DELETE
-    deleteTask: builder.mutation<
-      DeleteTaskResponse,
-      string
-    >({
+    deleteTask: builder.mutation<DeleteTaskResponse, string>({
       query: (id) => ({
         url: `/tasks/delete/${id}`,
         method: "DELETE",

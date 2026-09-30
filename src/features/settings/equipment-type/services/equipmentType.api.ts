@@ -1,4 +1,5 @@
 import { baseApi } from "@/core/api/baseApi";
+import type { PaginationParams } from "@/types";
 import type { EquipmentType, EquipmentTypeFormValues } from "../types";
 
 type EquipmentTypesResponse = {
@@ -23,16 +24,38 @@ type DeleteEquipmentTypeResponse = {
   message: string;
 };
 
+export type EquipmentTypesResult = {
+  data: EquipmentType[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+
 export const equipmentTypeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET ALL
-    getEquipmentTypes: builder.query<EquipmentType[], void>({
-      query: () => "/equipment_types?page=1&limit=100",
+    getEquipmentTypes: builder.query<
+      EquipmentTypesResult,
+      PaginationParams | void
+    >({
+      query: (params) => {
+        const page = params?.page ?? 1;
+        const limit = params?.limit ?? 10;
+        return `/equipment_types?page=${page}&limit=${limit}`;
+      },
 
-      transformResponse: (response: EquipmentTypesResponse) => response.data,
+      transformResponse: (response: EquipmentTypesResponse) => ({
+        data: response.data,
+        pagination: response.pagination,
+      }),
 
       providesTags: ["EquipmentTypes"],
     }),
+
 
     // GET BY ID
     getEquipmentTypeById: builder.query<EquipmentType, string>({

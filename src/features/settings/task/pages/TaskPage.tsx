@@ -17,9 +17,11 @@ import {
   useUpdateTaskMutation,
 } from "../services/task.api";
 
+const LIMIT = 10;
+
 export function TaskPage() {
   const { t } = useTranslation();
-  // const [tasks, setTasks] = useState<Task[]>([]);
+  const [page, setPage] = useState(1);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -27,19 +29,16 @@ export function TaskPage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery();
+  const { data, isLoading, isFetching } = useGetTasksQuery({
+    page,
+    limit: LIMIT,
+  });
   const [addTask] = useCreateTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
-  // useEffect(() => {
-  //   async function loadData() {
-  //     const data = await taskService.getAll();
-  //     setTasks(data);
-  //   }
-
-  //   loadData();
-  // }, []);
+  const tasks = data?.data ?? [];
+  const paginationMeta = data?.pagination;
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -65,11 +64,10 @@ export function TaskPage() {
           id: selectedTask.id,
           data: values,
         }).unwrap();
-        notify.success(t("updated Successfully"));
+        notify.success(t("updatedSuccessfully"));
       } else {
         await addTask(values).unwrap();
-
-        notify.success(t("created Successfully"));
+        notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
@@ -87,6 +85,9 @@ export function TaskPage() {
       }
       await deleteTask(selectedTask.id).unwrap();
       notify.success(t("deletedSuccessfully"));
+      if (tasks.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
       deleteDialog.closeDialog();
       setSelectedTask(undefined);
     } catch {
@@ -118,6 +119,18 @@ export function TaskPage() {
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <TaskTable
             rows={tasks}
+            loading={isLoading || isFetching}
+            pagination={
+              paginationMeta
+                ? {
+                    page,
+                    limit: LIMIT,
+                    total: paginationMeta.total,
+                    totalPages: paginationMeta.totalPages,
+                    onPageChange: setPage,
+                  }
+                : undefined
+            }
             onEdit={handleOpenEdit}
             onDelete={(task) => {
               setSelectedTask(task);

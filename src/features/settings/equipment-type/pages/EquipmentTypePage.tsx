@@ -17,8 +17,11 @@ import {
   useUpdateEquipmentTypeMutation,
 } from "../services/equipmentType.api";
 
+const LIMIT = 2;
+
 export function EquipmentTypePage() {
   const { t } = useTranslation();
+  const [page, setPage] = useState(1);
   const [selectedEquipmentType, setSelectedEquipmentType] = useState<
     EquipmentType | undefined
   >();
@@ -28,10 +31,16 @@ export function EquipmentTypePage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  const { data: equipmentTypes = [] } = useGetEquipmentTypesQuery();
+  const { data, isLoading, isFetching } = useGetEquipmentTypesQuery({
+    page,
+    limit: LIMIT,
+  });
   const [addEquipmentType] = useCreateEquipmentTypeMutation();
   const [updateEquipmentType] = useUpdateEquipmentTypeMutation();
   const [deleteEquipmentType] = useDeleteEquipmentTypeMutation();
+
+  const equipmentTypes = data?.data ?? [];
+  const paginationMeta = data?.pagination;
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -75,9 +84,11 @@ export function EquipmentTypePage() {
       if (!selectedEquipmentType) {
         return;
       }
-      // await equipmentTypeService.delete(selectedEquipmentType.id);
       await deleteEquipmentType(selectedEquipmentType.id).unwrap();
       notify.success(t("deletedSuccessfully"));
+      if (equipmentTypes.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
       deleteDialog.closeDialog();
       setSelectedEquipmentType(undefined);
     } catch {
@@ -109,6 +120,18 @@ export function EquipmentTypePage() {
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <EquipmentTypeTable
             rows={equipmentTypes}
+            loading={isLoading || isFetching}
+            pagination={
+              paginationMeta
+                ? {
+                    page,
+                    limit: LIMIT,
+                    total: paginationMeta.total,
+                    totalPages: paginationMeta.totalPages,
+                    onPageChange: setPage,
+                  }
+                : undefined
+            }
             onEdit={handleOpenEdit}
             onDelete={(equipmentType) => {
               setSelectedEquipmentType(equipmentType);

@@ -1,4 +1,5 @@
 import { baseApi } from "@/core/api/baseApi";
+import type { PaginationParams } from "@/types";
 import type { Project, ProjectFormValues } from "../types";
 
 type ProjectsResponse = {
@@ -23,13 +24,30 @@ type DeleteProjectResponse = {
   message: string;
 };
 
+export type ProjectsResult = {
+  data: Project[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET ALL
-    getProjects: builder.query<Project[], void>({
-      query: () => "/projects?page=1&limit=100",
+    getProjects: builder.query<ProjectsResult, PaginationParams | void>({
+      query: (params) => {
+        const page = params?.page ?? 1;
+        const limit = params?.limit ?? 10;
+        return `/projects?page=${page}&limit=${limit}`;
+      },
 
-      transformResponse: (response: ProjectsResponse) => response.data,
+      transformResponse: (response: ProjectsResponse) => ({
+        data: response.data,
+        pagination: response.pagination,
+      }),
 
       providesTags: ["Projects"],
     }),
@@ -42,10 +60,7 @@ export const projectApi = baseApi.injectEndpoints({
     }),
 
     // CREATE
-    createProject: builder.mutation<
-      Project,
-      ProjectFormValues
-    >({
+    createProject: builder.mutation<Project, ProjectFormValues>({
       query: (data) => ({
         url: "/projects/add",
         method: "POST",
@@ -80,10 +95,7 @@ export const projectApi = baseApi.injectEndpoints({
     }),
 
     // DELETE
-    deleteProject: builder.mutation<
-      DeleteProjectResponse,
-      string
-    >({
+    deleteProject: builder.mutation<DeleteProjectResponse, string>({
       query: (id) => ({
         url: `/projects/delete/${id}`,
         method: "DELETE",

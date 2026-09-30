@@ -2,15 +2,24 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
+import type { TablePaginationProps } from "@/types";
 import type { Project } from "../types";
 
 interface ProjectTableProps {
   rows: Project[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
 }
 
-export function ProjectTable({ rows, onEdit, onDelete }: ProjectTableProps) {
+export function ProjectTable({
+  rows,
+  loading = false,
+  pagination,
+  onEdit,
+  onDelete,
+}: ProjectTableProps) {
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(
@@ -35,12 +44,22 @@ export function ProjectTable({ rows, onEdit, onDelete }: ProjectTableProps) {
         flex: 0.8,
         minWidth: 110,
         renderCell: ({ row }: { row: Project }) => (
-          <AppActions onEdit={() => onEdit(row)} onDelete={() => onDelete(row)} />
+          <AppActions
+            onEdit={() => onEdit(row)}
+            onDelete={() => onDelete(row)}
+          />
         ),
       },
     ],
     [t, onEdit, onDelete],
   );
 
-  return <AppTable rows={rows} columns={columns} showPagination={false} />;
+  return (
+    <AppTable
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      pagination={pagination}
+    />
+  );
 }

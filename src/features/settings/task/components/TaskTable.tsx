@@ -2,15 +2,24 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
+import type { TablePaginationProps } from "@/types";
 import type { Task } from "../types";
 
 interface TaskTableProps {
   rows: Task[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
 
-export function TaskTable({ rows, onEdit, onDelete }: TaskTableProps) {
+export function TaskTable({
+  rows,
+  loading = false,
+  pagination,
+  onEdit,
+  onDelete,
+}: TaskTableProps) {
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(
@@ -29,12 +38,22 @@ export function TaskTable({ rows, onEdit, onDelete }: TaskTableProps) {
         flex: 0.8,
         minWidth: 110,
         renderCell: ({ row }: { row: Task }) => (
-          <AppActions onEdit={() => onEdit(row)} onDelete={() => onDelete(row)} />
+          <AppActions
+            onEdit={() => onEdit(row)}
+            onDelete={() => onDelete(row)}
+          />
         ),
       },
     ],
     [t, onEdit, onDelete],
   );
 
-  return <AppTable rows={rows} columns={columns} showPagination={false} />;
+  return (
+    <AppTable
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      pagination={pagination}
+    />
+  );
 }

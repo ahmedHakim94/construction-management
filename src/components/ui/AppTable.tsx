@@ -1,17 +1,26 @@
-import { Box, useTheme, type Theme } from "@mui/material";
-import { DataGrid, type DataGridProps, type GridColDef } from "@mui/x-data-grid";
+import { Box, Typography, useTheme, type Theme } from "@mui/material";
+import {
+  DataGrid,
+  type DataGridProps,
+  type GridColDef,
+} from "@mui/x-data-grid";
 import { arSD, enUS } from "@mui/x-data-grid/locales";
 import { useTranslation } from "react-i18next";
+import type { TablePaginationProps } from "@/types";
 
 export type AppTableColDef = GridColDef;
 
-type AppTableProps = DataGridProps & {
+export interface AppTableProps extends Omit<
+  DataGridProps,
+  "pagination" | "paginationModel" | "onPaginationModelChange"
+> {
   showPagination?: boolean;
-};
+  pagination?: TablePaginationProps;
+  emptyMessage?: string;
+}
 
 const getTableStyles = (theme: Theme) => ({
   border: `1px solid ${theme.palette.divider}`,
-  // borderRadius: theme.shape.borderRadius,
   backgroundColor: theme.palette.background.paper,
   overflow: "hidden",
 
@@ -63,9 +72,10 @@ const getTableStyles = (theme: Theme) => ({
     outline: "none",
   },
 
-  "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
-    outline: "none",
-  },
+  "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
+    {
+      outline: "none",
+    },
 
   // Footer
   "& .MuiDataGrid-footerContainer": {
@@ -78,18 +88,55 @@ const getTableStyles = (theme: Theme) => ({
   "& .MuiTablePagination-actions": {
     direction: "ltr",
   },
+  "& .MuiTablePagination-toolbar": {
+    width: "100%",
+    // justifyContent: "flex-start",
+    direction: theme.direction,
+    padding:"0px"
+  },
 
   "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel": {
     fontSize: "0.8125rem",
     color: theme.palette.text.secondary,
     fontVariantNumeric: "tabular-nums",
+    direction:"ltr"
+  },
+
+  // Empty state overlay
+  "& .MuiDataGrid-overlay": {
+    backgroundColor: "transparent",
   },
 });
 
+function CustomNoRowsOverlay({ message }: { message?: string }) {
+  const { t } = useTranslation();
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        minHeight: 120,
+        p: 2,
+      }}
+    >
+      <Typography variant="body2" color="text.secondary">
+        {message || t("noDataAvailable", "No data available")}
+      </Typography>
+    </Box>
+  );
+}
+
 export function AppTable({
   sx,
-  pageSizeOptions = [10, 25, 50],
-  showPagination = true,
+  pagination,
+  showPagination,
+  loading = false,
+  emptyMessage,
+  slots,
+  slotProps,
+  getRowId = (row: any) => row.id ?? row._id ?? row.code,
   ...props
 }: AppTableProps) {
   const { i18n } = useTranslation();
@@ -100,28 +147,64 @@ export function AppTable({
       ? arSD.components.MuiDataGrid.defaultProps.localeText
       : enUS.components.MuiDataGrid.defaultProps.localeText;
 
-  return (
-    <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
-      <DataGrid
-        autoHeight
-        disableRowSelectionOnClick
-        pageSizeOptions={pageSizeOptions}
-        localeText={localeText}
-        pagination
-        hideFooter={!showPagination}
-        hideFooterPagination={!showPagination}
-        initialState={{
+  const isPaginationActive = Boolean(pagination) || (showPagination ?? false);
+
+  const paginationProps = pagination
+    ? {
+        paginationMode: "server" as const,
+        rowCount: pagination.total,
+        paginationModel: {
+          page: Math.max(pagination.page - 1, 0),
+          pageSize: pagination.limit,
+        },
+        pageSizeOptions: [pagination.limit],
+        onPaginationModelChange: (model: {
+          page: number;
+          pageSize: number;
+        }) => {
+          if (model.page + 1 !== pagination.page) {
+            pagination.onPageChange(model.page + 1);
+          }
+        },
+        slotProps: {
+          ...slotProps,
+          pagination: {
+            rowsPerPageOptions: [],
+            ...slotProps?.pagination,
+          },
+        },
+      }
+    : {
+        hideFooter: !isPaginationActive,
+        hideFooterPagination: !isPaginationActive,
+        initialState: {
           pagination: {
             paginationModel: {
               page: 0,
               pageSize: 10,
             },
           },
+        },
+        slotProps,
+      };
+
+  return (
+    <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
+      <DataGrid
+        autoHeight
+        disableRowSelectionOnClick
+        localeText={localeText}
+        loading={loading}
+        getRowId={getRowId}
+        slots={{
+          noRowsOverlay: () => <CustomNoRowsOverlay message={emptyMessage} />,
+          ...slots,
         }}
         sx={{
           ...getTableStyles(theme),
           ...sx,
         }}
+        {...paginationProps}
         {...props}
       />
     </Box>

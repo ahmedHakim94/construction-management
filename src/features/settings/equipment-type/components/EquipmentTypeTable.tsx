@@ -2,16 +2,21 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
+import type { TablePaginationProps } from "@/types";
 import type { EquipmentType } from "../types";
 
 interface EquipmentTypeTableProps {
   rows: EquipmentType[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   onEdit: (equipmentType: EquipmentType) => void;
   onDelete: (equipmentType: EquipmentType) => void;
 }
 
 export function EquipmentTypeTable({
   rows,
+  loading = false,
+  pagination,
   onEdit,
   onDelete,
 }: EquipmentTypeTableProps) {
@@ -43,5 +48,12 @@ export function EquipmentTypeTable({
     [t, onEdit, onDelete],
   );
 
-  return <AppTable rows={rows} columns={columns} showPagination={false}/>;
+  return (
+    <AppTable
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      pagination={pagination}
+    />
+  );
 }

@@ -17,8 +17,11 @@ import {
   useUpdateProjectMutation,
 } from "../services/projects.api";
 
+const LIMIT = 3;
+
 export function ProjectPage() {
   const { t } = useTranslation();
+  const [page, setPage] = useState(1);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -26,10 +29,16 @@ export function ProjectPage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  const { data: projects = []} = useGetProjectsQuery();
+  const { data, isLoading, isFetching } = useGetProjectsQuery({
+    page,
+    limit: LIMIT,
+  });
   const [addProject] = useCreateProjectMutation();
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject] = useDeleteProjectMutation();
+
+  const projects = data?.data ?? [];
+  const paginationMeta = data?.pagination;
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -74,6 +83,9 @@ export function ProjectPage() {
 
       await deleteProject(selectedProject.id).unwrap();
       notify.success(t("deletedSuccessfully"));
+      if (projects.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
       deleteDialog.closeDialog();
       setSelectedProject(undefined);
     } catch {
@@ -105,6 +117,18 @@ export function ProjectPage() {
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <ProjectTable
             rows={projects}
+            loading={isLoading || isFetching}
+            pagination={
+              paginationMeta
+                ? {
+                    page,
+                    limit: LIMIT,
+                    total: paginationMeta.total,
+                    totalPages: paginationMeta.totalPages,
+                    onPageChange: setPage,
+                  }
+                : undefined
+            }
             onEdit={handleOpenEdit}
             onDelete={(project) => {
               setSelectedProject(project);
