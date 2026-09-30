@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -8,13 +8,18 @@ import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { TaskTable } from "../components/TaskTable";
 import { TaskDialog } from "../components/TaskDialog";
-import { taskService } from "../services/task.service";
 import type { Task, TaskFormValues } from "../types";
 import { AddTask } from "@mui/icons-material";
+import {
+  useCreateTaskMutation,
+  useDeleteTaskMutation,
+  useGetTasksQuery,
+  useUpdateTaskMutation,
+} from "../services/task.api";
 
 export function TaskPage() {
   const { t } = useTranslation();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  // const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -22,16 +27,19 @@ export function TaskPage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  useEffect(() => {
-    async function loadData() {
-      const data = await taskService.getAll();
-      setTasks(data);
-    }
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery();
+  const [addTask] = useCreateTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
+  const [deleteTask] = useDeleteTaskMutation();
 
-    loadData();
-  }, []);
+  // useEffect(() => {
+  //   async function loadData() {
+  //     const data = await taskService.getAll();
+  //     setTasks(data);
+  //   }
 
-
+  //   loadData();
+  // }, []);
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -53,18 +61,15 @@ export function TaskPage() {
   const handleSubmit = async (values: TaskFormValues) => {
     try {
       if (mode === "edit" && selectedTask) {
-        const updated = await taskService.update(selectedTask.id, values);
-
-        if (updated) {
-          setTasks((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          notify.success(t("updatedSuccessfully"));
-        }
+        await updateTask({
+          id: selectedTask.id,
+          data: values,
+        }).unwrap();
+        notify.success(t("updated Successfully"));
       } else {
-        const created = await taskService.create(values);
-        setTasks((current) => [created, ...current]);
-        notify.success(t("createdSuccessfully"));
+        await addTask(values).unwrap();
+
+        notify.success(t("created Successfully"));
       }
 
       handleCloseDialog();
@@ -80,11 +85,7 @@ export function TaskPage() {
       if (!selectedTask) {
         return;
       }
-
-      await taskService.delete(selectedTask.id);
-      setTasks((current) =>
-        current.filter((item) => item.id !== selectedTask.id),
-      );
+      await deleteTask(selectedTask.id).unwrap();
       notify.success(t("deletedSuccessfully"));
       deleteDialog.closeDialog();
       setSelectedTask(undefined);
@@ -103,7 +104,11 @@ export function TaskPage() {
           description={t("tasksDescription")}
           actions={
             <>
-              <AppButton variant="contained" startIcon={<AddTask />} onClick={handleOpenCreate}>
+              <AppButton
+                variant="contained"
+                startIcon={<AddTask />}
+                onClick={handleOpenCreate}
+              >
                 {t("addTask")}
               </AppButton>
             </>

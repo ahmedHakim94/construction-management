@@ -23,7 +23,9 @@ export function EquipmentPage() {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | undefined>();
+  const [selectedEquipment, setSelectedEquipment] = useState<
+    Equipment | undefined
+  >();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -32,11 +34,12 @@ export function EquipmentPage() {
 
   useEffect(() => {
     async function loadData() {
-      const [equipmentData, contractorData, equipmentTypeData] = await Promise.all([
-        equipmentService.getAll(),
-        contractorService.getAll(),
-        equipmentTypeService.getAll(),
-      ]);
+      const [equipmentData, contractorData, equipmentTypeData] =
+        await Promise.all([
+          equipmentService.getAll(),
+          contractorService.getAll(),
+          equipmentTypeService.getAll(),
+        ]);
 
       setEquipment(equipmentData);
       setContractors(contractorData);
@@ -45,15 +48,16 @@ export function EquipmentPage() {
 
     loadData();
   }, []);
-  
 
   const displayRows = useMemo(() => {
     return equipment.map((item) => ({
       ...item,
       contractorName:
-        contractors.find((contractor) => contractor.id === item.contractorId)?.name ?? "",
+        contractors.find((contractor) => contractor.id === item.contractorId)
+          ?.name ?? "",
       equipmentTypeName:
-          equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.name ?? "",
+        equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.name ??
+        "",
     }));
   }, [equipment, contractors, equipmentTypes]);
 
@@ -96,10 +100,12 @@ export function EquipmentPage() {
   };
 
   const handleSubmit = async (values: EquipmentFormValues) => {
-
     try {
       if (mode === "edit" && selectedEquipment) {
-        const updated = await equipmentService.update(selectedEquipment.id, values);
+        const updated = await equipmentService.update(
+          selectedEquipment.id,
+          values,
+        );
 
         if (updated) {
           setEquipment((current) =>
@@ -154,7 +160,13 @@ export function EquipmentPage() {
                 onChange={setSearch}
                 placeholder={t("searchEquipment")}
               />
-              <AppButton variant="contained" startIcon={<Construction />} onClick={handleOpenCreate}>{t("addEquipment")}</AppButton>
+              <AppButton
+                variant="contained"
+                startIcon={<Construction />}
+                onClick={handleOpenCreate}
+              >
+                {t("addEquipment")}
+              </AppButton>
             </>
           }
         />

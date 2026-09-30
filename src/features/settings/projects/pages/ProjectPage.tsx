@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import { AddBusiness } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -9,12 +9,16 @@ import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { ProjectTable } from "../components/ProjectTable";
 import { ProjectDialog } from "../components/ProjectDialog";
-import { projectService } from "../services/project.service";
 import type { Project, ProjectFormValues } from "../types";
+import {
+  useCreateProjectMutation,
+  useDeleteProjectMutation,
+  useGetProjectsQuery,
+  useUpdateProjectMutation,
+} from "../services/projects.api";
 
 export function ProjectPage() {
   const { t } = useTranslation();
-  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -22,14 +26,10 @@ export function ProjectPage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  useEffect(() => {
-    async function loadData() {
-      const data = await projectService.getAll();
-      setProjects(data);
-    }
-
-    loadData();
-  }, []);
+  const { data: projects = []} = useGetProjectsQuery();
+  const [addProject] = useCreateProjectMutation();
+  const [updateProject] = useUpdateProjectMutation();
+  const [deleteProject] = useDeleteProjectMutation();
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -51,17 +51,10 @@ export function ProjectPage() {
   const handleSubmit = async (values: ProjectFormValues) => {
     try {
       if (mode === "edit" && selectedProject) {
-        const updated = await projectService.update(selectedProject.id, values);
-
-        if (updated) {
-          setProjects((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          notify.success(t("updatedSuccessfully"));
-        }
+        await updateProject({ id: selectedProject.id, data: values }).unwrap();
+        notify.success(t("updatedSuccessfully"));
       } else {
-        const created = await projectService.create(values);
-        setProjects((current) => [created, ...current]);
+        await addProject(values).unwrap();
         notify.success(t("createdSuccessfully"));
       }
 
@@ -79,10 +72,7 @@ export function ProjectPage() {
         return;
       }
 
-      await projectService.delete(selectedProject.id);
-      setProjects((current) =>
-        current.filter((item) => item.id !== selectedProject.id),
-      );
+      await deleteProject(selectedProject.id).unwrap();
       notify.success(t("deletedSuccessfully"));
       deleteDialog.closeDialog();
       setSelectedProject(undefined);
@@ -101,7 +91,13 @@ export function ProjectPage() {
           description={t("projectsDescription")}
           actions={
             <>
-              <AppButton variant="contained" startIcon={<AddBusiness />} onClick={handleOpenCreate}>{t("addProject")}</AppButton>
+              <AppButton
+                variant="contained"
+                startIcon={<AddBusiness />}
+                onClick={handleOpenCreate}
+              >
+                {t("addProject")}
+              </AppButton>
             </>
           }
         />

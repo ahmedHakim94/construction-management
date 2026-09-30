@@ -4,10 +4,7 @@ import { equipmentTypeService } from "@/features/settings/equipment-type/service
 
 const STORAGE_KEY = "construction_equipment";
 
-let equipment: Equipment[] = storage.get<Equipment[]>(
-  STORAGE_KEY,
-  [],
-);
+let equipment: Equipment[] = storage.get<Equipment[]>(STORAGE_KEY, []);
 
 async function getEquipmentName(equipmentTypeId: string): Promise<string> {
   const equipmentType = await equipmentTypeService.getById(equipmentTypeId);
@@ -91,4 +88,3 @@ export const equipmentService = {
     storage.set(STORAGE_KEY, equipment);
   },
 };
-

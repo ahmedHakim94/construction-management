@@ -27,7 +27,9 @@ export function useContractorForm({
   const isArabic = i18n.language === "ar";
 
   const [loading, setLoading] = useState(false);
-  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<readonly SelectOption[]>([]);
+  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<
+    readonly SelectOption[]
+  >([]);
 
   const methods = useForm<ContractorFormValues>({
     resolver: zodResolver(contractorSchema),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import { Category } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -9,12 +9,16 @@ import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { EquipmentTypeTable } from "../components/EquipmentTypeTable";
 import { EquipmentTypeDialog } from "../components/EquipmentTypeDialog";
-import { equipmentTypeService } from "../services/equipmentType.service";
 import type { EquipmentType, EquipmentTypeFormValues } from "../types";
+import {
+  useCreateEquipmentTypeMutation,
+  useDeleteEquipmentTypeMutation,
+  useGetEquipmentTypesQuery,
+  useUpdateEquipmentTypeMutation,
+} from "../services/equipmentType.api";
 
 export function EquipmentTypePage() {
   const { t } = useTranslation();
-  const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
   const [selectedEquipmentType, setSelectedEquipmentType] = useState<
     EquipmentType | undefined
   >();
@@ -24,14 +28,10 @@ export function EquipmentTypePage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  useEffect(() => {
-    async function loadData() {
-      const data = await equipmentTypeService.getAll();
-      setEquipmentTypes(data);
-    }
-
-    loadData();
-  }, []);
+  const { data: equipmentTypes = [] } = useGetEquipmentTypesQuery();
+  const [addEquipmentType] = useCreateEquipmentTypeMutation();
+  const [updateEquipmentType] = useUpdateEquipmentTypeMutation();
+  const [deleteEquipmentType] = useDeleteEquipmentTypeMutation();
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -53,26 +53,19 @@ export function EquipmentTypePage() {
   const handleSubmit = async (values: EquipmentTypeFormValues) => {
     try {
       if (mode === "edit" && selectedEquipmentType) {
-        const updated = await equipmentTypeService.update(
-          selectedEquipmentType.id,
-          values,
-        );
-
-        if (updated) {
-          setEquipmentTypes((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          notify.success(t("updatedSuccessfully"));
-        }
+        await updateEquipmentType({
+          id: selectedEquipmentType.id,
+          data: values,
+        }).unwrap();
+        notify.success(t("updatedSuccessfully"));
       } else {
-        const created = await equipmentTypeService.create(values);
-        setEquipmentTypes((current) => [created, ...current]);
-        notify.success(t("createdSuccessfully"));
+        await addEquipmentType(values).unwrap();
+        notify.success(t("created successfully"));
       }
 
       handleCloseDialog();
     } catch {
-      notify.error(t("somethingWentWrong"));
+      notify.error(t("something went wrong"));
     }
   };
 
@@ -82,11 +75,8 @@ export function EquipmentTypePage() {
       if (!selectedEquipmentType) {
         return;
       }
-
-      await equipmentTypeService.delete(selectedEquipmentType.id);
-      setEquipmentTypes((current) =>
-        current.filter((item) => item.id !== selectedEquipmentType.id),
-      );
+      // await equipmentTypeService.delete(selectedEquipmentType.id);
+      await deleteEquipmentType(selectedEquipmentType.id).unwrap();
       notify.success(t("deletedSuccessfully"));
       deleteDialog.closeDialog();
       setSelectedEquipmentType(undefined);
@@ -105,7 +95,11 @@ export function EquipmentTypePage() {
           description={t("equipmentTypesDescription")}
           actions={
             <>
-              <AppButton variant="contained" startIcon={<Category />} onClick={handleOpenCreate}>
+              <AppButton
+                variant="contained"
+                startIcon={<Category />}
+                onClick={handleOpenCreate}
+              >
                 {t("addEquipmentType")}
               </AppButton>
             </>
