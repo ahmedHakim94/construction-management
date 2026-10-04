@@ -70,10 +70,8 @@ export const equipmentApi = baseApi.injectEndpoints({
     getAllEquipment: builder.query<Equipment[], void>({
       query: () => "/equipments/all",
 
-      transformResponse: (response: {
-        success: boolean;
-        data: Equipment[];
-      }) => response.data,
+      transformResponse: (response: { success: boolean; data: Equipment[] }) =>
+        response.data,
 
       providesTags: ["Equipment"],
     }),
@@ -95,7 +93,7 @@ export const equipmentApi = baseApi.injectEndpoints({
 
       transformResponse: (response: EquipmentResponse) => response.data,
 
-      invalidatesTags: ["Equipment"],
+      invalidatesTags: ["Equipment", "Contractors"],
     }),
 
     // UPDATE
@@ -111,7 +109,7 @@ export const equipmentApi = baseApi.injectEndpoints({
 
       transformResponse: (response: EquipmentResponse) => response.data,
 
-      invalidatesTags: ["Equipment"],
+      invalidatesTags: ["Equipment", "Contractors"],
     }),
 
     // DELETE
@@ -121,7 +119,7 @@ export const equipmentApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
 
-      invalidatesTags: ["Equipment"],
+      invalidatesTags: ["Equipment", "Contractors"],
     }),
   }),
 });
