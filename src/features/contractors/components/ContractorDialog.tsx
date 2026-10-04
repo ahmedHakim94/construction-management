@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { DialogActions, DialogContent, DialogTitle, Typography, Box } from "@mui/material";
+import {
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+  Box,
+} from "@mui/material";
 import { FormProvider, useFieldArray } from "react-hook-form";
 import {
   Close as CloseIcon,
@@ -47,7 +53,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
       setExpandedId(fields[0].id);
     } else if (fields.length > prevFieldsRef.current.length) {
       const addedField = fields.find(
-        (f) => !prevFieldsRef.current.some((pf) => pf.id === f.id)
+        (f) => !prevFieldsRef.current.some((pf) => pf.id === f.id),
       );
       if (addedField) {
         setExpandedId(addedField.id);
@@ -55,7 +61,9 @@ export function ContractorDialog(props: ContractorDialogProps) {
     } else if (fields.length < prevFieldsRef.current.length) {
       const wasExpandedDeleted = !fields.some((f) => f.id === expandedId);
       if (wasExpandedDeleted) {
-        const deletedIndex = prevFieldsRef.current.findIndex((pf) => pf.id === expandedId);
+        const deletedIndex = prevFieldsRef.current.findIndex(
+          (pf) => pf.id === expandedId,
+        );
         if (fields.length > 0) {
           const newExpandIndex = Math.min(deletedIndex, fields.length - 1);
           setExpandedId(fields[newExpandIndex].id);
@@ -166,10 +174,10 @@ export function ContractorDialog(props: ContractorDialogProps) {
                   size="small"
                   onClick={() =>
                     append({
-                      equipmentTypeId: "",
+                      equipmentTypeId: 0,
                       model: "",
                       plateNumber: "",
-                      hourRate: 0,
+                      hourlyPrice: 0,
                       notes: "",
                     })
                   }
@@ -195,7 +203,9 @@ export function ContractorDialog(props: ContractorDialogProps) {
                       equipmentTypeOptions={equipmentTypeOptions}
                       onDelete={() => remove(index)}
                       isExpanded={expandedId === field.id}
-                      onToggle={() => setExpandedId(expandedId === field.id ? null : field.id)}
+                      onToggle={() =>
+                        setExpandedId(expandedId === field.id ? null : field.id)
+                      }
                     />
                   ))}
                 </Box>
@@ -207,7 +217,13 @@ export function ContractorDialog(props: ContractorDialogProps) {
 
       <DialogActions
         dir={isArabic ? "rtl" : "ltr"}
-        sx={{ px: 3, pb: 2, pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}
+        sx={{
+          px: 3,
+          pb: 2,
+          pt: 1.5,
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
       >
         <AppButton
           loading={loading}
@@ -224,4 +240,3 @@ export function ContractorDialog(props: ContractorDialogProps) {
     </AppDialog>
   );
 }
-

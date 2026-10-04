@@ -45,7 +45,7 @@ export function EquipmentSection({
         bgcolor: "background.paper",
         overflow: isExpanded ? "visible" : "hidden",
         transition: "border-color 0.15s ease",
-        padding:"10px"
+        padding: "10px",
       }}
       dir={isArabic ? "rtl" : "ltr"}
     >
@@ -66,7 +66,7 @@ export function EquipmentSection({
           "&:hover": {
             bgcolor: "background.default",
           },
-          borderRadius: 2
+          borderRadius: 2,
         }}
       >
         <Box
@@ -183,7 +183,7 @@ export function EquipmentSection({
               />
 
               <Controller
-                name={`equipment.${index}.hourRate`}
+                name={`equipment.${index}.hourlyPrice`}
                 control={control}
                 render={({ field: inputField, fieldState }) => (
                   <AppInput
@@ -200,7 +200,9 @@ export function EquipmentSection({
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <MoneyIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+                          <MoneyIcon
+                            sx={{ color: "text.secondary", fontSize: 20 }}
+                          />
                         </InputAdornment>
                       ),
                     }}

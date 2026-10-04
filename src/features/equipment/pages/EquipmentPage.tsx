@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import { Construction } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -10,18 +10,19 @@ import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { EquipmentTable } from "../components/EquipmentTable";
 import { EquipmentDialog } from "../components/EquipmentDialog";
-import { equipmentService } from "../services/equipment.service";
-import { contractorService } from "@/features/contractors/services/contractor.service";
-import type { Contractor } from "@/features/contractors/types";
-import { equipmentTypeService } from "@/features/settings/equipment-type/services/equipmentType.service";
-import type { EquipmentType } from "@/features/settings/equipment-type/types";
 import type { Equipment, EquipmentFormValues } from "../types";
+import {
+  useCreateEquipmentMutation,
+  useDeleteEquipmentMutation,
+  useGetEquipmentQuery,
+  useUpdateEquipmentMutation,
+} from "../services/equipment.api";
+
+const LIMIT = 10;
 
 export function EquipmentPage() {
   const { t } = useTranslation();
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [equipmentTypes, setEquipmentTypes] = useState<EquipmentType[]>([]);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<
     Equipment | undefined
@@ -32,55 +33,22 @@ export function EquipmentPage() {
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  useEffect(() => {
-    async function loadData() {
-      const [equipmentData, contractorData, equipmentTypeData] =
-        await Promise.all([
-          equipmentService.getAll(),
-          contractorService.getAll(),
-          equipmentTypeService.getAll(),
-        ]);
+  const { data, isLoading, isFetching } = useGetEquipmentQuery({
+    page,
+    limit: LIMIT,
+    search: search.trim() || undefined,
+  });
+  const [addEquipment] = useCreateEquipmentMutation();
+  const [editEquipment] = useUpdateEquipmentMutation();
+  const [deleteEquipment] = useDeleteEquipmentMutation();
 
-      setEquipment(equipmentData);
-      setContractors(contractorData);
-      setEquipmentTypes(equipmentTypeData);
-    }
+  const equipment = data?.data ?? [];
+  const paginationMeta = data?.pagination;
 
-    loadData();
-  }, []);
-
-  const displayRows = useMemo(() => {
-    return equipment.map((item) => ({
-      ...item,
-      contractorName:
-        contractors.find((contractor) => contractor.id === item.contractorId)
-          ?.name ?? "",
-      equipmentTypeName:
-        equipmentTypes.find((type) => type.id === item.equipmentTypeId)?.name ??
-        "",
-    }));
-  }, [equipment, contractors, equipmentTypes]);
-
-  const filteredEquipment = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) {
-      return displayRows;
-    }
-
-    return displayRows.filter((item) => {
-      const values = [
-        item.contractorName,
-        item.equipmentTypeName,
-        item.model ?? "",
-        item.plateNumber ?? "",
-        item.equipmentNumber ?? "",
-        String(item.hourRate),
-        item.notes ?? "",
-      ];
-      return values.some((value) => value.toLowerCase().includes(term));
-    });
-  }, [displayRows, search]);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -102,26 +70,20 @@ export function EquipmentPage() {
   const handleSubmit = async (values: EquipmentFormValues) => {
     try {
       if (mode === "edit" && selectedEquipment) {
-        const updated = await equipmentService.update(
-          selectedEquipment.id,
-          values,
-        );
-
-        if (updated) {
-          setEquipment((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          notify.success(t("updatedSuccessfully"));
-        }
+        await editEquipment({
+          id: selectedEquipment.id,
+          data: values,
+        }).unwrap();
       } else {
-        const created = await equipmentService.create(values);
-        setEquipment((current) => [created, ...current]);
+        await addEquipment(values).unwrap();
         notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
-    } catch {
+    } catch (error) {
       notify.error(t("somethingWentWrong"));
+      console.error(error);
+      throw error;
     }
   };
 
@@ -133,11 +95,11 @@ export function EquipmentPage() {
         return;
       }
 
-      await equipmentService.delete(selectedEquipment.id);
-      setEquipment((current) =>
-        current.filter((item) => item.id !== selectedEquipment.id),
-      );
+      await deleteEquipment(selectedEquipment.id).unwrap();
       notify.success(t("deletedSuccessfully"));
+      if (equipment.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
       deleteDialog.closeDialog();
       setSelectedEquipment(undefined);
     } catch {
@@ -157,7 +119,7 @@ export function EquipmentPage() {
             <>
               <AppSearchInput
                 value={search}
-                onChange={setSearch}
+                onChange={handleSearchChange}
                 placeholder={t("searchEquipment")}
               />
               <AppButton
@@ -173,7 +135,19 @@ export function EquipmentPage() {
 
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <EquipmentTable
-            rows={filteredEquipment}
+            rows={equipment}
+            loading={isLoading || isFetching}
+            pagination={
+              paginationMeta
+                ? {
+                    page,
+                    limit: LIMIT,
+                    total: paginationMeta.total,
+                    totalPages: paginationMeta.totalPages,
+                    onPageChange: setPage,
+                  }
+                : undefined
+            }
             onEdit={handleOpenEdit}
             onDelete={(item) => {
               setSelectedEquipment(item);
@@ -197,7 +171,7 @@ export function EquipmentPage() {
         message={
           <>
             {t("deleteEquipment")}
-            <strong>{` ${selectedEquipment?.model ?? selectedEquipment?.equipmentNumber ?? ""} ?`}</strong>
+            <strong>{` ${selectedEquipment?.model ?? selectedEquipment?.id ?? ""} ?`}</strong>
           </>
         }
         confirmText={t("delete")}
@@ -208,3 +182,4 @@ export function EquipmentPage() {
     </PageContainer>
   );
 }
+

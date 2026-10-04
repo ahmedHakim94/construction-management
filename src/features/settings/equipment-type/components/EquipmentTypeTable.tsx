@@ -24,6 +24,13 @@ export function EquipmentTypeTable({
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
+
+      {
+        field: "id",
+        headerName: "#",
+        flex: 1,
+        minWidth: 50,
+      },
       {
         field: "name",
         headerName: t("equipmentTypeName"),

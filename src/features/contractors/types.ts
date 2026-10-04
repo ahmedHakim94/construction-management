@@ -4,14 +4,11 @@ import { contractorSchema } from "./schemas/contractor.schema";
 export type ContractorStatus = "ACTIVE" | "INACTIVE";
 
 export interface Contractor {
-  id: string;
-  code: string;
+  id: number;
   name: string;
   phone: string;
-  address: string;
-  nationalId?: string;
-  notes?: string;
   status: ContractorStatus;
+  notes?: string;
   createdAt: string;
 }
 
@@ -25,4 +22,22 @@ export interface ExternalContractor {
 
 export interface ExternalContractorFormValues {
   name: string;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface ContractorEquipment {
+  id: number;
+  equipmentTypeId: number;
+  hourlyPrice: number;
+  model?: string;
+  plateNumber?: string;
+  notes?: string;
+}
+
+export interface ContractorDetails extends Contractor {
+  equipment: ContractorEquipment[];
 }

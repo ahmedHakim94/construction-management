@@ -34,7 +34,6 @@ export type EquipmentTypesResult = {
   };
 };
 
-
 export const equipmentTypeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET ALL
@@ -56,6 +55,16 @@ export const equipmentTypeApi = baseApi.injectEndpoints({
       providesTags: ["EquipmentTypes"],
     }),
 
+    getAllEquipmentType: builder.query<EquipmentType[], void>({
+      query: () => "/equipment_types/all",
+
+      transformResponse: (response: {
+        success: boolean;
+        data: EquipmentType[];
+      }) => response.data,
+
+      providesTags: ["EquipmentTypes"],
+    }),
 
     // GET BY ID
     getEquipmentTypeById: builder.query<EquipmentType, string>({
@@ -101,10 +110,7 @@ export const equipmentTypeApi = baseApi.injectEndpoints({
     }),
 
     // DELETE
-    deleteEquipmentType: builder.mutation<
-      DeleteEquipmentTypeResponse,
-      string
-    >({
+    deleteEquipmentType: builder.mutation<DeleteEquipmentTypeResponse, string>({
       query: (id) => ({
         url: `/equipment_types/delete/${id}`,
         method: "DELETE",
@@ -117,6 +123,7 @@ export const equipmentTypeApi = baseApi.injectEndpoints({
 
 export const {
   useGetEquipmentTypesQuery,
+  useGetAllEquipmentTypeQuery,
   useGetEquipmentTypeByIdQuery,
   useCreateEquipmentTypeMutation,
   useUpdateEquipmentTypeMutation,

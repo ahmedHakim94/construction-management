@@ -9,11 +9,12 @@ import {
   AppInput,
   AppSelect,
   AppTextarea,
+  type SelectOption,
 } from "@/components/ui";
 import { equipmentSchema } from "../schemas/equipment.schema";
 import type { Equipment, EquipmentFormValues } from "../types";
-import { contractorService } from "@/features/contractors/services/contractor.service";
-import { equipmentTypeService } from "@/features/settings/equipment-type/services/equipmentType.service";
+import { useGetAllContractorsQuery } from "@/features/contractors/services/contractors.api";
+import { useGetAllEquipmentTypeQuery } from "@/features/settings/equipment-type/services/equipmentType.api";
 
 interface EquipmentDialogProps {
   open: boolean;
@@ -32,56 +33,54 @@ export function EquipmentDialog({
 }: EquipmentDialogProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const [contractorOptions, setContractorOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [contractorOptions, setContractorOptions] = useState<SelectOption[]>([]);
+  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: {
-      contractorId: "",
-      equipmentTypeId: "",
+      contractorId: 0,
+      equipmentTypeId: 0,
       model: "",
       plateNumber: "",
-      hourRate: 0,
+      hourlyPrice: 0,
       notes: "",
     },
   });
 
-  useEffect(() => {
-    async function loadOptions() {
-      const contractors = await contractorService.getAll();
-      const equipmentTypes = await equipmentTypeService.getAll();
+  const { data: contractors } = useGetAllContractorsQuery();
+  const { data: equipment_type } = useGetAllEquipmentTypeQuery();
 
+  useEffect(() => {
+    if (contractors) {
       setContractorOptions(
         contractors.map((item) => ({
-          value: item.id,
-          label: item.name,
-        })),
-      );
-
-      setEquipmentTypeOptions(
-        equipmentTypes.map((item) => ({
-          value: item.id,
+          value: String(item.id),
           label: item.name,
         })),
       );
     }
+  }, [contractors]);
 
-    loadOptions();
-  }, []);
+  useEffect(() => {
+    if (equipment_type) {
+      setEquipmentTypeOptions(
+        equipment_type.map((item) => ({
+          value: String(item.id),
+          label: item.name,
+        })),
+      );
+    }
+  }, [equipment_type]);
 
   useEffect(() => {
     reset({
-      contractorId: equipment?.contractorId ?? "",
-      equipmentTypeId: equipment?.equipmentTypeId ?? "",
+      contractorId: equipment?.contractorId ?? 0,
+      equipmentTypeId: equipment?.equipmentTypeId ?? 0,
       model: equipment?.model ?? "",
       plateNumber: equipment?.plateNumber ?? "",
-      hourRate: equipment?.hourRate ?? 0,
+      hourlyPrice: Number(equipment?.hourlyPrice) || 0,
       notes: equipment?.notes ?? "",
     });
   }, [equipment, open, reset]);
@@ -125,8 +124,8 @@ export function EquipmentDialog({
                 label={t("contractor")}
                 required
                 options={contractorOptions}
-                value={field.value}
-                onChange={field.onChange}
+                value={field.value ? String(field.value) : ""}
+                onChange={(val) => field.onChange(val ? Number(val) : 0)}
                 placeholder={selectPlaceholder}
                 error={fieldState.error?.message}
               />
@@ -141,8 +140,8 @@ export function EquipmentDialog({
                 label={t("equipmentType")}
                 required
                 options={equipmentTypeOptions}
-                value={field.value}
-                onChange={field.onChange}
+                value={field.value ? String(field.value) : ""}
+                onChange={(val) => field.onChange(val ? Number(val) : 0)}
                 placeholder={selectPlaceholder}
                 error={fieldState.error?.message}
               />
@@ -150,7 +149,7 @@ export function EquipmentDialog({
           />
 
           <Controller
-            name="hourRate"
+            name="hourlyPrice"
             control={control}
             render={({ field, fieldState }) => (
               <AppInput
@@ -204,3 +203,4 @@ export function EquipmentDialog({
     </AppDialog>
   );
 }
+

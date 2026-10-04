@@ -8,19 +8,29 @@ interface EquipmentTableProps {
   rows: Equipment[];
   onEdit: (equipment: Equipment) => void;
   onDelete: (equipment: Equipment) => void;
+  loading?: boolean;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  };
 }
 
 export function EquipmentTable({
   rows,
   onEdit,
   onDelete,
+  loading,
+  pagination,
 }: EquipmentTableProps) {
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
       {
-        field: "equipmentNumber",
+        field: "id",
         headerName: t("equipmentNumber"),
         flex: 1,
         minWidth: 140,
@@ -44,7 +54,7 @@ export function EquipmentTable({
         minWidth: 140,
       },
       {
-        field: "hourRate",
+        field: "hourlyPrice",
         headerName: t("hourRate"),
         flex: 0.8,
         minWidth: 120,
@@ -92,5 +102,12 @@ export function EquipmentTable({
     [rows],
   );
 
-  return <AppTable rows={rowsWithId} columns={columns} />;
+  return (
+    <AppTable
+      rows={rowsWithId}
+      columns={columns}
+      loading={loading}
+      pagination={pagination}
+    />
+  );
 }

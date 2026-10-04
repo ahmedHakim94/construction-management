@@ -1,55 +1,54 @@
-import {
-  Box
-} from "@mui/material";
+import { Box } from "@mui/material";
 import { PersonAddAlt1Outlined } from "@mui/icons-material";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { ContractorsTable } from "../components/ContractorsTable";
 import { ContractorDialog } from "../components/ContractorDialog";
-import { contractorService } from "../services/contractor.service";
 import type { Contractor, ContractorFormValues } from "../types";
 import { useDialog } from "@/hooks/useDialog";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
 import { notify } from "@/shared/utils/notify";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { equipmentService } from "@/features/equipment/services/equipment.service";
+import {
+  useCreateContractorMutation,
+  useDeleteContractorMutation,
+  useGetContractorsQuery,
+  useUpdateContractorMutation,
+} from "../services/contractors.api";
+
+const LIMIT = 10;
 
 export function ContractorsPage() {
   const { t } = useTranslation();
-  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedContractor, setSelectedContractor] = useState<
     Contractor | undefined
   >();
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
-  useEffect(() => {
-    async function loadData() {
-      const data = await contractorService.getAll();
-      setContractors(data);
-    }
+  const { data, isLoading, isFetching } = useGetContractorsQuery({
+    page,
+    limit: LIMIT,
+    search: search.trim() || undefined,
+  });
+  const [createContractor] = useCreateContractorMutation();
+  const [updateContractor] = useUpdateContractorMutation();
+  const [deleteContractor] = useDeleteContractorMutation();
 
-    loadData();
-  }, []);
+  const contractors = data?.data ?? [];
+  const paginationMeta = data?.pagination;
 
-  const filteredContractors = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) {
-      return contractors;
-    }
-
-    return contractors.filter((contractor) => {
-      const values = [contractor.code, contractor.name, contractor.phone];
-      return values.some((value) => value.toLowerCase().includes(term));
-    });
-  }, [contractors, search]);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -70,85 +69,24 @@ export function ContractorsPage() {
 
   const handleSubmit = async (values: ContractorFormValues) => {
     try {
-      const contractorData = {
-        name: values.name,
-        phone: values.phone,
-        address: values.address || "",
-        nationalId: values.nationalId,
-        notes: values.notes,
-        status: values.status,
-      };
-
       if (mode === "edit" && selectedContractor) {
-        const updated = await contractorService.update(
-          selectedContractor.id,
-          contractorData,
-        );
+        await updateContractor({
+          id: selectedContractor.id,
+          data: values,
+        }).unwrap();
 
-        if (updated) {
-          // Get existing equipment for this contractor
-          const allEquipment = await equipmentService.getAll();
-          const existingEq = allEquipment.filter(
-            (item) => item.contractorId === selectedContractor.id,
-          );
-
-          // 1. Delete equipment that are no longer in values.equipment
-          const incomingEqIds = new Set(
-            (values.equipment || []).map((e) => e.id).filter(Boolean),
-          );
-          for (const eq of existingEq) {
-            if (!incomingEqIds.has(eq.id)) {
-              await equipmentService.delete(eq.id);
-            }
-          }
-
-          // 2. Create or Update incoming equipment list
-          for (const eq of values.equipment || []) {
-            const eqFormValues = {
-              contractorId: selectedContractor.id,
-              equipmentTypeId: eq.equipmentTypeId,
-              model: eq.model ?? "",
-              plateNumber: eq.plateNumber ?? "",
-              hourRate: eq.hourRate,
-              notes: eq.notes ?? "",
-            };
-
-            if (eq.id) {
-              await equipmentService.update(eq.id, eqFormValues);
-            } else {
-              await equipmentService.create(eqFormValues);
-            }
-          }
-
-          setContractors((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          notify.success(t("updatedSuccessfully"));
-        }
+        notify.success(t("updatedSuccessfully"));
       } else {
-        const created = await contractorService.create(contractorData);
+        await createContractor(values).unwrap();
 
-        // Create equipment linked to this new contractor
-        for (const eq of values.equipment || []) {
-          const eqFormValues = {
-            contractorId: created.id,
-            equipmentTypeId: eq.equipmentTypeId,
-            model: eq.model ?? "",
-            plateNumber: eq.plateNumber ?? "",
-            hourRate: eq.hourRate,
-            notes: eq.notes ?? "",
-          };
-          await equipmentService.create(eqFormValues);
-        }
-
-        setContractors((current) => [created, ...current]);
         notify.success(t("createdSuccessfully"));
       }
 
-      handleCloseDialog();
+      // handleCloseDialog();
     } catch (error) {
       console.error(error);
       notify.error(t("somethingWentWrong"));
+      throw error;
     }
   };
 
@@ -158,22 +96,12 @@ export function ContractorsPage() {
     }
     setDeleteLoading(true);
     try {
-      // 1. Delete associated equipment first
-      const allEquipment = await equipmentService.getAll();
-      const contractorEq = allEquipment.filter(
-        (item) => item.contractorId === selectedContractor.id,
-      );
-      for (const eq of contractorEq) {
-        await equipmentService.delete(eq.id);
-      }
+      await deleteContractor(selectedContractor.id).unwrap();
 
-      // 2. Delete contractor only after equipment deletion succeeds
-      await contractorService.delete(selectedContractor.id);
-
-      setContractors((current) =>
-        current.filter((item) => item.id !== selectedContractor.id),
-      );
       notify.success(t("deletedSuccessfully"));
+      if (contractors.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
       deleteDialog.closeDialog();
       setSelectedContractor(undefined);
     } catch {
@@ -193,7 +121,7 @@ export function ContractorsPage() {
             <>
               <AppSearchInput
                 value={search}
-                onChange={setSearch}
+                onChange={handleSearchChange}
                 placeholder={t("searchContractors")}
               />
               <AppButton
@@ -208,7 +136,19 @@ export function ContractorsPage() {
         />
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <ContractorsTable
-            rows={filteredContractors}
+            rows={contractors}
+            loading={isLoading || isFetching}
+            pagination={
+              paginationMeta
+                ? {
+                    page,
+                    limit: LIMIT,
+                    total: paginationMeta.total,
+                    totalPages: paginationMeta.totalPages,
+                    onPageChange: setPage,
+                  }
+                : undefined
+            }
             onEdit={handleOpenEdit}
             onDelete={(contractor) => {
               setSelectedContractor(contractor);
@@ -232,7 +172,7 @@ export function ContractorsPage() {
         message={
           <>
             {t("deleteContractor")}
-            <strong>{selectedContractor?.name} ？</strong> 
+            <strong>{` ${selectedContractor?.name} ?`}</strong>
           </>
         }
         confirmText={t("delete")}
@@ -240,7 +180,6 @@ export function ContractorsPage() {
         onConfirm={handleDelete}
         loading={deleteLoading}
       />
-
     </PageContainer>
   );
 }

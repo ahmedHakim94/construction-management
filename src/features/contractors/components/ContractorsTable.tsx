@@ -2,28 +2,32 @@ import { Chip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import { AppTable, type AppTableColDef } from "@/components/ui";
+import type { TablePaginationProps } from "@/types";
 import type { Contractor } from "../types";
 import { useMemo } from "react";
 import { AppActions } from "@/components/ui/AppActions";
 
 interface ContractorsTableProps {
   rows: Contractor[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   onEdit: (contractor: Contractor) => void;
   onDelete: (contractor: Contractor) => void;
 }
 
 export function ContractorsTable({
   rows,
+  loading = false,
+  pagination,
   onEdit,
   onDelete,
 }: ContractorsTableProps) {
   const { t } = useTranslation();
 
-
   const columns = useMemo<AppTableColDef[]>(() => [
     {
-      field: "code",
-      headerName: t("code"),
+      field: "id",
+      headerName: t("#"),
       flex: 1,
       minWidth: 120,
     },
@@ -74,5 +78,13 @@ export function ContractorsTable({
     },
   ], [t, onEdit, onDelete]);
 
-  return <AppTable rows={rows} columns={columns} />;
+  return (
+    <AppTable
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      pagination={pagination}
+    />
+  );
 }
+

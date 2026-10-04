@@ -17,7 +17,7 @@ import {
   useUpdateEquipmentTypeMutation,
 } from "../services/equipmentType.api";
 
-const LIMIT = 2;
+const LIMIT = 10;
 
 export function EquipmentTypePage() {
   const { t } = useTranslation();

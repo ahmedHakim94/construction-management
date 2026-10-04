@@ -6,25 +6,9 @@ const STORAGE_KEY = "construction_equipment";
 
 let equipment: Equipment[] = storage.get<Equipment[]>(STORAGE_KEY, []);
 
-async function getEquipmentName(equipmentTypeId: string): Promise<string> {
-  const equipmentType = await equipmentTypeService.getById(equipmentTypeId);
+async function getEquipmentName(equipmentTypeId: number): Promise<string> {
+  const equipmentType = await equipmentTypeService.getById(String(equipmentTypeId));
   return equipmentType?.name || "";
-}
-
-function generateEquipmentNumber() {
-  const existingNumbers = new Set(
-    equipment.map((item) => item.equipmentNumber).filter(Boolean),
-  );
-
-  let nextNumber = equipment.length + 1;
-  let equipmentNumber = `EQ-${String(nextNumber).padStart(3, "0")}`;
-
-  while (existingNumbers.has(equipmentNumber)) {
-    nextNumber += 1;
-    equipmentNumber = `EQ-${String(nextNumber).padStart(3, "0")}`;
-  }
-
-  return equipmentNumber;
 }
 
 export const equipmentService = {
@@ -32,22 +16,22 @@ export const equipmentService = {
     return [...equipment];
   },
 
-  async getById(id: string): Promise<Equipment | undefined> {
+  async getById(id: number): Promise<Equipment | undefined> {
     return equipment.find((item) => item.id === id);
   },
 
   async create(data: EquipmentFormValues): Promise<Equipment> {
     const nextEquipment: Equipment = {
-      id: `e-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: Date.now(),
       contractorId: data.contractorId,
+      contractorName: "",
       equipmentTypeId: data.equipmentTypeId,
+      equipmentTypeName: await getEquipmentName(data.equipmentTypeId),
       model: data.model || undefined,
       plateNumber: data.plateNumber || undefined,
-      equipmentNumber: generateEquipmentNumber(),
-      hourRate: data.hourRate,
+      hourlyPrice: data.hourlyPrice,
       notes: data.notes || undefined,
       createdAt: new Date().toISOString().split("T")[0],
-      name: await getEquipmentName(data.equipmentTypeId),
     };
 
     equipment = [nextEquipment, ...equipment];
@@ -56,7 +40,7 @@ export const equipmentService = {
   },
 
   async update(
-    id: string,
+    id: number,
     data: EquipmentFormValues,
   ): Promise<Equipment | undefined> {
     const equipmentName = await getEquipmentName(data.equipmentTypeId);
@@ -70,12 +54,11 @@ export const equipmentService = {
         ...item,
         contractorId: data.contractorId,
         equipmentTypeId: data.equipmentTypeId,
+        equipmentTypeName: equipmentName,
         model: data.model || undefined,
         plateNumber: data.plateNumber || undefined,
-        // equipmentNumber: data.equipmentNumber || undefined,
-        hourRate: data.hourRate,
+        hourlyPrice: data.hourlyPrice,
         notes: data.notes || undefined,
-        name: equipmentName,
       };
     });
 
@@ -83,8 +66,9 @@ export const equipmentService = {
     return equipment.find((item) => item.id === id);
   },
 
-  async delete(id: string): Promise<void> {
+  async delete(id: number): Promise<void> {
     equipment = equipment.filter((item) => item.id !== id);
     storage.set(STORAGE_KEY, equipment);
   },
 };
+
