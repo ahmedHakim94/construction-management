@@ -25,6 +25,7 @@ export const externalContractorService = {
     const nextExternalContractor: ExternalContractor = {
       id: `external-${crypto.randomUUID()}`,
       name: data.name,
+      phone: data.phone,
       createdAt: new Date().toISOString().split("T")[0],
     };
 

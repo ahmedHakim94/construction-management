@@ -32,6 +32,16 @@
   "addExternalContractor": "Add New External Contractor",
   "externalContractorRequired": "External contractor is required",
   "externalContractorName": "External Contractor Name",
-  "externalContractorNamePlaceholder": "Enter contractor name"
+  "externalContractorNamePlaceholder": "Enter contractor name",
+  "startTime": "Start Time",
+  "endTime": "End Time",
+  "phone": "Phone Number",
+  "phonePlaceholder": "Enter phone number",
+  "dateRequired": "Date is required",
+  "projectRequired": "Project is required",
+  "taskRequired": "Task is required",
+  "startTimeRequired": "Start time is required",
+  "endTimeRequired": "End time is required",
+  "hourRateRequired": "Hour rate must be greater than 0"
 }
 

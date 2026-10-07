@@ -7,6 +7,7 @@ import {
 import { arSD, enUS } from "@mui/x-data-grid/locales";
 import { useTranslation } from "react-i18next";
 import type { TablePaginationProps } from "@/types";
+import { useMemo, useRef } from "react";
 
 export type AppTableColDef = GridColDef;
 
@@ -92,14 +93,14 @@ const getTableStyles = (theme: Theme) => ({
     width: "100%",
     // justifyContent: "flex-start",
     direction: theme.direction,
-    padding:"0px"
+    padding: "0px",
   },
 
   "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel": {
     fontSize: "0.8125rem",
     color: theme.palette.text.secondary,
     fontVariantNumeric: "tabular-nums",
-    direction:"ltr"
+    direction: "ltr",
   },
 
   // Empty state overlay
@@ -142,6 +143,16 @@ export function AppTable({
   const { i18n } = useTranslation();
   const theme = useTheme();
 
+  const rowCountRef = useRef(0);
+
+  const rowCount = useMemo(() => {
+    if (!loading && pagination) {
+      rowCountRef.current = pagination.total;
+    }
+
+    return rowCountRef.current;
+  }, [loading, pagination?.total]);
+
   const localeText =
     i18n.language === "ar"
       ? arSD.components.MuiDataGrid.defaultProps.localeText
@@ -152,7 +163,7 @@ export function AppTable({
   const paginationProps = pagination
     ? {
         paginationMode: "server" as const,
-        rowCount: pagination.total,
+        rowCount,
         paginationModel: {
           page: Math.max(pagination.page - 1, 0),
           pageSize: pagination.limit,

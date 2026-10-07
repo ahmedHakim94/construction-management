@@ -75,10 +75,7 @@ export const taskApi = baseApi.injectEndpoints({
     }),
 
     // UPDATE
-    updateTask: builder.mutation<
-      Task,
-      { id: string; data: TaskFormValues }
-    >({
+    updateTask: builder.mutation<Task, { id: string; data: TaskFormValues }>({
       query: ({ id, data }) => ({
         url: `/tasks/edit/${id}`,
         method: "PUT",
@@ -101,6 +98,17 @@ export const taskApi = baseApi.injectEndpoints({
 
       invalidatesTags: ["Tasks"],
     }),
+
+    //get all
+
+    getAllTasks: builder.query<Task[], void>({
+      query: () => ({
+        url: "/tasks/all",
+        method: "GET",
+      }),
+      transformResponse: (response: { data: Task[] }) => response.data,
+      providesTags: ["Tasks"],
+    }),
   }),
 });
 
@@ -110,4 +118,5 @@ export const {
   useCreateTaskMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,
+  useGetAllTasksQuery,
 } = taskApi;

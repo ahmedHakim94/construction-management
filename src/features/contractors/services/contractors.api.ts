@@ -4,6 +4,7 @@ import type {
   Contractor,
   ContractorDetails,
   ContractorFormValues,
+  ExternalContractor,
 } from "../types";
 
 type ContractorsParams = PaginationParams & {
@@ -130,6 +131,37 @@ export const contractorApi = baseApi.injectEndpoints({
 
       invalidatesTags: ["Contractors", "Equipment"],
     }),
+
+    // external contractor
+
+    getExternalContractors: builder.query<ExternalContractor[], void>({
+      query: () => "/contractors/external",
+
+      transformResponse: (response: {
+        success: boolean;
+        data: ExternalContractor[];
+      }) => response.data,
+
+      providesTags: ["Contractors"],
+    }),
+
+    createExternalContractor: builder.mutation<
+      ExternalContractor,
+      { name: string; phone?: string }
+    >({
+      query: (data) => ({
+        url: "/contractors/external/add",
+        method: "POST",
+        body: data,
+      }),
+
+      transformResponse: (response: {
+        success: boolean;
+        data: ExternalContractor;
+      }) => response.data,
+
+      invalidatesTags: ["Contractors"],
+    }),
   }),
 });
 
@@ -140,4 +172,6 @@ export const {
   useCreateContractorMutation,
   useUpdateContractorMutation,
   useDeleteContractorMutation,
+  useGetExternalContractorsQuery,
+  useCreateExternalContractorMutation,
 } = contractorApi;

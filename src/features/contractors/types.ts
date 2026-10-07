@@ -14,14 +14,9 @@ export interface Contractor {
 
 export type ContractorFormValues = z.infer<typeof contractorSchema>;
 
-export interface ExternalContractor {
-  id: string;
-  name: string;
-  createdAt: string;
-}
-
 export interface ExternalContractorFormValues {
   name: string;
+  phone?: string;
 }
 
 export interface PaginationParams {
@@ -40,4 +35,11 @@ export interface ContractorEquipment {
 
 export interface ContractorDetails extends Contractor {
   equipment: ContractorEquipment[];
+}
+
+export interface ExternalContractor {
+  id: number;
+  name: string;
+  phone?: string | null;
+  createdAt: string;
 }

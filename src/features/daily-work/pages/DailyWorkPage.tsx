@@ -1,120 +1,72 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { Today } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import type { Dayjs } from "dayjs";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
-import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { notify } from "@/shared/utils/notify";
-import { useDialog } from "@/hooks/useDialog";
-import { DailyWorkTable } from "../components/DailyWorkTable";
-import { DailyWorkDialog } from "../components/DailyWorkDialog";
-import { dailyWorkService } from "../services/dailyWork.service";
-import { contractorService } from "@/features/contractors/services/contractor.service";
-import { externalContractorService } from "@/features/contractors/services/externalContractor.service";
-import { projectService } from "@/features/settings/projects/services/project.service";
-import { equipmentService } from "@/features/equipment/services/equipment.service";
-import { taskService } from "@/features/settings/task/services/task.service";
-import type { DailyWork, DailyWorkFormValues } from "../types";
-import type { Contractor, ExternalContractor } from "@/features/contractors/types";
-import type { Project } from "@/features/settings/projects/types";
-import type { Equipment } from "@/features/equipment/types";
-import type { Task } from "@/features/settings/task/types";
 import { AppFilters } from "@/components/ui/AppFilters";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
-import type { Dayjs } from "dayjs";
-import { paymentService } from "@/features/payments/services/payment.service";
+import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
+import { useDialog } from "@/hooks/useDialog";
+
+import {
+  DailyWorkTable,
+  type DailyWorkRow,
+} from "../components/DailyWorkTable";
+import { DailyWorkDialog } from "../components/DailyWorkDialog";
+import {
+  useCreateDailyWorkMutation,
+  useDeleteDailyWorkMutation,
+  useGetDailyWorkQuery,
+  useUpdateDailyWorkMutation,
+} from "../services/dailyWork.api";
+
+import type { DailyWork, CreateDailyWorkPayload } from "../types";
+import { toast } from "react-toastify";
 
 export function DailyWorkPage() {
   const { t } = useTranslation();
-  const [records, setRecords] = useState<DailyWork[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [externalContractors, setExternalContractors] = useState<ExternalContractor[]>([]);
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
+
   const [search, setSearch] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState<DailyWork | undefined>();
-  const [mode, setMode] = useState<"create" | "edit">("create");
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [page, setPage] = useState(1);
+
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [selectedRecord, setSelectedRecord] = useState<DailyWorkRow>();
 
   const dialog = useDialog();
   const deleteDialog = useDialog();
 
+  const limit = 10;
+
   useEffect(() => {
-    async function loadData() {
-      const [
-        recordData,
-        projectData,
-        contractorData,
-        externalContractorData,
-        equipmentData,
-        taskData,
-      ] = await Promise.all([
-        dailyWorkService.getAll(),
-        projectService.getAll(),
-        contractorService.getAll(),
-        externalContractorService.getAll(),
-        equipmentService.getAll(),
-        taskService.getAll(),
-      ]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 400);
 
-      setRecords(recordData);
-      setProjects(projectData);
-      setContractors(contractorData);
-      setExternalContractors(externalContractorData);
-      setEquipment(equipmentData);
-      setTasks(taskData);
-    }
+    return () => clearTimeout(timer);
+  }, [search]);
 
-    loadData();
-  }, []);
+  const {
+    data: dailyWorkData,
+    isLoading,
+    isFetching,
+    isError,
+  } = useGetDailyWorkQuery({
+    page,
+    limit,
+    search: debouncedSearch,
+    date: selectedDate?.format("YYYY-MM-DD"),
+  });
 
-  const displayRows = useMemo(() => {
-    return records.map((item) => {
-      const normalContractor = contractors.find(
-        (contractor) => contractor.id === item.contractorId,
-      );
-      const externalContractor = externalContractors.find(
-        (contractor) => contractor.id === item.contractorId,
-      );
-      const contractorName =
-        normalContractor?.name ?? externalContractor?.name ?? "";
+  const [addWorkDaily] = useCreateDailyWorkMutation();
+  const [updateWorkDaily] = useUpdateDailyWorkMutation();
+  const [deleteWorkDaily] = useDeleteDailyWorkMutation();
 
-      return {
-        ...item,
-        projectName:
-          projects.find((project) => project.id === item.projectId)?.name ?? "",
-        contractorName,
-        equipmentLabel: item.equipmentId
-          ? (equipment.find((eq) => eq.id === item.equipmentId)?.name ?? "")
-          : (item.temporaryEquipmentName ?? ""),
-        taskName: tasks.find((task) => task.id === item.taskId)?.name ?? "",
-      };
-    });
-  }, [records, projects, contractors, externalContractors, equipment, tasks]);
-
-  const filteredRecords = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    return displayRows.filter((item) => {
-      const matchesSearch =
-        !term ||
-        [
-          item.projectName,
-          item.contractorName,
-          item.equipmentLabel,
-          item.taskName,
-        ].some((value) => value.toLowerCase().includes(term));
-
-      const matchesDate =
-        !selectedDate || item.date === selectedDate.format("YYYY-MM-DD");
-
-      return matchesSearch && matchesDate;
-    });
-  }, [displayRows, search, selectedDate]);
+  const total = dailyWorkData?.pagination?.total ?? 0;
 
   const handleOpenCreate = () => {
     setMode("create");
@@ -122,10 +74,15 @@ export function DailyWorkPage() {
     dialog.openDialog();
   };
 
-  const handleOpenEdit = (record: DailyWork) => {
+  const handleOpenEdit = (record: DailyWorkRow) => {
     setMode("edit");
     setSelectedRecord(record);
     dialog.openDialog();
+  };
+
+  const handleOpenDelete = (record: DailyWorkRow) => {
+    setSelectedRecord(record);
+    deleteDialog.openDialog();
   };
 
   const handleCloseDialog = () => {
@@ -133,66 +90,65 @@ export function DailyWorkPage() {
     setSelectedRecord(undefined);
   };
 
-  const handleSubmit = async (values: DailyWorkFormValues) => {
-    try {
-      if (mode === "edit" && selectedRecord) {
-        const updated = await dailyWorkService.update(
-          selectedRecord.id,
-          values,
-        );
+  const handleCloseDelete = () => {
+    deleteDialog.closeDialog();
+    setSelectedRecord(undefined);
+  };
 
-        if (updated) {
-          setRecords((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
-          );
-          const updatedExternalContractors =
-            await externalContractorService.getAll();
-          setExternalContractors(updatedExternalContractors);
-          notify.success(t("updatedSuccessfully"));
-        }
-      } else {
-        const created = await dailyWorkService.create(values);
-        setRecords((current) => [created, ...current]);
-        const updatedExternalContractors =
-          await externalContractorService.getAll();
-        setExternalContractors(updatedExternalContractors);
-        notify.success(t("createdSuccessfully"));
+  const handleSubmit = async (
+    values: CreateDailyWorkPayload,
+  ): Promise<void> => {
+    if (mode === "create") {
+      try {
+        await addWorkDaily(values).unwrap();
+
+        toast.success("Daily work added successfully");
+        handleCloseDialog();
+      } catch (error) {
+        toast.error("Failed to add daily work");
+        console.error(error);
+        throw error;
       }
+    } else {
+      if (!selectedRecord) return;
 
-      handleCloseDialog();
-    } catch {
-      notify.error(t("somethingWentWrong"));
+      try {
+        await updateWorkDaily({
+          id: selectedRecord.id,
+          payload: values,
+        }).unwrap();
+
+        toast.success("Daily work updated successfully");
+        handleCloseDialog();
+      } catch (error) {
+        toast.error("Failed to update daily work");
+        console.error(error);
+        throw error;
+      }
     }
   };
 
-
   const handleDelete = async () => {
-    setDeleteLoading(true);
-
+    if (!selectedRecord) return;
     try {
-      if (!selectedRecord) {
-        return;
-      }
-
-      const hasPaidPayment = await paymentService.hasPaidPaymentForDailyWork(selectedRecord);
-
-      if (hasPaidPayment) {
-        notify.error(t("cannotDeleteDailyWorkWithPayment"));
-        return;
-      }
-
-      await dailyWorkService.delete(selectedRecord.id);
-      setRecords((current) =>
-        current.filter((item) => item.id !== selectedRecord.id),
-      );
-      notify.success(t("deletedSuccessfully"));
-      deleteDialog.closeDialog();
-      setSelectedRecord(undefined);
-    } catch {
-      notify.error(t("somethingWentWrong"));
-    } finally {
-      setDeleteLoading(false);
+      await deleteWorkDaily(selectedRecord.id).unwrap();
+      toast.success("Daily work deleted successfully");
+      handleCloseDelete();
+    } catch (error) {
+      toast.error("Failed to delete daily work");
+      console.error(error);
+      throw error;
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleDateChange = (value: Dayjs | null) => {
+    setSelectedDate(value);
+    setPage(1);
   };
 
   return (
@@ -202,7 +158,11 @@ export function DailyWorkPage() {
           title={t("dailyWork")}
           description={t("dailyWorkDescription")}
           actions={
-            <AppButton variant="contained" startIcon={<Today />} onClick={handleOpenCreate}>
+            <AppButton
+              variant="contained"
+              startIcon={<Today />}
+              onClick={handleOpenCreate}
+            >
               {t("addDailyWork")}
             </AppButton>
           }
@@ -211,25 +171,30 @@ export function DailyWorkPage() {
         <AppFilters>
           <AppSearchInput
             value={search}
-            onChange={setSearch}
+            onChange={handleSearchChange}
             placeholder={t("searchDailyWork")}
           />
+
           <AppDatePicker
             value={selectedDate}
-            onChange={setSelectedDate}
+            onChange={handleDateChange}
             label={t("date")}
-            
           />
         </AppFilters>
 
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <DailyWorkTable
-            rows={filteredRecords}
-            onEdit={handleOpenEdit}
-            onDelete={(record) => {
-              setSelectedRecord(record);
-              deleteDialog.openDialog();
+            rows={dailyWorkData?.data ?? []}
+            loading={isLoading || isFetching}
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages: dailyWorkData?.pagination?.totalPages ?? 0,
+              onPageChange: setPage,
             }}
+            onEdit={handleOpenEdit}
+            onDelete={handleOpenDelete}
           />
         </AppCard>
       </Box>
@@ -238,27 +203,25 @@ export function DailyWorkPage() {
         open={dialog.open}
         mode={mode}
         dailyWork={selectedRecord}
-        projects={projects}
-        contractors={contractors}
-        equipment={equipment}
-        tasks={tasks}
+        projects={[]}
+        contractors={[]}
+        equipment={[]}
+        tasks={[]}
         onClose={handleCloseDialog}
         onSubmit={handleSubmit}
       />
 
       <AppConfirmDialog
         open={deleteDialog.open}
-        title={t("deleteDailyWork")}
+        title={"هل انت متأكد ؟"}
         message={
           <>
-            {t("deleteDailyWork")}
-            <strong>{` ${selectedRecord?.projectId ?? ""} ?`}</strong>
+            سيتم حذف هذا السجل نهائياً
           </>
         }
         confirmText={t("delete")}
-        onClose={deleteDialog.closeDialog}
+        onClose={handleCloseDelete}
         onConfirm={handleDelete}
-        loading={deleteLoading}
       />
     </PageContainer>
   );

@@ -32,6 +32,16 @@
   "addExternalContractor": "إضافة مقاول خارجي جديد",
   "externalContractorRequired": "المقاول الخارجي مطلوب",
   "externalContractorName": "اسم المقاول الخارجي",
-  "externalContractorNamePlaceholder": "اكتب اسم المقاول"
+  "externalContractorNamePlaceholder": "اكتب اسم المقاول",
+  "startTime": "وقت البدء",
+  "endTime": "وقت الانتهاء",
+  "phone": "رقم الهاتف",
+  "phonePlaceholder": "أدخل رقم الهاتف",
+  "dateRequired": "التاريخ مطلوب",
+  "projectRequired": "المشروع مطلوب",
+  "taskRequired": "المهمة مطلوبة",
+  "startTimeRequired": "وقت البدء مطلوب",
+  "endTimeRequired": "وقت الانتهاء مطلوب",
+  "hourRateRequired": "سعر الساعة يجب أن يكون أكبر من 0"
 }
 

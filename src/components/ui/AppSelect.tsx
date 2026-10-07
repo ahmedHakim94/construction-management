@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { reactSelectStyles } from "../../styles/reactSelectStyles";
 
 export interface SelectOption {
-  value: string;
+  value: string | number;
   label: string;
 }
 
@@ -13,8 +13,8 @@ interface AppSelectProps {
   label?: string;
   required?: boolean;
   options: readonly SelectOption[];
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: string | number;
+  onChange?: (value: any) => void;
   placeholder?: string;
   error?: string;
   className?: string;
@@ -59,7 +59,7 @@ export function AppSelect({
       <Box dir={isRtl ? "rtl" : "ltr"}>
         <Select
           options={options}
-          value={options.find((item) => item.value === value) ?? null}
+          value={options?.find((item) => item.value === value) ?? null}
           onChange={(option) => onChange?.(option?.value ?? "")}
           placeholder={placeholder}
           isRtl={isRtl}
