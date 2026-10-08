@@ -1,6 +1,10 @@
 export interface PaginationParams {
   page?: number;
   limit?: number;
+  search?: string;
+  projectId?: string;
+  year?: number | string;
+  month?: number | string;
 }
 
 export interface PaginationMeta {

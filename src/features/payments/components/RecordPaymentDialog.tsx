@@ -4,13 +4,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
   Typography,
+  MenuItem,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AppButton, AppDialog, AppInput } from "@/components/ui";
-import { recordPaymentSchema } from "../schemas/payment.schema";
+import { useTranslation } from "react-i18next";
+import { AppButton, AppDialog } from "@/components/ui";
 import type { RecordPaymentFormValues } from "../types";
 
 interface RecordPaymentDialogProps {
@@ -23,6 +23,12 @@ interface RecordPaymentDialogProps {
   onSubmit: (values: RecordPaymentFormValues) => Promise<void>;
 }
 
+const today = () => {
+  const date = new Date();
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+};
+
 export function RecordPaymentDialog({
   open,
   netAmount,
@@ -32,134 +38,181 @@ export function RecordPaymentDialog({
   onClose,
   onSubmit,
 }: RecordPaymentDialogProps) {
-  const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === "ar";
-
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
     reset,
-    setError,
-    formState: { errors },
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<RecordPaymentFormValues>({
-    resolver: zodResolver(recordPaymentSchema),
     defaultValues: {
       amount: 0,
+      paymentDate: today(),
+      paymentMethod: "CASH",
+      referenceNumber: "",
+      notes: "",
     },
   });
 
   useEffect(() => {
-    reset({ amount: 0 });
+    if (open)
+      reset({
+        amount: 0,
+        paymentDate: today(),
+        paymentMethod: "CASH",
+        referenceNumber: "",
+        notes: "",
+      });
   }, [open, reset]);
 
-  const handleFormSubmit = async (values: RecordPaymentFormValues) => {
-    if (values.amount <= 0) {
-      setError("amount", {
-        type: "manual",
-        message: t("paymentAmountInvalid"),
-      });
-      return;
-    }
-
-    if (values.amount > remainingAmount) {
-      setError("amount", {
-        type: "manual",
-        message: t("paymentAmountExceedsRemaining"),
-      });
-      return;
-    }
-
-    await onSubmit(values);
-  };
-
-  const summaryItems = [
-    { label: t("netDue"), value: netAmount, color: "text.primary" },
-    { label: t("paidAmount"), value: paidAmount, color: "success.main" },
-    { label: t("remainingAmount"), value: remainingAmount, color: "warning.main" },
-  ];
+  const method = watch("paymentMethod");
+  const busy = loading || isSubmitting;
 
   return (
-    <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <AppDialog
+      open={open}
+      onClose={busy ? undefined : onClose}
+      maxWidth="sm"
+      fullWidth
+    >
       <DialogTitle>{t("recordPayment")}</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }} dir={isArabic ? "rtl" : "ltr"}>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <DialogContent dividers>
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
-              gap: 1.5,
+              gap: 2,
+              mb: 3,
             }}
           >
-            {summaryItems.map((item) => (
-              <Box
-                key={item.label}
-                sx={{
-                  p: 1.5,
-                  borderRadius: 1.5,
-                  bgcolor: "background.default",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  textAlign: "center",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{ color: "text.secondary", fontWeight: 500, display: "block", mb: 0.5 }}
-                >
-                  {item.label}
+            {[
+              { label: t("netAmount"), value: netAmount },
+              { label: t("paidAmount"), value: paidAmount },
+              { label: t("remainingAmount"), value: remainingAmount },
+            ].map(({ label, value }) => (
+              <Box key={label}>
+                <Typography variant="caption" color="text.secondary">
+                  {label}
                 </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 600,
-                    color: item.color,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {item.value.toLocaleString()}
+                <Typography fontWeight={600}>
+                  {Number(value).toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </Typography>
               </Box>
             ))}
           </Box>
-
-          <form
-            onSubmit={handleSubmit(handleFormSubmit)}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Controller
               name="amount"
               control={control}
+              rules={{
+                required: t("required"),
+                validate: (value) =>
+                  (Number(value) > 0 && Number(value) <= remainingAmount) ||
+                  `Amount must be between 0 and ${remainingAmount}`,
+              }}
               render={({ field }) => (
-                <AppInput
-                  label={t("paymentAmount")}
+                <TextField
+                  {...field}
+                  fullWidth
                   type="number"
-                  inputProps={{ min: 0, step: 0.01 }}
-                  value={field.value}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
+                  label={t("paymentAmount")}
+                  inputProps={{ min: 0.01, max: remainingAmount, step: 0.01 }}
+                  onChange={(event) =>
+                    field.onChange(
+                      event.target.value === ""
+                        ? 0
+                        : Number(event.target.value),
+                    )
+                  }
                   error={!!errors.amount}
                   helperText={errors.amount?.message}
                 />
               )}
             />
-          </form>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <AppButton
-          loading={loading}
-          onClick={handleSubmit(handleFormSubmit)}
-          variant="contained"
-        >
-          {t("recordPayment")}
-        </AppButton>
-        <AppButton variant="outlined" color="inherit" onClick={onClose}>
-          {t("cancel")}
-        </AppButton>
-      </DialogActions>
+            <Controller
+              name="paymentDate"
+              control={control}
+              rules={{ required: t("required") }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="date"
+                  label={t("date")}
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.paymentDate}
+                  helperText={errors.paymentDate?.message}
+                />
+              )}
+            />
+            <Controller
+              name="paymentMethod"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  fullWidth
+                  label={t("paymentMethod")}
+                >
+                  <MenuItem value="CASH">{t("cash")}</MenuItem>
+                  <MenuItem value="TRANSFER">{t("transfer")}</MenuItem>
+                </TextField>
+              )}
+            />
+            {method === "TRANSFER" && (
+              <Controller
+                name="referenceNumber"
+                control={control}
+                rules={{
+                  validate: (value) =>
+                    method !== "TRANSFER" || !!value?.trim() || t("required"),
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ""}
+                    fullWidth
+                    label={t("transferReferenceNumber")}
+                    error={!!errors.referenceNumber}
+                    helperText={errors.referenceNumber?.message}
+                  />
+                )}
+              />
+            )}
+            <Controller
+              name="notes"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label={t("notes")}
+                />
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <AppButton onClick={onClose} disabled={busy}>
+            {t("close")}
+          </AppButton>
+          <AppButton
+            type="submit"
+            variant="contained"
+            disabled={busy || remainingAmount <= 0}
+          >
+            {t("recordPayment")}
+          </AppButton>
+        </DialogActions>
+      </Box>
     </AppDialog>
   );
 }

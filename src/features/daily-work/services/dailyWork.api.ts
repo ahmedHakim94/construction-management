@@ -31,7 +31,7 @@ export const dailyWorkApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["DailyWork"],
+      invalidatesTags: ["DailyWork","Payments"],
     }),
 
     updateDailyWork: builder.mutation<
@@ -46,7 +46,7 @@ export const dailyWorkApi = baseApi.injectEndpoints({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["DailyWork"],
+      invalidatesTags: ["DailyWork","Payments"],
     }),
 
     deleteDailyWork: builder.mutation<
@@ -57,7 +57,7 @@ export const dailyWorkApi = baseApi.injectEndpoints({
         url: `/daily_works/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["DailyWork"],
+      invalidatesTags: ["DailyWork","Payments"],
     }),
   }),
 });

@@ -1,62 +1,40 @@
-import { useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import type { Payment } from "../types";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import type { PaymentSchemaValues } from "../schemas/payment.schema";
-import type { Contractor, ExternalContractor } from "@/features/contractors/types";
-import type { Project } from "@/features/settings/projects/types";
 
-export function usePaymentFilters(
-  payments: Payment[],
-  contractors: Contractor[],
-  externalContractors: ExternalContractor[],
-  projects: Project[],
-) {
-  const { t } = useTranslation();
+const DEFAULT_FILTERS: PaymentSchemaValues = {
+  search: "",
+  projectId: "",
+  year: "",
+  month: "",
+};
 
-  const form = useForm<PaymentSchemaValues>({
-    defaultValues: {
-      projectId: "",
-    },
+export function usePaymentFilters(onFiltersChange?: () => void) {
+  const { control, reset } = useForm<PaymentSchemaValues>({
+    defaultValues: DEFAULT_FILTERS,
   });
 
-  const projectId = form.watch("projectId");
+  const [search, projectId, year, month] = useWatch({
+    control,
+    name: ["search", "projectId", "year", "month"],
+  });
 
-  const paymentRows = useMemo(() => {
-    return payments
-      .filter((payment) => {
-        if (!projectId) return true;
-        return payment.projectId === projectId;
-      })
-      .map((payment) => {
-        const normalContractor = contractors.find(
-          (item) => item.id === payment.contractorId,
-        );
-        const externalContractor = externalContractors.find(
-          (item) => item.id === payment.contractorId,
-        );
-        const contractorName =
-          normalContractor?.name ?? externalContractor?.name ?? "";
+  useEffect(() => {
+    onFiltersChange?.();
+  }, [search, projectId, year, month, onFiltersChange]);
 
-        return {
-          ...payment,
-          projectName:
-            projects.find((item) => item.id === payment.projectId)?.name ?? "",
-          contractorName,
-          period: `${payment.startDate} - ${payment.endDate}`,
-          statusLabel:
-            payment.status === "UNPAID"
-              ? t("statusUnpaid")
-              : payment.status === "PARTIALLY_PAID"
-                ? t("statusPartiallyPaid")
-                : t("statusPaid"),
-        };
-      });
-  }, [payments, contractors, externalContractors, projects, projectId, t]);
+  const filters = {
+    search: search ?? "",
+    projectId: projectId ?? "",
+    year: year ?? "",
+    month: month ?? "",
+  };
+
+  const resetFilters = () => reset(DEFAULT_FILTERS);
 
   return {
-    control: form.control,
-    paymentRows,
+    control,
+    filters,
+    resetFilters,
   };
 }
-  

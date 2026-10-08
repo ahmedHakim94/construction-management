@@ -1,24 +1,29 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
-import type { Payment } from "../types";
-
-interface PaymentRow extends Payment {
-  projectName: string;
-  contractorName: string;
-  period: string;
-  statusLabel: string;
-}
+import type { PaymentSummary } from "../types";
+import type { TablePaginationProps } from "@/types";
+import { AppActions } from "@/components/ui/AppActions";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { Box, IconButton, Tooltip } from "@mui/material";
 
 interface PaymentTableProps {
-  rows: PaymentRow[];
-  onView: (payment: PaymentRow) => void;
-  onEdit?: (payment: PaymentRow) => void;
-  onDelete: (payment: PaymentRow) => void;
+  rows: PaymentSummary[];
+  loading?: boolean;
+  onEdit: (task: PaymentSummary) => void;
+  onDelete: (task: PaymentSummary) => void;
+  onView: (payment: PaymentSummary) => void;
+  pagination?: TablePaginationProps;
 }
 
-export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTableProps) {
+export function PaymentTable({
+  rows,
+  loading = false,
+  pagination,
+  onEdit,
+  onDelete,
+  onView,
+}: PaymentTableProps) {
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(
@@ -38,8 +43,10 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
       {
         field: "period",
         headerName: t("period"),
-        flex: 1.6,
-        minWidth: 200,
+        flex: 1,
+        minWidth: 140,
+        valueGetter: (_value, row) =>
+          `${String(row.month).padStart(2, "0")}/${row.year}`,
       },
       {
         field: "grossAmount",
@@ -72,32 +79,48 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
         minWidth: 140,
       },
       {
-        field: "createdAt",
-        headerName: t("createdDate"),
-        flex: 1,
-        minWidth: 140,
-      },
-      {
-        field: "statusLabel",
+        field: "status",
         headerName: t("status"),
         flex: 1,
         minWidth: 140,
+        valueGetter: (_value, row) => {
+          switch (row.status) {
+            case "PAID":
+              return t("paid");
+
+            case "PARTIALLY_PAID":
+              return t("partiallyPaid");
+
+            default:
+              return t("unpaid");
+          }
+        },
       },
       {
         field: "actions",
         headerName: t("actions"),
         sortable: false,
         filterable: false,
-        flex: 1.2,
+        flex: 1,
         minWidth: 150,
-        renderCell: ({ row }: { row: PaymentRow }) => (
-          <AppActions
-            onView={() => onView(row)}
-            onEdit={onEdit ? () => onEdit(row) : undefined}
-            viewTooltip={t("view")}
-            editTooltip={t("recordPayment")}
-            deleteTooltip={t("delete")}
-          />
+        renderCell: ({ row }: { row: PaymentSummary }) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Tooltip title={t("viewDetails")}>
+              <IconButton
+                size="small"
+                color="primary"
+                aria-label={t("viewDetails")}
+                onClick={() => onView(row)}
+              >
+                <VisibilityOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <AppActions
+              onEdit={() => onEdit(row)}
+              onDelete={() => onDelete(row)}
+            />
+          </Box>
         ),
       },
     ],
@@ -108,18 +131,41 @@ export function PaymentTable({ rows, onView, onEdit, onDelete }: PaymentTablePro
     <AppTable
       rows={rows}
       columns={columns}
-      getRowClassName={({ row }: { row: PaymentRow }) => {
+      loading={loading}
+      pagination={pagination}
+      getRowId={(row) =>
+        `${row.contractorId}-${row.projectId}-${row.year}-${row.month}`
+      }
+      getRowClassName={({ row }) => {
         if (row.status === "PAID") return "row-paid";
-        if (row.status === "PARTIALLY_PAID") return "row-partially-paid";
+        if (row.status === "PARTIALLY_PAID") {
+          return "row-partially-paid";
+        }
+
         return "row-unpaid";
       }}
       sx={{
-        "& .row-paid": { bgcolor: "success.light" },
-        "& .row-paid:hover": { bgcolor: "success.light", filter: "brightness(0.97)" },
-        "& .row-partially-paid": { bgcolor: "warning.light" },
-        "& .row-partially-paid:hover": { bgcolor: "warning.light", filter: "brightness(0.97)" },
-        "& .row-unpaid": { bgcolor: "error.light" },
-        "& .row-unpaid:hover": { bgcolor: "error.light", filter: "brightness(0.97)" },
+        "& .row-paid": {
+          bgcolor: "success.light",
+        },
+        "& .row-paid:hover": {
+          bgcolor: "success.light",
+          filter: "brightness(0.97)",
+        },
+        "& .row-partially-paid": {
+          bgcolor: "warning.light",
+        },
+        "& .row-partially-paid:hover": {
+          bgcolor: "warning.light",
+          filter: "brightness(0.97)",
+        },
+        "& .row-unpaid": {
+          bgcolor: "error.light",
+        },
+        "& .row-unpaid:hover": {
+          bgcolor: "error.light",
+          filter: "brightness(0.97)",
+        },
       }}
     />
   );
