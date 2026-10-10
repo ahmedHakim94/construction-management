@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { TaskTable } from "../components/TaskTable";
 import { TaskDialog } from "../components/TaskDialog";
@@ -64,15 +63,13 @@ export function TaskPage() {
           id: selectedTask.id,
           data: values,
         }).unwrap();
-        notify.success(t("updatedSuccessfully"));
       } else {
         await addTask(values).unwrap();
-        notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     }
   };
 
@@ -84,14 +81,13 @@ export function TaskPage() {
         return;
       }
       await deleteTask(selectedTask.id).unwrap();
-      notify.success(t("deletedSuccessfully"));
       if (tasks.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
       deleteDialog.closeDialog();
       setSelectedTask(undefined);
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     } finally {
       setDeleteLoading(false);
     }

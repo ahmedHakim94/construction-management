@@ -25,7 +25,7 @@ export function ContractorsReportTable({
         renderCell: ({ row }: { row: ContractorReport }) => (
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
             <span>{row.contractorName}</span>
-            {row.contractorId?.startsWith("external-") && (
+            {Boolean(row.isExternal) && (
               <Chip
                 label={t("dailyWork:external")}
                 size="small"

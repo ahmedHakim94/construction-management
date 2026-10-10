@@ -14,7 +14,6 @@ import { useGetProjectsQuery } from "@/features/settings/projects/services/proje
 import type { PaymentSummary, RecordPaymentFormValues } from "../types";
 import { RecordPaymentDialog } from "../components/RecordPaymentDialog";
 import { PaymentDetailsDialog } from "../components/PaymentDetailsDialog";
-import { notify } from "@/shared/utils/notify";
 
 const LIMIT = 10;
 
@@ -74,11 +73,9 @@ export function PaymentPage() {
         notes: values.notes,
       }).unwrap();
 
-      notify.success("تم تسجيل الدفعة بنجاح");
       setSelectedPayment(null);
     } catch (error) {
       console.error("Failed to record payment:", error);
-      notify.error("فشل تسجيل الدفعة");
     }
   };
 

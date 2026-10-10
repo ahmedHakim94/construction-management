@@ -9,7 +9,10 @@ export interface DailyWorkReportTableProps {
   isLoading: boolean;
 }
 
-export function DailyWorkReportTable({ rows, isLoading }: DailyWorkReportTableProps) {
+export function DailyWorkReportTable({
+  rows,
+  isLoading,
+}: DailyWorkReportTableProps) {
   const { t } = useTranslation(["reports", "dailyWork"]);
 
   const columns = useMemo<AppTableColDef[]>(
@@ -34,7 +37,7 @@ export function DailyWorkReportTable({ rows, isLoading }: DailyWorkReportTablePr
         renderCell: ({ row }: { row: DailyWorkReport }) => (
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
             <span>{row.contractorName}</span>
-            {row.contractorId?.startsWith("external-") && (
+            {Boolean(row.isExternal) && (
               <Chip
                 label={t("dailyWork:external")}
                 size="small"

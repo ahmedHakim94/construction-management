@@ -6,7 +6,6 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { EquipmentTable } from "../components/EquipmentTable";
 import { EquipmentDialog } from "../components/EquipmentDialog";
@@ -76,12 +75,10 @@ export function EquipmentPage() {
         }).unwrap();
       } else {
         await addEquipment(values).unwrap();
-        notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
     } catch (error) {
-      notify.error(t("somethingWentWrong"));
       console.error(error);
       throw error;
     }
@@ -96,14 +93,13 @@ export function EquipmentPage() {
       }
 
       await deleteEquipment(selectedEquipment.id).unwrap();
-      notify.success(t("deletedSuccessfully"));
       if (equipment.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
       deleteDialog.closeDialog();
       setSelectedEquipment(undefined);
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     } finally {
       setDeleteLoading(false);
     }

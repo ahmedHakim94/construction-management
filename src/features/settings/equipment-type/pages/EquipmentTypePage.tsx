@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { EquipmentTypeTable } from "../components/EquipmentTypeTable";
 import { EquipmentTypeDialog } from "../components/EquipmentTypeDialog";
@@ -66,15 +65,13 @@ export function EquipmentTypePage() {
           id: selectedEquipmentType.id,
           data: values,
         }).unwrap();
-        notify.success(t("updatedSuccessfully"));
       } else {
         await addEquipmentType(values).unwrap();
-        notify.success(t("created successfully"));
       }
 
       handleCloseDialog();
     } catch {
-      notify.error(t("something went wrong"));
+      // error handled globally
     }
   };
 
@@ -85,14 +82,13 @@ export function EquipmentTypePage() {
         return;
       }
       await deleteEquipmentType(selectedEquipmentType.id).unwrap();
-      notify.success(t("deletedSuccessfully"));
       if (equipmentTypes.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
       deleteDialog.closeDialog();
       setSelectedEquipmentType(undefined);
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     } finally {
       setDeleteLoading(false);
     }

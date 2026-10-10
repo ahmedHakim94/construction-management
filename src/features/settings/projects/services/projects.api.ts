@@ -103,6 +103,13 @@ export const projectApi = baseApi.injectEndpoints({
 
       invalidatesTags: ["Projects"],
     }),
+
+    getAllProjects: builder.query<Project[], void>({
+      query: () => "/projects/all",
+      transformResponse: (response: { success: boolean; data: Project[] }) =>
+        response.data,
+      providesTags: ["Projects"],
+    }),
   }),
 });
 
@@ -112,4 +119,5 @@ export const {
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useGetAllProjectsQuery,
 } = projectApi;

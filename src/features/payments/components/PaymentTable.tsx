@@ -118,7 +118,7 @@ export function PaymentTable({
 
             <AppActions
               onEdit={() => onEdit(row)}
-              onDelete={() => onDelete(row)}
+              // onDelete={() => onDelete(row)}
             />
           </Box>
         ),

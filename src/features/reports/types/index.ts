@@ -45,12 +45,14 @@ export interface DailyWorkReport {
   deduction: number;
   deductionReason?: string;
   netAmount: number;
+  isExternal?: boolean;
 }
 
 export interface ContractorReport {
   id: string; // contractorId, required for AppCustomTable
   contractorId: string;
   contractorName: string;
+  isExternal?: boolean;
   equipmentCount: number;
   totalWorkingHours: number;
   totalCost: number;

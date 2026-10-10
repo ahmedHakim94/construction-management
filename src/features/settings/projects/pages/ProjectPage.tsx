@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
-import { notify } from "@/shared/utils/notify";
 import { useDialog } from "@/hooks/useDialog";
 import { ProjectTable } from "../components/ProjectTable";
 import { ProjectDialog } from "../components/ProjectDialog";
@@ -61,15 +60,13 @@ export function ProjectPage() {
     try {
       if (mode === "edit" && selectedProject) {
         await updateProject({ id: selectedProject.id, data: values }).unwrap();
-        notify.success(t("updatedSuccessfully"));
       } else {
         await addProject(values).unwrap();
-        notify.success(t("createdSuccessfully"));
       }
 
       handleCloseDialog();
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     }
   };
 
@@ -82,14 +79,13 @@ export function ProjectPage() {
       }
 
       await deleteProject(selectedProject.id).unwrap();
-      notify.success(t("deletedSuccessfully"));
       if (projects.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
       deleteDialog.closeDialog();
       setSelectedProject(undefined);
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     } finally {
       setDeleteLoading(false);
     }

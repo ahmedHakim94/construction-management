@@ -25,12 +25,13 @@ export interface DashboardPayment {
 }
 
 export interface DashboardDailyWork {
-  id: string;
+  id: number;
   date: string;
-  projectId?: string;
-  contractorId?: string;
+  projectId?: number;
+  contractorId?: number;
   projectName: string;
   contractorName: string;
+  isExternal?: boolean | number;
   equipmentName: string;
   taskName: string;
   workingHours: number;
@@ -38,10 +39,10 @@ export interface DashboardDailyWork {
 }
 
 export interface DashboardProjectWork {
-  id: string;
-  projectId: string;
+  projectId: number;
   projectName: string;
-  workRecords: number;
   workingHours: number;
   totalCost: number;
+  totalDeductions: number;
+  netAmount: number;
 }

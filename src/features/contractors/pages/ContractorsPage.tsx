@@ -9,7 +9,6 @@ import { ContractorDialog } from "../components/ContractorDialog";
 import type { Contractor, ContractorFormValues } from "../types";
 import { useDialog } from "@/hooks/useDialog";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
-import { notify } from "@/shared/utils/notify";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import {
   useCreateContractorMutation,
@@ -74,18 +73,13 @@ export function ContractorsPage() {
           id: selectedContractor.id,
           data: values,
         }).unwrap();
-
-        notify.success(t("updatedSuccessfully"));
       } else {
         await createContractor(values).unwrap();
-
-        notify.success(t("createdSuccessfully"));
       }
 
       // handleCloseDialog();
     } catch (error) {
       console.error(error);
-      notify.error(t("somethingWentWrong"));
       throw error;
     }
   };
@@ -98,14 +92,13 @@ export function ContractorsPage() {
     try {
       await deleteContractor(selectedContractor.id).unwrap();
 
-      notify.success(t("deletedSuccessfully"));
       if (contractors.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
       deleteDialog.closeDialog();
       setSelectedContractor(undefined);
     } catch {
-      notify.error(t("somethingWentWrong"));
+      // error handled globally
     } finally {
       setDeleteLoading(false);
     }

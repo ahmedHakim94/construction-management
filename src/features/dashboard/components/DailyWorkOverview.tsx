@@ -22,13 +22,6 @@ export function DailyWorkOverview({
   const { t } = useTranslation(["dashboard", "dailyWork"]);
   const navigate = useNavigate();
 
-  // Show only the latest 10 records sorted by date descending
-  const recentRecords = useMemo(() => {
-    return [...dailyWork]
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 10);
-  }, [dailyWork]);
-
   const columns = useMemo<AppTableColDef[]>(
     () => [
       {
@@ -51,7 +44,7 @@ export function DailyWorkOverview({
         renderCell: ({ row }: { row: DashboardDailyWork }) => (
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
             <span>{row.contractorName}</span>
-            {row.contractorId?.startsWith("external-") && (
+            {Boolean(row.isExternal) && (
               <Chip
                 label={t("dailyWork:external")}
                 size="small"
@@ -110,10 +103,7 @@ export function DailyWorkOverview({
           mb: 3,
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 700, textAlign: "start" }}
-        >
+        <Typography variant="h6" sx={{ fontWeight: 700, textAlign: "start" }}>
           {t("dashboard:recentDailyWork")}
         </Typography>
         <AppButton
@@ -126,7 +116,7 @@ export function DailyWorkOverview({
       </Box>
 
       <AppCustomTable
-        rows={recentRecords}
+        rows={dailyWork.slice(0, 5)}
         columns={columns}
         loading={isLoading}
         noRowsLabel={t("dashboard:noDailyWorkRecordsFound")}
