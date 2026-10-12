@@ -13,5 +13,33 @@
   "addProject": "Add Project",
   "editProject": "Edit Project",
   "deleteProject": "Delete Project",
-  "projectName": "Project Name"
+  "projectName": "Project Name",
+  "permissions": {
+    "title": "Permissions Management",
+    "description": "Configure shared permissions for all User accounts.",
+    "roleInfo": "Demo only: settings are saved in this browser, and do not enforce access until the API is connected.",
+    "userRole": "User permissions",
+    "save": "Save permissions",
+    "discard": "Discard changes",
+    "saved": "Permissions saved locally.",
+    "error": "Could not save permissions.",
+    "actions": {
+      "view": "View",
+      "create": "Create",
+      "edit": "Edit",
+      "delete": "Delete",
+      "export": "Export"
+    },
+    "modules": {
+      "dashboard": "Dashboard",
+      "contractors": "Contractors",
+      "equipment": "Equipment",
+      "equipmentTypes": "Equipment Types",
+      "projects": "Projects",
+      "tasks": "Tasks",
+      "dailyWork": "Daily Work",
+      "payments": "Payments",
+      "reports": "Reports"
+    }
+  }
 }

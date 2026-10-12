@@ -1,61 +1,47 @@
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
 import { AppInput, AppPasswordInput } from "@/components/ui";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setCredentials } from "@/features/auth/store/authSlice";
-import { login } from "@/features/auth/services/auth.service";
-import { notify } from "@/shared/utils/notify";
-import { ROUTE_PATHS } from "@/app/router/routeConstants";
-
 import { loginSchema } from "../schemas/login.schema";
 import type { LoginFormData } from "../schemas/login.schema";
+import { useLoginMutation } from "../services/authApi";
+import { ROUTE_PATHS } from "@/app/router";
 
 export function LoginForm() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation("auth");
 
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const { control, handleSubmit } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
+  const [login, { isLoading }] = useLoginMutation();
 
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await login(data.username, data.password);
+      const response = await login(data).unwrap();
 
       dispatch(
         setCredentials({
           user: response.user,
           token: response.token,
-          refreshToken: response.refreshToken,
         }),
       );
 
-      navigate(ROUTE_PATHS.dashboard);
+      navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === "InvalidCredentials"
-      ) {
-        notify.error(t("invalidCredentials"));
-      } else {
-        notify.error(t("somethingWentWrong"));
-      }
-    } finally {
-      setIsLoading(false);
+      console.error("Login failed:", error);
     }
   };
 
@@ -81,19 +67,17 @@ export function LoginForm() {
         <Stack spacing={3}>
           {/* Username */}
           <Controller
-            name="username"
+            name="email"
             control={control}
             render={({ field, fieldState }) => (
               <AppInput
                 {...field}
-                label={t("username")}
-                placeholder={t("usernamePlaceholder")}
+                label={t("email")}
+                placeholder={t("emailPlaceholder")}
                 error={!!fieldState.error}
                 helperText={fieldState.error?.message}
                 slotProps={{
-                  inputLabel: {
-                    shrink: true,
-                  },
+                  inputLabel: { shrink: true },
                 }}
               />
             )}

@@ -8,6 +8,8 @@ import {
 
 import { API_CONFIG } from "../config/api";
 import { notify } from "@/shared/utils/notify";
+import { logout } from "@/features/auth/store/authSlice";
+import type { RootState } from "@/app/store/store";
 
 type ApiResponse = {
   success?: boolean;
@@ -17,6 +19,16 @@ type ApiResponse = {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_CONFIG.baseURL,
+
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as RootState).auth.token;
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    return headers;
+  },
 });
 
 const getMessage = (data: unknown): string | undefined => {
@@ -42,6 +54,20 @@ const baseQueryWithNotifications: BaseQueryFn<
     typeof args === "string" ? "GET" : (args.method ?? "GET").toUpperCase();
 
   if (result.error) {
+    const url = typeof args === "string" ? args : args.url;
+    const isLoginRequest = url.split("?")[0] === "/auth/login";
+
+    const token = (api.getState() as RootState).auth.token;
+
+    // Auto logout when an authenticated request returns 401.
+    if (result.error.status === 401 && token && !isLoginRequest) {
+      api.dispatch(logout());
+
+      notify.error("انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى");
+
+      return result;
+    }
+
     notify.error(
       getMessage(result.error.data) ??
         "حدث خطأ أثناء تنفيذ العملية، يرجى المحاولة مرة أخرى",

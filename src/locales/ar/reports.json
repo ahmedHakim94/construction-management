@@ -24,5 +24,11 @@
   "totalPaid": "إجمالي المدفوع",
   "remaining": "المتبقي",
   "noContractorsReport": "لم يتم العثور على مقاولين.",
-  "noProjectsReport": "لم يتم العثور على مشاريع."
+  "noProjectsReport": "لم يتم العثور على مشاريع.",
+  "export": "تصدير",
+  "exportExcel": "تصدير Excel (.xlsx)",
+  "exportPdf": "تصدير PDF (.pdf)",
+  "exportDate": "تاريخ التصدير",
+  "dateFilterLabel": "الفترة",
+  "page": "صفحة"
 }

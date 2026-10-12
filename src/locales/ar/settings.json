@@ -13,5 +13,33 @@
   "addProject": "إضافة مشروع",
   "editProject": "تعديل مشروع",
   "deleteProject": "حذف مشروع",
-  "projectName": "اسم المشروع"
+  "projectName": "اسم المشروع",
+   "permissions": {
+    "title": "إدارة الصلاحيات",
+    "description": "تحديد الصلاحيات المشتركة لجميع المستخدمين من نوع User.",
+    "roleInfo": "هذه نسخة تجريبية: الحفظ محلي على هذا المتصفح فقط، ولا يطبق أي حماية فعلية حتى ربط الـAPI.",
+    "userRole": "صلاحيات User",
+    "save": "حفظ الصلاحيات",
+    "discard": "إلغاء التغييرات",
+    "saved": "تم حفظ الاختيارات محليًا.",
+    "error": "تعذر حفظ الاختيارات.",
+    "actions": {
+      "view": "عرض",
+      "create": "إضافة",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "export": "تصدير"
+    },
+    "modules": {
+      "dashboard": "لوحة التحكم",
+      "contractors": "المقاولون",
+      "equipment": "المعدات",
+      "equipmentTypes": "أنواع المعدات",
+      "projects": "المشاريع",
+      "tasks": "المهام",
+      "dailyWork": "الأعمال اليومية",
+      "payments": "المدفوعات",
+      "reports": "التقارير"
+    }
+  }
 }

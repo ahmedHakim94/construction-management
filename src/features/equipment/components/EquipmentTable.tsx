@@ -29,12 +29,12 @@ export function EquipmentTable({
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
-      {
-        field: "id",
-        headerName: t("equipmentNumber"),
-        flex: 1,
-        minWidth: 140,
-      },
+      // {
+      //   field: "id",
+      //   headerName: t("equipmentNumber"),
+      //   flex: 1,
+      //   minWidth: 140,
+      // },
       {
         field: "contractorName",
         headerName: t("contractorName"),

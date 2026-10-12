@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/app/store/hooks";
 import { logout } from "@/features/auth/store/authSlice";
 import { ROUTE_PATHS } from "@/app/router/routeConstants";
+import { baseApi } from "@/core/api/baseApi";
 
 interface HeaderProps {
   locale?: "en" | "ar";
@@ -28,10 +29,13 @@ export function Header({ onSidebarToggle }: HeaderProps) {
   };
 
   const handleLogout = () => {
-    handleCloseMenu();
-    dispatch(logout());
-    navigate(ROUTE_PATHS.login);
-  };
+  handleCloseMenu();
+
+  dispatch(logout());
+  dispatch(baseApi.util.resetApiState());
+
+  navigate(ROUTE_PATHS.login, { replace: true });
+};
 
   return (
     <Box

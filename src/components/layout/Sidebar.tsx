@@ -7,6 +7,7 @@ import {
   Handyman,
   Paid,
   Settings,
+  Shield,
   WorkHistory,
 } from "@mui/icons-material";
 import {
@@ -92,6 +93,11 @@ const navigationItems: SidebarItem[] = [
         key: "projects",
         path: "/settings/projects",
         icon: Build,
+      },
+      {
+        key: "permissions",
+        path: "/settings/permissions",
+        icon: Shield,
       },
     ],
   },

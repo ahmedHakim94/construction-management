@@ -24,5 +24,6 @@
   "createdSuccessfully": "Created successfully",
   "updatedSuccessfully": "Updated successfully",
   "home": "Dashboard",
-  "external": "External"
+  "external": "External",
+  "permissions": "Permissions"
 }

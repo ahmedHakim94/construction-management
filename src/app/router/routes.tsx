@@ -17,6 +17,7 @@ const ReportsPage = lazy(() => import("@/features/reports/pages/ReportsPage").th
 const EquipmentTypePage = lazy(() => import("@/features/settings/equipment-type/pages/EquipmentTypePage").then(m => ({ default: m.EquipmentTypePage })));
 const TaskPage = lazy(() => import("@/features/settings/task/pages/TaskPage").then(m => ({ default: m.TaskPage })));
 const ProjectPage = lazy(() => import("@/features/settings/projects/pages/ProjectPage").then(m => ({ default: m.ProjectPage })));
+const PermissionsPage = lazy(() => import("@/features/settings/permissions/pages/PermissionsPage").then(m => ({ default: m.PermissionsPage })));
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -90,6 +91,10 @@ export const router = createBrowserRouter([
           {
             path: "settings/projects",
             element: <ProjectPage />,
+          },
+          {
+            path: "settings/permissions",
+            element: <PermissionsPage />,
           },
           {
             path: "daily-work",

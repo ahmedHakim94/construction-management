@@ -52,6 +52,14 @@
   "project": "المشروع",
   "selectProject": "اختر المشروع",
   "allProjects": "كل المشاريع",
-  "cannotDeleteDailyWorkWithPayment": "لا يمكن حذف سجل العمل اليومي لوجود دفعة مالية مرتبطة به."
+  "cannotDeleteDailyWorkWithPayment": "لا يمكن حذف سجل العمل اليومي لوجود دفعة مالية مرتبطة به.",
+  "date": "التاريخ",
+  "paymentMethod": "طريقة الدفع",
+  "transferReferenceNumber": "رقم الحوالة المرجعي",
+  "cash": "نقداً",
+  "transfer": "تحويل بنكي",
+  "export": "تصدير",
+  "exportExcel": "تصدير Excel (.xlsx)",
+  "exportPdf": "تصدير PDF (.pdf)"
 }
 

@@ -24,5 +24,11 @@
   "totalPaid": "Total Paid",
   "remaining": "Remaining",
   "noContractorsReport": "No contractors found.",
-  "noProjectsReport": "No projects found."
+  "noProjectsReport": "No projects found.",
+  "export": "Export",
+  "exportExcel": "Export Excel (.xlsx)",
+  "exportPdf": "Export PDF (.pdf)",
+  "exportDate": "Export Date",
+  "dateFilterLabel": "Date Range",
+  "page": "Page"
 }

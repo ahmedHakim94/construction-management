@@ -24,5 +24,6 @@
   "createdSuccessfully": "تم الإنشاء بنجاح",
   "updatedSuccessfully": "تم التحديث بنجاح",
   "home": "الصفحه الرئيسية",
-  "external": "خارجي"
+  "external": "خارجي",
+  "permissions": "الصلاحيات"
 }

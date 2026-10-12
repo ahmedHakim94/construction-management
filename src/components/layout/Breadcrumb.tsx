@@ -22,6 +22,7 @@ export function Breadcrumb() {
       "equipment-types": "equipmentTypes",
       projects: "projects",
       tasks: "tasks",
+      permissions: "permissions",
     };
 
     const key = translationKeyMap[segment];

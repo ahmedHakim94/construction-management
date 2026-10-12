@@ -25,12 +25,12 @@ export function ContractorsTable({
   const { t } = useTranslation();
 
   const columns = useMemo<AppTableColDef[]>(() => [
-    {
-      field: "id",
-      headerName: t("#"),
-      flex: 1,
-      minWidth: 120,
-    },
+    // {
+    //   field: "id",
+    //   headerName: t("#"),
+    //   flex: 1,
+    //   minWidth: 120,
+    // },
     {
       field: "name",
       headerName: t("name"),

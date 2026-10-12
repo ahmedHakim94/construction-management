@@ -1,10 +1,7 @@
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
-
 import constructionBg from "@/assets/images/construction-login.png";
-
 import { LoginForm } from "../components/LoginForm";
-
 import "../styles/login.scss";
 import BoxOverLayer from "../components/BoxOverLayer";
 
@@ -20,12 +17,6 @@ export function LoginPage() {
      <Box className="login-page__content">
         <Box className="login-page__card">
           <LoginForm />
-
-          {/* <Typography className="login-page__copyright">
-            {t("copyright", {
-              year: new Date().getFullYear(),
-            })}
-          </Typography> */}
         </Box>
       </Box>
       <Box
