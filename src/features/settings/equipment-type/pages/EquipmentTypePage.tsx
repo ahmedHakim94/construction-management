@@ -15,11 +15,13 @@ import {
   useGetEquipmentTypesQuery,
   useUpdateEquipmentTypeMutation,
 } from "../services/equipmentType.api";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const LIMIT = 10;
 
 export function EquipmentTypePage() {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
   const [selectedEquipmentType, setSelectedEquipmentType] = useState<
     EquipmentType | undefined
@@ -102,13 +104,15 @@ export function EquipmentTypePage() {
           description={t("equipmentTypesDescription")}
           actions={
             <>
-              <AppButton
-                variant="contained"
-                startIcon={<Category />}
-                onClick={handleOpenCreate}
-              >
-                {t("addEquipmentType")}
-              </AppButton>
+              {hasPermission("equipmentTypes.create") && (
+                <AppButton
+                  variant="contained"
+                  startIcon={<Category />}
+                  onClick={handleOpenCreate}
+                >
+                  {t("addEquipmentType")}
+                </AppButton>
+              )}
             </>
           }
         />

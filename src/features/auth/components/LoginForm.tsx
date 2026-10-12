@@ -39,7 +39,7 @@ export function LoginForm() {
         }),
       );
 
-      navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
+      navigate(ROUTE_PATHS.dashboard, { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
     }

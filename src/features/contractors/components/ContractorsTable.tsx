@@ -6,6 +6,7 @@ import type { TablePaginationProps } from "@/types";
 import type { Contractor } from "../types";
 import { useMemo } from "react";
 import { AppActions } from "@/components/ui/AppActions";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface ContractorsTableProps {
   rows: Contractor[];
@@ -23,6 +24,11 @@ export function ContractorsTable({
   onDelete,
 }: ContractorsTableProps) {
   const { t } = useTranslation();
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission("contractors.edit");
+  const canDelete = hasPermission("contractors.delete");
+  const hasActions = canEdit || canDelete;
 
   const columns = useMemo<AppTableColDef[]>(() => [
     // {
@@ -62,21 +68,25 @@ export function ContractorsTable({
       flex: 1,
       minWidth: 140,
     },
-    {
-      field: "actions",
-      headerName: t("actions"),
-      sortable: false,
-      filterable: false,
-      flex: 0.8,
-      minWidth: 110,
-      renderCell: ({ row }: { row: Contractor }) => (
-        <AppActions
-          onEdit={() => onEdit(row)}
-          onDelete={() => onDelete(row)}
-        />
-      ),
-    },
-  ], [t, onEdit, onDelete]);
+    ...(hasActions
+      ? [
+          {
+            field: "actions",
+            headerName: t("actions"),
+            sortable: false,
+            filterable: false,
+            flex: 0.8,
+            minWidth: 110,
+            renderCell: ({ row }: { row: Contractor }) => (
+              <AppActions
+                onEdit={canEdit ? () => onEdit(row) : undefined}
+                onDelete={canDelete ? () => onDelete(row) : undefined}
+              />
+            ),
+          },
+        ]
+      : []),
+  ], [t, onEdit, onDelete, canEdit, canDelete, hasActions]);
 
   return (
     <AppTable

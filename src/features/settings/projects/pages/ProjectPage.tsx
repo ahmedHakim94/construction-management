@@ -15,6 +15,7 @@ import {
   useGetProjectsQuery,
   useUpdateProjectMutation,
 } from "../services/projects.api";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const LIMIT = 3;
 
@@ -91,6 +92,8 @@ export function ProjectPage() {
     }
   };
 
+  const { hasPermission } = usePermissions();
+
   return (
     <PageContainer>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -99,13 +102,15 @@ export function ProjectPage() {
           description={t("projectsDescription")}
           actions={
             <>
-              <AppButton
-                variant="contained"
-                startIcon={<AddBusiness />}
-                onClick={handleOpenCreate}
-              >
-                {t("addProject")}
-              </AppButton>
+              {hasPermission("projects.create") && (
+                <AppButton
+                  variant="contained"
+                  startIcon={<AddBusiness />}
+                  onClick={handleOpenCreate}
+                >
+                  {t("addProject")}
+                </AppButton>
+              )}
             </>
           }
         />

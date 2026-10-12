@@ -1,3 +1,4 @@
+
 import {
   Assessment,
   Build,
@@ -26,6 +27,9 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { SvgIconComponent } from "@mui/icons-material";
 
+import { useAppSelector } from "@/app/store/hooks";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+
 interface SidebarProps {
   open?: boolean;
   mobileOpen?: boolean;
@@ -36,6 +40,8 @@ interface SidebarItem {
   key: string;
   path: string;
   icon: SvgIconComponent;
+  permission?: string;
+  adminOnly?: boolean;
   children?: SidebarItem[];
 }
 
@@ -48,31 +54,37 @@ const navigationItems: SidebarItem[] = [
     key: "dashboard",
     path: "/dashboard",
     icon: DashboardRounded,
+    permission: "dashboard.view",
   },
   {
     key: "contractors",
     path: "/contractors",
     icon: Handyman,
+    permission: "contractors.view",
   },
   {
     key: "equipment",
     path: "/equipment",
     icon: Build,
+    permission: "equipment.view",
   },
   {
     key: "dailyWork",
     path: "/daily-work",
     icon: WorkHistory,
+    permission: "dailyWork.view",
   },
   {
     key: "payments",
     path: "/payments",
     icon: Paid,
+    permission: "payments.view",
   },
   {
     key: "reports",
     path: "/reports",
     icon: Assessment,
+    permission: "reports.view",
   },
   {
     key: "settings",
@@ -83,31 +95,70 @@ const navigationItems: SidebarItem[] = [
         key: "equipmentTypes",
         path: "/settings/equipment-types",
         icon: Build,
+        permission: "equipmentTypes.view",
       },
       {
         key: "tasks",
         path: "/settings/tasks",
         icon: Assessment,
+        permission: "tasks.view",
       },
       {
         key: "projects",
         path: "/settings/projects",
         icon: Build,
+        permission: "projects.view",
       },
       {
         key: "permissions",
         path: "/settings/permissions",
         icon: Shield,
+        adminOnly: true,
+        permission: "permissions.view",
       },
     ],
   },
 ];
 
+function filterNavigation(
+  items: SidebarItem[],
+  hasPermission: (permission: string) => boolean,
+  isAdmin: boolean,
+): SidebarItem[] {
+  return items.flatMap((item) => {
+    if (item.adminOnly && !isAdmin) {
+      return [];
+    }
 
-function isPathActive(currentPath: string, itemPath: string, hasChildren: boolean) {
+    if (item.permission && !hasPermission(item.permission)) {
+      return [];
+    }
+
+    if (item.children) {
+      const children = filterNavigation(
+        item.children,
+        hasPermission,
+        isAdmin,
+      );
+
+      return children.length > 0
+        ? [{ ...item, children }]
+        : [];
+    }
+
+    return [item];
+  });
+}
+
+function isPathActive(
+  currentPath: string,
+  itemPath: string,
+  hasChildren: boolean,
+) {
   if (hasChildren) {
     return currentPath.startsWith(itemPath);
   }
+
   return currentPath === itemPath;
 }
 
@@ -119,34 +170,56 @@ export function Sidebar({
   const location = useLocation();
   const { t } = useTranslation();
 
+  const { hasPermission } = usePermissions();
+
+  const isAdmin = useAppSelector(
+    (state) => state.auth.user?.role === "admin",
+  );
+
+  const visibleNavigationItems = filterNavigation(
+    navigationItems,
+    hasPermission,
+    isAdmin,
+  );
+
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => {
     const initial = new Set<string>();
+
     navigationItems.forEach((item) => {
-      if (item.children?.length && location.pathname.startsWith(item.path)) {
+      if (
+        item.children?.length &&
+        location.pathname.startsWith(item.path)
+      ) {
         initial.add(item.key);
       }
     });
+
     return initial;
   });
 
   const toggleExpand = useCallback((key: string) => {
     setOpenKeys((prev) => {
       const next = new Set(prev);
+
       if (next.has(key)) {
         next.delete(key);
       } else {
         next.add(key);
       }
+
       return next;
     });
   }, []);
-
 
   const renderItem = (item: SidebarItem, nested = false) => {
     const Icon = item.icon;
     const hasChildren = Boolean(item.children?.length);
     const isExpanded = openKeys.has(item.key);
-    const isActive = isPathActive(location.pathname, item.path, hasChildren);
+    const isActive = isPathActive(
+      location.pathname,
+      item.path,
+      hasChildren,
+    );
 
     return (
       <Box key={item.path}>
@@ -168,13 +241,21 @@ export function Sidebar({
             px: 1.5,
             py: 0.5,
             pl: nested ? 4 : 1.5,
-            color: isActive ? "primary.contrastText" : "text.secondary",
-            bgcolor: isActive ? "primary.main" : "transparent",
+            color: isActive
+              ? "primary.contrastText"
+              : "text.secondary",
+            bgcolor: isActive
+              ? "primary.main"
+              : "transparent",
             justifyContent: open ? "flex-start" : "center",
             transition: "all 0.15s ease",
             "&:hover": {
-              bgcolor: isActive ? "primary.main" : "action.hover",
-              color: isActive ? "primary.contrastText" : "text.primary",
+              bgcolor: isActive
+                ? "primary.main"
+                : "action.hover",
+              color: isActive
+                ? "primary.contrastText"
+                : "text.primary",
             },
           }}
         >
@@ -198,17 +279,21 @@ export function Sidebar({
             />
           )}
 
-          {hasChildren && open && (
-            isExpanded ? (
+          {hasChildren &&
+            open &&
+            (isExpanded ? (
               <ExpandLess fontSize="small" />
             ) : (
               <ExpandMore fontSize="small" />
-            )
-          )}
+            ))}
         </ListItemButton>
 
         {hasChildren && open && (
-          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <Collapse
+            in={isExpanded}
+            timeout="auto"
+            unmountOnExit
+          >
             <List
               disablePadding
               sx={{
@@ -218,7 +303,9 @@ export function Sidebar({
                 gap: 0.25,
               }}
             >
-              {item.children!.map((child) => renderItem(child, true))}
+              {item.children?.map((child) =>
+                renderItem(child, true),
+              )}
             </List>
           </Collapse>
         )}
@@ -249,7 +336,9 @@ export function Sidebar({
             px: 1.5,
             py: 0.25,
             display: "flex",
-            justifyContent: open ? "flex-start" : "center",
+            justifyContent: open
+              ? "flex-start"
+              : "center",
           }}
         >
           <Typography
@@ -265,6 +354,7 @@ export function Sidebar({
             CM
           </Typography>
         </Box>
+
         <List
           disablePadding
           sx={{
@@ -273,7 +363,9 @@ export function Sidebar({
             gap: 0.4,
           }}
         >
-          {navigationItems.map((item) => renderItem(item))}
+          {visibleNavigationItems.map((item) =>
+            renderItem(item),
+          )}
         </List>
       </Stack>
     </Box>

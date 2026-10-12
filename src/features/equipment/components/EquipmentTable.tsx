@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { Equipment } from "../types";
 import { AppActions } from "@/components/ui/AppActions";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface EquipmentTableProps {
   rows: Equipment[];
@@ -26,6 +27,11 @@ export function EquipmentTable({
   pagination,
 }: EquipmentTableProps) {
   const { t } = useTranslation();
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission("equipment.edit");
+  const canDelete = hasPermission("equipment.delete");
+  const hasActions = canEdit || canDelete;
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
@@ -79,22 +85,26 @@ export function EquipmentTable({
         flex: 1.2,
         minWidth: 180,
       },
-      {
-        field: "actions",
-        headerName: t("actions"),
-        sortable: false,
-        filterable: false,
-        flex: 0.8,
-        minWidth: 110,
-        renderCell: ({ row }: { row: Equipment }) => (
-          <AppActions
-            onEdit={() => onEdit(row)}
-            onDelete={() => onDelete(row)}
-          />
-        ),
-      },
+      ...(hasActions
+        ? [
+            {
+              field: "actions",
+              headerName: t("actions"),
+              sortable: false,
+              filterable: false,
+              flex: 0.8,
+              minWidth: 110,
+              renderCell: ({ row }: { row: Equipment }) => (
+                <AppActions
+                  onEdit={canEdit ? () => onEdit(row) : undefined}
+                  onDelete={canDelete ? () => onDelete(row) : undefined}
+                />
+              ),
+            },
+          ]
+        : []),
     ],
-    [t],
+    [t, onEdit, onDelete, canEdit, canDelete, hasActions],
   );
 
   const rowsWithId = useMemo(

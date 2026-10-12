@@ -6,12 +6,12 @@ import type { TablePaginationProps } from "@/types";
 import { AppActions } from "@/components/ui/AppActions";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Tooltip } from "@mui/material";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface PaymentTableProps {
   rows: PaymentSummary[];
   loading?: boolean;
   onEdit: (task: PaymentSummary) => void;
-  onDelete: (task: PaymentSummary) => void;
   onView: (payment: PaymentSummary) => void;
   pagination?: TablePaginationProps;
 }
@@ -21,10 +21,14 @@ export function PaymentTable({
   loading = false,
   pagination,
   onEdit,
-  onDelete,
   onView,
 }: PaymentTableProps) {
   const { t } = useTranslation();
+
+  const { hasPermission } = usePermissions();
+  const canView = hasPermission("payments.view");
+  const canRecordPayment = hasPermission("payments.create");
+  const hasActions = canView || canRecordPayment;
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
@@ -96,35 +100,40 @@ export function PaymentTable({
           }
         },
       },
-      {
-        field: "actions",
-        headerName: t("actions"),
-        sortable: false,
-        filterable: false,
-        flex: 1,
-        minWidth: 150,
-        renderCell: ({ row }: { row: PaymentSummary }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Tooltip title={t("viewDetails")}>
-              <IconButton
-                size="small"
-                color="primary"
-                aria-label={t("viewDetails")}
-                onClick={() => onView(row)}
-              >
-                <VisibilityOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+      ...(hasActions
+        ? [
+            {
+              field: "actions",
+              headerName: t("actions"),
+              sortable: false,
+              filterable: false,
+              flex: 1,
+              minWidth: 150,
+              renderCell: ({ row }: { row: PaymentSummary }) => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  {canView && (
+                    <Tooltip title={t("viewDetails")}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        aria-label={t("viewDetails")}
+                        onClick={() => onView(row)}
+                      >
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
 
-            <AppActions
-              onEdit={() => onEdit(row)}
-              // onDelete={() => onDelete(row)}
-            />
-          </Box>
-        ),
-      },
+                  <AppActions
+                    onEdit={canRecordPayment ? () => onEdit(row) : undefined}
+                  />
+                </Box>
+              ),
+            },
+          ]
+        : []),
     ],
-    [t, onView, onEdit, onDelete],
+    [t, onView, onEdit, canView, canRecordPayment, hasActions],
   );
 
   return (

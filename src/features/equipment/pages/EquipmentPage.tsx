@@ -16,11 +16,13 @@ import {
   useGetEquipmentQuery,
   useUpdateEquipmentMutation,
 } from "../services/equipment.api";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const LIMIT = 10;
 
 export function EquipmentPage() {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<
@@ -118,13 +120,15 @@ export function EquipmentPage() {
                 onChange={handleSearchChange}
                 placeholder={t("searchEquipment")}
               />
-              <AppButton
-                variant="contained"
-                startIcon={<Construction />}
-                onClick={handleOpenCreate}
-              >
-                {t("addEquipment")}
-              </AppButton>
+              {hasPermission("equipment.create") && (
+                <AppButton
+                  variant="contained"
+                  startIcon={<Construction />}
+                  onClick={handleOpenCreate}
+                >
+                  {t("addEquipment")}
+                </AppButton>
+              )}
             </>
           }
         />

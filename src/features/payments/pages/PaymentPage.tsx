@@ -160,7 +160,6 @@ export function PaymentPage() {
             }
             onView={setSelectedDetails}
             onEdit={setSelectedPayment}
-            onDelete={() => {}}
           />
         </AppCard>
 

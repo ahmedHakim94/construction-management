@@ -4,6 +4,7 @@ import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { TablePaginationProps } from "@/types";
 import type { Project } from "../types";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface ProjectTableProps {
   rows: Project[];
@@ -21,6 +22,10 @@ export function ProjectTable({
   onDelete,
 }: ProjectTableProps) {
   const { t } = useTranslation();
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission("projects.edit");
+  const canDelete = hasPermission("projects.delete");
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
@@ -45,13 +50,15 @@ export function ProjectTable({
         minWidth: 110,
         renderCell: ({ row }: { row: Project }) => (
           <AppActions
-            onEdit={() => onEdit(row)}
-            onDelete={() => onDelete(row)}
+            // onEdit={() => onEdit(row)}
+            // onDelete={() => onDelete(row)}
+            onEdit={canEdit ? () => onEdit(row) : undefined}
+            onDelete={canDelete ? () => onDelete(row) : undefined}
           />
         ),
       },
     ],
-    [t, onEdit, onDelete],
+    [t, onEdit, onDelete, canEdit, canDelete],
   );
 
   return (

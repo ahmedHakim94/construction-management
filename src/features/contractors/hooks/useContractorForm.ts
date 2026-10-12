@@ -43,7 +43,9 @@ export function useContractorForm({
 
   const { handleSubmit, reset } = methods;
 
-  const { data: equipmentTypes = [] } = useGetAllEquipmentTypeQuery();
+  const { data: equipmentTypes = [] } = useGetAllEquipmentTypeQuery(undefined, {
+    skip: !open,
+  });
 
   const { data: contractorDetails } = useGetContractorByIdQuery(
     contractor?.id ?? 0,

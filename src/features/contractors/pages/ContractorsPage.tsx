@@ -16,11 +16,13 @@ import {
   useGetContractorsQuery,
   useUpdateContractorMutation,
 } from "../services/contractors.api";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const LIMIT = 10;
 
 export function ContractorsPage() {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedContractor, setSelectedContractor] = useState<
@@ -117,13 +119,15 @@ export function ContractorsPage() {
                 onChange={handleSearchChange}
                 placeholder={t("searchContractors")}
               />
-              <AppButton
-                startIcon={<PersonAddAlt1Outlined />}
-                onClick={handleOpenCreate}
-                variant="contained"
-              >
-                {t("addContractor")}
-              </AppButton>
+              {hasPermission("contractors.create") && (
+                <AppButton
+                  startIcon={<PersonAddAlt1Outlined />}
+                  onClick={handleOpenCreate}
+                  variant="contained"
+                >
+                  {t("addContractor")}
+                </AppButton>
+              )}
             </>
           }
         />

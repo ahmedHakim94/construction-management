@@ -39,7 +39,8 @@
       "tasks": "Tasks",
       "dailyWork": "Daily Work",
       "payments": "Payments",
-      "reports": "Reports"
+      "reports": "Reports",
+      "permissions": "Permissions"
     }
   }
 }

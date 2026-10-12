@@ -15,11 +15,13 @@ import {
   useGetTasksQuery,
   useUpdateTaskMutation,
 } from "../services/task.api";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 const LIMIT = 10;
 
 export function TaskPage() {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -101,13 +103,15 @@ export function TaskPage() {
           description={t("tasksDescription")}
           actions={
             <>
-              <AppButton
-                variant="contained"
-                startIcon={<AddTask />}
-                onClick={handleOpenCreate}
-              >
-                {t("addTask")}
-              </AppButton>
+              {hasPermission("tasks.create") && (
+                <AppButton
+                  variant="contained"
+                  startIcon={<AddTask />}
+                  onClick={handleOpenCreate}
+                >
+                  {t("addTask")}
+                </AppButton>
+              )}
             </>
           }
         />

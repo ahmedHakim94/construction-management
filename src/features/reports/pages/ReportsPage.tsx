@@ -21,6 +21,7 @@ import {
   getDailyWorkReportColumns,
   getContractorsReportColumns,
 } from "../utils/reportColumns";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export function ReportsPage() {
   const { t, i18n } = useTranslation([
@@ -29,6 +30,9 @@ export function ReportsPage() {
     "dashboard",
     "common",
   ]);
+
+  const { hasPermission } = usePermissions();
+  const canExport = hasPermission("reports.export");
 
   const isRtl = i18n.language === "ar" || i18n.dir() === "rtl";
 
@@ -169,25 +173,27 @@ export function ReportsPage() {
               {t("reports:projectsReport")}
             </Typography>
 
-            <ExportButtonMenu
-              disabled={reports.length === 0 || isLoading}
-              onExportExcel={() =>
-                handleExport(
-                  "excel",
-                  t("reports:projectsReport"),
-                  projectsColumns,
-                  reports,
-                )
-              }
-              onExportPdf={() =>
-                handleExport(
-                  "pdf",
-                  t("reports:projectsReport"),
-                  projectsColumns,
-                  reports,
-                )
-              }
-            />
+            {canExport && (
+              <ExportButtonMenu
+                disabled={reports.length === 0 || isLoading}
+                onExportExcel={() =>
+                  handleExport(
+                    "excel",
+                    t("reports:projectsReport"),
+                    projectsColumns,
+                    reports,
+                  )
+                }
+                onExportPdf={() =>
+                  handleExport(
+                    "pdf",
+                    t("reports:projectsReport"),
+                    projectsColumns,
+                    reports,
+                  )
+                }
+              />
+            )}
           </Box>
 
           <ReportsTable
@@ -215,25 +221,27 @@ export function ReportsPage() {
               {t("reports:dailyWorkDetailedReport")}
             </Typography>
 
-            <ExportButtonMenu
-              disabled={dailyWorkReports.length === 0 || isLoading}
-              onExportExcel={() =>
-                handleExport(
-                  "excel",
-                  t("reports:dailyWorkDetailedReport"),
-                  dailyWorkColumns,
-                  dailyWorkReports,
-                )
-              }
-              onExportPdf={() =>
-                handleExport(
-                  "pdf",
-                  t("reports:dailyWorkDetailedReport"),
-                  dailyWorkColumns,
-                  dailyWorkReports,
-                )
-              }
-            />
+            {canExport && (
+              <ExportButtonMenu
+                disabled={dailyWorkReports.length === 0 || isLoading}
+                onExportExcel={() =>
+                  handleExport(
+                    "excel",
+                    t("reports:dailyWorkDetailedReport"),
+                    dailyWorkColumns,
+                    dailyWorkReports,
+                  )
+                }
+                onExportPdf={() =>
+                  handleExport(
+                    "pdf",
+                    t("reports:dailyWorkDetailedReport"),
+                    dailyWorkColumns,
+                    dailyWorkReports,
+                  )
+                }
+              />
+            )}
           </Box>
 
           <DailyWorkReportTable
@@ -261,25 +269,27 @@ export function ReportsPage() {
               {t("reports:contractorsReport")}
             </Typography>
 
-            <ExportButtonMenu
-              disabled={contractorReports.length === 0 || isLoading}
-              onExportExcel={() =>
-                handleExport(
-                  "excel",
-                  t("reports:contractorsReport"),
-                  contractorColumns,
-                  contractorReports,
-                )
-              }
-              onExportPdf={() =>
-                handleExport(
-                  "pdf",
-                  t("reports:contractorsReport"),
-                  contractorColumns,
-                  contractorReports,
-                )
-              }
-            />
+            {canExport && (
+              <ExportButtonMenu
+                disabled={contractorReports.length === 0 || isLoading}
+                onExportExcel={() =>
+                  handleExport(
+                    "excel",
+                    t("reports:contractorsReport"),
+                    contractorColumns,
+                    contractorReports,
+                  )
+                }
+                onExportPdf={() =>
+                  handleExport(
+                    "pdf",
+                    t("reports:contractorsReport"),
+                    contractorColumns,
+                    contractorReports,
+                  )
+                }
+              />
+            )}
           </Box>
 
           <ContractorsReportTable

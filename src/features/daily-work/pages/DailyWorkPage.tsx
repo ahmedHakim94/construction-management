@@ -25,9 +25,11 @@ import {
 
 import type { DailyWork, CreateDailyWorkPayload } from "../types";
 import { toast } from "react-toastify";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export function DailyWorkPage() {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -158,13 +160,15 @@ export function DailyWorkPage() {
           title={t("dailyWork")}
           description={t("dailyWorkDescription")}
           actions={
-            <AppButton
-              variant="contained"
-              startIcon={<Today />}
-              onClick={handleOpenCreate}
-            >
-              {t("addDailyWork")}
-            </AppButton>
+            hasPermission("dailyWork.create") ? (
+              <AppButton
+                variant="contained"
+                startIcon={<Today />}
+                onClick={handleOpenCreate}
+              >
+                {t("addDailyWork")}
+              </AppButton>
+            ) : null
           }
         />
 

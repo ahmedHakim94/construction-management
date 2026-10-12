@@ -24,6 +24,7 @@ import type {
   PaymentTransaction,
 } from "../types";
 import { formatAmount } from "../utils";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface Props {
   summary: PaymentSummary;
@@ -40,6 +41,10 @@ export function PaymentHistorySection({
 }: Props) {
   const { t, i18n } = useTranslation(["payments", "reports", "common"]);
   const isRtl = i18n.language === "ar" || i18n.dir() === "rtl";
+
+  const { hasPermission } = usePermissions();
+  const canRecordPayment =
+    hasPermission("payments.create") || hasPermission("payments.edit");
 
   const paymentColumns: ExportColumnDef<PaymentTransaction>[] = useMemo(
     () => [
@@ -145,7 +150,7 @@ export function PaymentHistorySection({
 
   return (
     <Box>
-      {summary.status !== "PAID" && (
+      {canRecordPayment && summary.status !== "PAID" && (
         <AppButton
           variant="contained"
           startIcon={<PaymentIcon />}

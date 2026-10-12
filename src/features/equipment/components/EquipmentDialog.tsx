@@ -33,8 +33,12 @@ export function EquipmentDialog({
 }: EquipmentDialogProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const [contractorOptions, setContractorOptions] = useState<SelectOption[]>([]);
-  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<SelectOption[]>([]);
+  const [contractorOptions, setContractorOptions] = useState<SelectOption[]>(
+    [],
+  );
+  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<
+    SelectOption[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<EquipmentFormValues>({
@@ -49,8 +53,12 @@ export function EquipmentDialog({
     },
   });
 
-  const { data: contractors } = useGetAllContractorsQuery();
-  const { data: equipment_type } = useGetAllEquipmentTypeQuery();
+  const { data: contractors } = useGetAllContractorsQuery(undefined, {
+    skip: !open,
+  });
+  const { data: equipment_type } = useGetAllEquipmentTypeQuery(undefined, {
+    skip: !open,
+  });
 
   useEffect(() => {
     if (contractors) {
@@ -203,4 +211,3 @@ export function EquipmentDialog({
     </AppDialog>
   );
 }
-
