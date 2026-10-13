@@ -1,12 +1,18 @@
 
 import {
   Assessment,
+  Badge,
   Build,
   DashboardRounded,
+  EventAvailable,
+  EventBusy,
   ExpandLess,
   ExpandMore,
   Handyman,
+  MoneyOff,
   Paid,
+  Payments,
+  People,
   Settings,
   Shield,
   WorkHistory,
@@ -22,7 +28,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { SvgIconComponent } from "@mui/icons-material";
@@ -85,6 +91,43 @@ const navigationItems: SidebarItem[] = [
     path: "/reports",
     icon: Assessment,
     permission: "reports.view",
+  },
+  {
+    key: "hr",
+    path: "/hr",
+    icon: Badge,
+    children: [
+      {
+        key: "employees",
+        path: "/hr/employees",
+        icon: People,
+        permission: "employees.view",
+      },
+      {
+        key: "attendance",
+        path: "/hr/attendance",
+        icon: EventAvailable,
+        permission: "attendance.view",
+      },
+      {
+        key: "leaves",
+        path: "/hr/leaves",
+        icon: EventBusy,
+        permission: "leaves.view",
+      },
+      {
+        key: "deductions",
+        path: "/hr/deductions",
+        icon: MoneyOff,
+        permission: "deductions.view",
+      },
+      {
+        key: "payroll",
+        path: "/hr/payroll",
+        icon: Payments,
+        permission: "payroll.view",
+      },
+    ],
   },
   {
     key: "settings",
@@ -196,6 +239,22 @@ export function Sidebar({
 
     return initial;
   });
+
+  useEffect(() => {
+    navigationItems.forEach((item) => {
+      if (
+        item.children?.length &&
+        location.pathname.startsWith(item.path)
+      ) {
+        setOpenKeys((prev) => {
+          if (prev.has(item.key)) return prev;
+          const next = new Set(prev);
+          next.add(item.key);
+          return next;
+        });
+      }
+    });
+  }, [location.pathname]);
 
   const toggleExpand = useCallback((key: string) => {
     setOpenKeys((prev) => {

@@ -52,6 +52,36 @@ const ReportsPage = lazy(() =>
   })),
 );
 
+const EmployeesPage = lazy(() =>
+  import("@/features/hr/employees/pages/EmployeesPage").then((m) => ({
+    default: m.EmployeesPage,
+  })),
+);
+
+const AttendancePage = lazy(() =>
+  import("@/features/hr/attendance/pages/AttendancePage").then((m) => ({
+    default: m.AttendancePage,
+  })),
+);
+
+const LeavesPage = lazy(() =>
+  import("@/features/hr/leaves/pages/LeavesPage").then((m) => ({
+    default: m.LeavesPage,
+  })),
+);
+
+const DeductionsPage = lazy(() =>
+  import("@/features/hr/deductions/pages/DeductionsPage").then((m) => ({
+    default: m.DeductionsPage,
+  })),
+);
+
+const PayrollPage = lazy(() =>
+  import("@/features/hr/payroll/pages/PayrollPage").then((m) => ({
+    default: m.PayrollPage,
+  })),
+);
+
 const EquipmentTypePage = lazy(() =>
   import("@/features/settings/equipment-type/pages/EquipmentTypePage").then(
     (m) => ({
@@ -279,6 +309,50 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission permission="reports.view">
                 <ReportsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr",
+            element: <Navigate to={ROUTE_PATHS.hrEmployees} replace />,
+          },
+          {
+            path: "hr/employees",
+            element: (
+              <RequirePermission permission="employees.view">
+                <EmployeesPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr/attendance",
+            element: (
+              <RequirePermission permission="attendance.view">
+                <AttendancePage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr/leaves",
+            element: (
+              <RequirePermission permission="leaves.view">
+                <LeavesPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr/deductions",
+            element: (
+              <RequirePermission permission="deductions.view">
+                <DeductionsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr/payroll",
+            element: (
+              <RequirePermission permission="payroll.view">
+                <PayrollPage />
               </RequirePermission>
             ),
           },

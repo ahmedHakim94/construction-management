@@ -1,0 +1,13 @@
+{
+  "hr": "HR",
+  "employees": "Employees",
+  "employeesDescription": "Manage employee records and profiles.",
+  "attendance": "Attendance",
+  "attendanceDescription": "Track employee attendance and working hours.",
+  "leaves": "Leaves",
+  "leavesDescription": "Manage leave requests and balances.",
+  "deductions": "Deductions",
+  "deductionsDescription": "Manage employee deductions and penalties.",
+  "payroll": "Payroll",
+  "payrollDescription": "Process and review employee payroll and salaries."
+}

@@ -23,6 +23,12 @@ export function Breadcrumb() {
       projects: "projects",
       tasks: "tasks",
       permissions: "permissions",
+      hr: "hr",
+      employees: "employees",
+      attendance: "attendance",
+      leaves: "leaves",
+      deductions: "deductions",
+      payroll: "payroll",
     };
 
     const key = translationKeyMap[segment];

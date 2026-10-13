@@ -40,6 +40,11 @@
       "dailyWork": "Daily Work",
       "payments": "Payments",
       "reports": "Reports",
+      "employees": "Employees",
+      "attendance": "Attendance",
+      "leaves": "Leaves",
+      "deductions": "Deductions",
+      "payroll": "Payroll",
       "permissions": "Permissions"
     }
   }

@@ -40,6 +40,11 @@
       "dailyWork": "الأعمال اليومية",
       "payments": "المدفوعات",
       "reports": "التقارير",
+      "employees": "الموظفون",
+      "attendance": "الحضور والغياب",
+      "leaves": "الإجازات",
+      "deductions": "الخصومات",
+      "payroll": "الرواتب",
       "permissions":"إدارة الصلاحيات"
     }
   }

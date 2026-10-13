@@ -33,6 +33,11 @@ const SECTIONS: Section[] = [
   { key: "dailyWork", actions: ["view", "create", "edit", "delete"] },
   { key: "payments", actions: ["view", "create", "edit", "delete"] },
   { key: "reports", actions: ["view", "export"] },
+  { key: "employees", actions: ["view", "create", "edit", "delete"] },
+  { key: "attendance", actions: ["view", "create", "edit", "delete"] },
+  { key: "leaves", actions: ["view", "create", "edit", "delete"] },
+  { key: "deductions", actions: ["view", "create", "edit", "delete"] },
+  { key: "payroll", actions: ["view", "create", "edit", "delete"] },
   { key: "permissions", actions: ["view"] },
 ];
 

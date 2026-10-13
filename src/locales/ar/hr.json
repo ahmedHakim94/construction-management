@@ -1,0 +1,13 @@
+{
+  "hr": "الموارد البشرية",
+  "employees": "الموظفون",
+  "employeesDescription": "إدارة سجلات وبيانات الموظفين.",
+  "attendance": "الحضور والغياب",
+  "attendanceDescription": "متابعة حضور وانصراف وساعات عمل الموظفين.",
+  "leaves": "الإجازات",
+  "leavesDescription": "إدارة طلبات وأرصدة الإجازات.",
+  "deductions": "الخصومات",
+  "deductionsDescription": "إدارة الخصومات والجزاءات للموظفين.",
+  "payroll": "الرواتب",
+  "payrollDescription": "معالجة ومراجعة مسيرات الرواتب والمستحقات."
+}

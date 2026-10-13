@@ -10,6 +10,7 @@ import dailyWorkEn from "@/locales/en/dailyWork.json";
 import paymentsEn from "@/locales/en/payments.json";
 import reportsEn from "@/locales/en/reports.json";
 import settingsEn from "@/locales/en/settings.json";
+import hrEn from "@/locales/en/hr.json";
 
 import commonAr from "@/locales/ar/common.json";
 import authAr from "@/locales/ar/auth.json";
@@ -20,6 +21,7 @@ import dailyWorkAr from "@/locales/ar/dailyWork.json";
 import paymentsAr from "@/locales/ar/payments.json";
 import reportsAr from "@/locales/ar/reports.json";
 import settingsAr from "@/locales/ar/settings.json";
+import hrAr from "@/locales/ar/hr.json";
 
 const resources = {
   en: {
@@ -32,6 +34,7 @@ const resources = {
     payments: paymentsEn,
     reports: reportsEn,
     settings: settingsEn,
+    hr: hrEn,
   },
   ar: {
     common: commonAr,
@@ -43,6 +46,7 @@ const resources = {
     payments: paymentsAr,
     reports: reportsAr,
     settings: settingsAr,
+    hr: hrAr,
   },
 };
 
@@ -61,6 +65,7 @@ void i18n.use(initReactI18next).init({
     "payments",
     "reports",
     "settings",
+    "hr",
   ],
   interpolation: {
     escapeValue: false,
