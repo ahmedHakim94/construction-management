@@ -4,7 +4,8 @@ interface UserProfile {
   id: number;
   email: string;
   name: string;
-  role: "admin" | "user";
+  role: "super_admin" | "admin" | "user";
+  project_id: number | null;
 }
 
 interface AuthState {

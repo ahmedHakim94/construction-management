@@ -3,6 +3,9 @@ import {
   EditOutlined,
   DeleteOutlined,
   VisibilityOutlined,
+  LinkOffOutlined,
+  CheckCircleOutline,
+  BlockOutlined,
 } from "@mui/icons-material";
 
 interface AppActionsProps {
@@ -12,18 +15,35 @@ interface AppActionsProps {
   viewTooltip?: string;
   editTooltip?: string;
   deleteTooltip?: string;
+  onUnlink?: () => void;
+  unlinkTooltip?: string;
+  onActivate?: () => void;
+  onDeactivate?: () => void;
+  activateTooltip?: string;
+  deactivateTooltip?: string;
 }
 
 export function AppActions({
   onView,
   onEdit,
   onDelete,
+  onUnlink,
+  onActivate,
+  onDeactivate,
   viewTooltip = "View",
   editTooltip = "Edit",
   deleteTooltip = "Delete",
+  unlinkTooltip = "Unlink",
+  activateTooltip = "Activate",
+  deactivateTooltip = "Deactivate",
 }: AppActionsProps) {
   return (
-    <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center">
+    <Stack
+      direction="row"
+      spacing={0.5}
+      justifyContent="center"
+      alignItems="center"
+    >
       {onView && (
         <Tooltip title={viewTooltip}>
           <IconButton
@@ -76,6 +96,48 @@ export function AppActions({
             }}
           >
             <DeleteOutlined sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {onUnlink && (
+        <Tooltip title={unlinkTooltip}>
+          <IconButton
+            size="small"
+            onClick={onUnlink}
+            sx={{
+              color: "warning.main",
+              p: 0.75,
+              "&:hover": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <LinkOffOutlined sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {onActivate && (
+        <Tooltip title={activateTooltip}>
+          <IconButton
+            size="small"
+            onClick={onActivate}
+            sx={{ color: "success.main", p: 0.75 }}
+          >
+            <CheckCircleOutline sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {onDeactivate && (
+        <Tooltip title={deactivateTooltip}>
+          <IconButton
+            size="small"
+            onClick={onDeactivate}
+            sx={{ color: "error.main", p: 0.75 }}
+          >
+            <BlockOutlined sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
       )}

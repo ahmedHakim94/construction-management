@@ -1,38 +1,8 @@
 import { baseApi } from "@/core/api/baseApi";
 import type { PaginationParams } from "@/types";
-import type { Project, ProjectFormValues } from "../types";
+import type { DeleteProjectResponse, Project, ProjectFormValues, ProjectResponse, ProjectsResponse, ProjectsResult } from "../types";
 
-type ProjectsResponse = {
-  success: boolean;
-  data: Project[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
 
-type ProjectResponse = {
-  success: boolean;
-  message?: string;
-  data: Project;
-};
-
-type DeleteProjectResponse = {
-  success: boolean;
-  message: string;
-};
-
-export type ProjectsResult = {
-  data: Project[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
 
 export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

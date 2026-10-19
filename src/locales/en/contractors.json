@@ -18,5 +18,16 @@
   "selectEquipmentTypes": "Select Equipment Types",
   "selectEquipmentTypesDescription": "Select the equipment types owned by the contractor *",
   "equipmentData": "Equipment Data",
-  "addAnotherEquipment": "Add Another Equipment"
+  "addAnotherEquipment": "Add Another Equipment",
+  "linkExistingContractor": "Link Existing Contractor",
+  "selectProject": "Select Project",
+  "selectContractor": "Select Contractor",
+  "linkContractor": "Link Contractor",
+  "unlinkContractor": "Unlink Contractor to project",
+  "unlinkContractorMessage": "Are you sure you want to unlink the contractor",
+  "confirm":"Confirm",
+  "activateContractor":"Activate Contractor",
+  "deactivateContractor":"Deactivate Contractor",
+  "confirmActivateContractor":"Are you sure you want to activate the contractor",
+  "confirmDeactivateContractor":"Are you sure you want to deactivate the contractor"
 }

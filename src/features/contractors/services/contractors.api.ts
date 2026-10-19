@@ -1,47 +1,22 @@
 import { baseApi } from "@/core/api/baseApi";
 import type { PaginationParams } from "@/types";
 import type {
+  AvailableContractor,
+  ChangeContractorStatusPayload,
   Contractor,
   ContractorDetails,
   ContractorFormValues,
+  ContractorProject,
+  ContractorResponse,
+  ContractorsParams,
+  ContractorsResponse,
+  ContractorsResult,
+  DeleteContractorResponse,
   ExternalContractor,
+  LinkContractorPayload,
+  LinkContractorResponse,
+  UnlinkContractorPayload,
 } from "../types";
-
-type ContractorsParams = PaginationParams & {
-  search?: string;
-};
-
-type ContractorsResponse = {
-  success: boolean;
-  data: Contractor[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
-
-type ContractorResponse = {
-  success: boolean;
-  message?: string;
-  data: Contractor;
-};
-
-type DeleteContractorResponse = {
-  success: boolean;
-  message: string;
-};
-
-export type ContractorsResult = {
-  data: Contractor[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
 
 export const contractorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -123,13 +98,16 @@ export const contractorApi = baseApi.injectEndpoints({
     }),
 
     // DELETE
-    deleteContractor: builder.mutation<DeleteContractorResponse, number>({
-      query: (id) => ({
-        url: `/contractors/delete/${id}`,
-        method: "DELETE",
+    unlinkContractor: builder.mutation<
+      { success: boolean; message: string },
+      UnlinkContractorPayload
+    >({
+      query: ({ contractorId, project_ids }) => ({
+        url: `/contractors/unlink/${contractorId}`,
+        method: "POST",
+        ...(project_ids && { body: { project_ids } }),
       }),
-
-      invalidatesTags: ["Contractors", "Equipment"],
+      invalidatesTags: ["Contractors"],
     }),
 
     // external contractor
@@ -162,6 +140,59 @@ export const contractorApi = baseApi.injectEndpoints({
 
       invalidatesTags: ["Contractors"],
     }),
+
+    getAvailableContractors: builder.query<
+      AvailableContractor[],
+      number | void
+    >({
+      query: (projectId) => ({
+        url: "/contractors/available",
+        params: projectId ? { project_id: projectId } : {},
+      }),
+
+      transformResponse: (response: {
+        success: boolean;
+        data: AvailableContractor[];
+      }) => response.data,
+
+      providesTags: ["Contractors"],
+    }),
+
+    linkContractorToProject: builder.mutation<
+      LinkContractorResponse,
+      LinkContractorPayload
+    >({
+      query: (data) => ({
+        url: "/contractors/link",
+        method: "POST",
+        body: data,
+      }),
+
+      invalidatesTags: ["Contractors"],
+    }),
+
+    getContractorProjects: builder.query<ContractorProject[], number>({
+      query: (contractorId) => `/contractors/${contractorId}/projects`,
+
+      transformResponse: (response: {
+        success: boolean;
+        data: ContractorProject[];
+      }) => response.data,
+
+      providesTags: ["Contractors"],
+    }),
+
+    changeContractorStatus: builder.mutation<
+      { success: boolean; message: string },
+      ChangeContractorStatusPayload
+    >({
+      query: ({ id, status }) => ({
+        url: `/contractors/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Contractors"],
+    }),
   }),
 });
 
@@ -171,7 +202,11 @@ export const {
   useGetContractorByIdQuery,
   useCreateContractorMutation,
   useUpdateContractorMutation,
-  useDeleteContractorMutation,
+  useUnlinkContractorMutation,
   useGetExternalContractorsQuery,
   useCreateExternalContractorMutation,
+  useGetAvailableContractorsQuery,
+  useLinkContractorToProjectMutation,
+  useGetContractorProjectsQuery,
+  useChangeContractorStatusMutation,
 } = contractorApi;

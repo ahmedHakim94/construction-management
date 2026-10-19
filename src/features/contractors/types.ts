@@ -43,3 +43,70 @@ export interface ExternalContractor {
   phone?: string | null;
   createdAt: string;
 }
+
+export type ContractorsParams = PaginationParams & {
+  search?: string;
+};
+
+export type ContractorsResponse = {
+  success: boolean;
+  data: Contractor[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type ContractorResponse = {
+  success: boolean;
+  message?: string;
+  data: Contractor;
+};
+
+export type DeleteContractorResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type AvailableContractor = {
+  id: number;
+  name: string;
+  phone: string;
+};
+
+export type LinkContractorPayload = {
+  contractor_id: number;
+  project_id?: number;
+};
+
+export type LinkContractorResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type ContractorsResult = {
+  data: Contractor[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type ContractorProject = {
+  id: number;
+  name: string;
+};
+
+export type UnlinkContractorPayload = {
+  contractorId: number;
+  project_ids?: number[];
+};
+
+export type ChangeContractorStatusPayload = {
+  id: number;
+  status: "ACTIVE" | "INACTIVE";
+};

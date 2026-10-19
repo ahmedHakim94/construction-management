@@ -18,5 +18,16 @@
   "selectEquipmentTypes": "اختيار أنواع المعدات",
   "selectEquipmentTypesDescription": "اختر أنواع المعدات التي يمتلكها المقاول *",
   "equipmentData": "بيانات المعدات",
-  "addAnotherEquipment": "إضافة معدة أخرى"
+  "addAnotherEquipment": "إضافة معدة أخرى",
+  "linkExistingContractor": "ربط مقاول موجود",
+  "selectProject": "اختر المشروع",
+  "selectContractor": "اختر المقاول",
+  "linkContractor": "ربط المقاول",
+  "unlinkContractor": "إلغاء ربط المقاول بالمشروع",
+  "unlinkContractorMessage": "هل أنت متأكد من رغبتك في إلغاء ربط المقاول",
+  "confirm":"تأكيد",
+  "activateContractor":"تفعيل المقاول",
+  "deactivateContractor":"تعطيل المقاول",
+  "confirmActivateContractor":"هل أنت متأكد من رغبتك في تفعيل المقاول",
+  "confirmDeactivateContractor":"هل أنت متأكد من رغبتك في تعطيل المقاول"
 }

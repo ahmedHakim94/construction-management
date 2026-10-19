@@ -1,4 +1,3 @@
-
 import {
   Assessment,
   Badge,
@@ -49,6 +48,7 @@ interface SidebarItem {
   permission?: string;
   adminOnly?: boolean;
   children?: SidebarItem[];
+  superAdminOnly?: boolean;
 }
 
 const DRAWER_WIDTH = 260;
@@ -150,7 +150,8 @@ const navigationItems: SidebarItem[] = [
         key: "projects",
         path: "/settings/projects",
         icon: Build,
-        permission: "projects.view",
+        // permission: "projects.view",
+        superAdminOnly: true,
       },
       {
         key: "permissions",
@@ -166,10 +167,14 @@ const navigationItems: SidebarItem[] = [
 function filterNavigation(
   items: SidebarItem[],
   hasPermission: (permission: string) => boolean,
-  isAdmin: boolean,
+  role?: "super_admin" | "admin" | "user",
 ): SidebarItem[] {
   return items.flatMap((item) => {
-    if (item.adminOnly && !isAdmin) {
+    if (item.superAdminOnly && role !== "super_admin") {
+      return [];
+    }
+
+    if (item.adminOnly && role !== "super_admin" && role !== "admin") {
       return [];
     }
 
@@ -178,15 +183,9 @@ function filterNavigation(
     }
 
     if (item.children) {
-      const children = filterNavigation(
-        item.children,
-        hasPermission,
-        isAdmin,
-      );
+      const children = filterNavigation(item.children, hasPermission, role);
 
-      return children.length > 0
-        ? [{ ...item, children }]
-        : [];
+      return children.length > 0 ? [{ ...item, children }] : [];
     }
 
     return [item];
@@ -215,24 +214,19 @@ export function Sidebar({
 
   const { hasPermission } = usePermissions();
 
-  const isAdmin = useAppSelector(
-    (state) => state.auth.user?.role === "admin",
-  );
-
+  const role = useAppSelector((state) => state.auth.user?.role);
+  
   const visibleNavigationItems = filterNavigation(
     navigationItems,
     hasPermission,
-    isAdmin,
+    role,
   );
 
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => {
     const initial = new Set<string>();
 
     navigationItems.forEach((item) => {
-      if (
-        item.children?.length &&
-        location.pathname.startsWith(item.path)
-      ) {
+      if (item.children?.length && location.pathname.startsWith(item.path)) {
         initial.add(item.key);
       }
     });
@@ -242,10 +236,7 @@ export function Sidebar({
 
   useEffect(() => {
     navigationItems.forEach((item) => {
-      if (
-        item.children?.length &&
-        location.pathname.startsWith(item.path)
-      ) {
+      if (item.children?.length && location.pathname.startsWith(item.path)) {
         setOpenKeys((prev) => {
           if (prev.has(item.key)) return prev;
           const next = new Set(prev);
@@ -274,11 +265,7 @@ export function Sidebar({
     const Icon = item.icon;
     const hasChildren = Boolean(item.children?.length);
     const isExpanded = openKeys.has(item.key);
-    const isActive = isPathActive(
-      location.pathname,
-      item.path,
-      hasChildren,
-    );
+    const isActive = isPathActive(location.pathname, item.path, hasChildren);
 
     return (
       <Box key={item.path}>
@@ -300,21 +287,13 @@ export function Sidebar({
             px: 1.5,
             py: 0.5,
             pl: nested ? 4 : 1.5,
-            color: isActive
-              ? "primary.contrastText"
-              : "text.secondary",
-            bgcolor: isActive
-              ? "primary.main"
-              : "transparent",
+            color: isActive ? "primary.contrastText" : "text.secondary",
+            bgcolor: isActive ? "primary.main" : "transparent",
             justifyContent: open ? "flex-start" : "center",
             transition: "all 0.15s ease",
             "&:hover": {
-              bgcolor: isActive
-                ? "primary.main"
-                : "action.hover",
-              color: isActive
-                ? "primary.contrastText"
-                : "text.primary",
+              bgcolor: isActive ? "primary.main" : "action.hover",
+              color: isActive ? "primary.contrastText" : "text.primary",
             },
           }}
         >
@@ -348,11 +327,7 @@ export function Sidebar({
         </ListItemButton>
 
         {hasChildren && open && (
-          <Collapse
-            in={isExpanded}
-            timeout="auto"
-            unmountOnExit
-          >
+          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
             <List
               disablePadding
               sx={{
@@ -362,9 +337,7 @@ export function Sidebar({
                 gap: 0.25,
               }}
             >
-              {item.children?.map((child) =>
-                renderItem(child, true),
-              )}
+              {item.children?.map((child) => renderItem(child, true))}
             </List>
           </Collapse>
         )}
@@ -395,9 +368,7 @@ export function Sidebar({
             px: 1.5,
             py: 0.25,
             display: "flex",
-            justifyContent: open
-              ? "flex-start"
-              : "center",
+            justifyContent: open ? "flex-start" : "center",
           }}
         >
           <Typography
@@ -422,9 +393,7 @@ export function Sidebar({
             gap: 0.4,
           }}
         >
-          {visibleNavigationItems.map((item) =>
-            renderItem(item),
-          )}
+          {visibleNavigationItems.map((item) => renderItem(item))}
         </List>
       </Stack>
     </Box>

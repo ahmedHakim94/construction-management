@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -7,7 +8,11 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   Typography,
 } from "@mui/material";
@@ -16,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppCard, AppPageHeader } from "@/components/ui";
 import {
+  useGetUsersQuery,
   useGetRolePermissionsQuery,
   useUpdateRolePermissionsMutation,
 } from "../services/rolePermissionsApi";
@@ -28,7 +34,6 @@ const SECTIONS: Section[] = [
   { key: "contractors", actions: ["view", "create", "edit", "delete"] },
   { key: "equipment", actions: ["view", "create", "edit", "delete"] },
   { key: "equipmentTypes", actions: ["view", "create", "edit", "delete"] },
-  { key: "projects", actions: ["view", "create", "edit", "delete"] },
   { key: "tasks", actions: ["view", "create", "edit", "delete"] },
   { key: "dailyWork", actions: ["view", "create", "edit", "delete"] },
   { key: "payments", actions: ["view", "create", "edit", "delete"] },
@@ -38,7 +43,6 @@ const SECTIONS: Section[] = [
   { key: "leaves", actions: ["view", "create", "edit", "delete"] },
   { key: "deductions", actions: ["view", "create", "edit", "delete"] },
   { key: "payroll", actions: ["view", "create", "edit", "delete"] },
-  { key: "permissions", actions: ["view"] },
 ];
 
 const ALL_CODES = new Set(
@@ -50,17 +54,38 @@ const ALL_CODES = new Set(
 export function PermissionsPage() {
   const { t } = useTranslation("settings");
 
-  const { data, isLoading, isError, refetch } = useGetRolePermissionsQuery();
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [message, setMessage] = useState<"saved" | "error" | null>(null);
+
+  const {
+    data: usersData,
+    isLoading: isUsersLoading,
+    isError: isUsersError,
+  } = useGetUsersQuery();
+
+  const {
+    data,
+    currentData,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetRolePermissionsQuery(selectedUserId as number, {
+    skip: selectedUserId === null,
+  });
 
   const [updateRolePermissions, { isLoading: isSaving }] =
     useUpdateRolePermissionsMutation();
 
-  const [selected, setSelected] = useState<string[]>([]);
-  const [message, setMessage] = useState<"saved" | "error" | null>(null);
+  const users = usersData?.users ?? [];
 
   const savedPermissions = useMemo(
-    () => data?.permissions ?? [],
-    [data?.permissions],
+    () =>
+      (currentData?.permissions ?? []).filter((code) =>
+        ALL_CODES.has(code),
+      ),
+    [currentData],
   );
 
   useEffect(() => {
@@ -74,6 +99,9 @@ export function PermissionsPage() {
     [selected, savedPermissions],
   );
 
+  const isBusy = isLoading || isFetching || isSaving;
+  const canEdit = selectedUserId !== null && !isBusy && !isError;
+
   const toggle = (code: string, checked: boolean) => {
     setSelected((previous) =>
       checked
@@ -84,13 +112,16 @@ export function PermissionsPage() {
   };
 
   const save = async () => {
+    if (!canEdit || !dirty || selectedUserId === null) return;
+
     try {
       await updateRolePermissions({
+        userId: selectedUserId,
         permissions: selected,
       }).unwrap();
 
       setMessage("saved");
-      refetch();
+      await refetch();
     } catch {
       setMessage("error");
     }
@@ -109,8 +140,6 @@ export function PermissionsPage() {
           description={t("permissions.description")}
         />
 
-        <Alert severity="info">{t("permissions.roleInfo")}</Alert>
-
         {message && (
           <Alert severity={message === "saved" ? "success" : "error"}>
             {t(`permissions.${message}`)}
@@ -118,104 +147,156 @@ export function PermissionsPage() {
         )}
 
         <AppCard sx={{ p: { xs: 2, md: 3 } }}>
-          {isLoading ? (
-            <Stack alignItems="center" py={5}>
-              <CircularProgress />
-            </Stack>
-          ) : isError ? (
-            <Alert severity="error">
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography>{t("permissions.error")}</Typography>
-                <Button onClick={() => refetch()}>Retry</Button>
-              </Stack>
-            </Alert>
-          ) : (
-            <Stack spacing={2.5}>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                flexWrap="wrap"
-                gap={1}
-              >
-                <Typography variant="h6" fontWeight={700}>
-                  {t("permissions.userRole")}
-                </Typography>
+          <Stack spacing={2.5}>
+            {isUsersLoading ? (
+              <CircularProgress size={24} />
+            ) : isUsersError ? (
+              <Alert severity="error">
+                Unable to load users.
+              </Alert>
+            ) : (
+              <FormControl fullWidth>
+                <InputLabel id="permissions-user-label">
+                  Select User
+                </InputLabel>
 
-                <Chip
-                  label={`${selected.filter((code) => ALL_CODES.has(code)).length} / ${ALL_CODES.size}`}
-                  color="primary"
-                  variant="outlined"
-                />
-              </Stack>
-
-              {SECTIONS.map((section, index) => (
-                <Box key={section.key}>
-                  {index > 0 && <Divider sx={{ mb: 2.5 }} />}
-
-                  <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    {t(`permissions.modules.${section.key}`)}
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: {
-                        xs: "repeat(2, minmax(0, 1fr))",
-                        sm: "repeat(4, minmax(0, 1fr))",
-                      },
-                      gap: 1,
-                    }}
-                  >
-                    {section.actions.map((action) => {
-                      const code = `${section.key}.${action}`;
-
-                      return (
-                        <FormControlLabel
-                          key={code}
-                          control={
-                            <Checkbox
-                              checked={selected.includes(code)}
-                              disabled={isSaving}
-                              onChange={(event) =>
-                                toggle(code, event.target.checked)
-                              }
-                            />
-                          }
-                          label={t(`permissions.actions.${action}`)}
-                        />
-                      );
-                    })}
-                  </Box>
-                </Box>
-              ))}
-
-              <Divider />
-
-              <Stack direction="row" justifyContent="flex-end" gap={1}>
-                <Button
-                  variant="outlined"
-                  disabled={!dirty || isSaving}
-                  onClick={discard}
+                <Select
+                  labelId="permissions-user-label"
+                  value={selectedUserId ?? ""}
+                  label="Select User"
+                  disabled={isSaving}
+                  onChange={(event) => {
+                    setSelectedUserId(Number(event.target.value));
+                    setSelected([]);
+                    setMessage(null);
+                  }}
                 >
-                  {t("permissions.discard")}
-                </Button>
+                  {users.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.name} ({user.email})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
-                <Button
-                  variant="contained"
-                  startIcon={<SaveOutlined />}
-                  disabled={!dirty || isSaving}
-                  onClick={save}
-                >
-                  {t("permissions.save")}
-                </Button>
-              </Stack>
-            </Stack>
-          )}
+            {!isUsersLoading && !isUsersError && users.length === 0 && (
+              <Alert severity="info">
+                No users available.
+              </Alert>
+            )}
+
+            {selectedUserId !== null && (
+              <>
+                {isLoading || isFetching ? (
+                  <Stack alignItems="center" py={5}>
+                    <CircularProgress />
+                  </Stack>
+                ) : isError ? (
+                  <Alert severity="error">
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Typography>
+                        {t("permissions.error")}
+                      </Typography>
+                      <Button onClick={() => refetch()}>
+                        Retry
+                      </Button>
+                    </Stack>
+                  </Alert>
+                ) : (
+                  <>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      flexWrap="wrap"
+                      gap={1}
+                    >
+                      <Typography variant="h6" fontWeight={700}>
+                        {t("permissions.userRole")}
+                      </Typography>
+
+                      <Chip
+                        label={`${selected.length} / ${ALL_CODES.size}`}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    </Stack>
+
+                    {SECTIONS.map((section, index) => (
+                      <Box key={section.key}>
+                        {index > 0 && <Divider sx={{ mb: 2.5 }} />}
+
+                        <Typography fontWeight={700} sx={{ mb: 1 }}>
+                          {t(`permissions.modules.${section.key}`)}
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: {
+                              xs: "repeat(2, minmax(0, 1fr))",
+                              sm: "repeat(4, minmax(0, 1fr))",
+                            },
+                            gap: 1,
+                          }}
+                        >
+                          {section.actions.map((action) => {
+                            const code = `${section.key}.${action}`;
+
+                            return (
+                              <FormControlLabel
+                                key={code}
+                                control={
+                                  <Checkbox
+                                    checked={selected.includes(code)}
+                                    disabled={!canEdit}
+                                    onChange={(event) =>
+                                      toggle(code, event.target.checked)
+                                    }
+                                  />
+                                }
+                                label={t(`permissions.actions.${action}`)}
+                              />
+                            );
+                          })}
+                        </Box>
+                      </Box>
+                    ))}
+
+                    <Divider />
+
+                    <Stack
+                      direction="row"
+                      justifyContent="flex-end"
+                      gap={1}
+                    >
+                      <Button
+                        variant="outlined"
+                        disabled={!dirty || !canEdit}
+                        onClick={discard}
+                      >
+                        {t("permissions.discard")}
+                      </Button>
+
+                      <Button
+                        variant="contained"
+                        startIcon={<SaveOutlined />}
+                        disabled={!dirty || !canEdit}
+                        onClick={save}
+                      >
+                        {t("permissions.save")}
+                      </Button>
+                    </Stack>
+                  </>
+                )}
+              </>
+            )}
+          </Stack>
         </AppCard>
       </Stack>
     </PageContainer>

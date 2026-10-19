@@ -1,3 +1,4 @@
+
 import { lazy, type ReactNode } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
@@ -117,7 +118,11 @@ function DefaultRedirect() {
 
   return (
     <Navigate
-      to={role === "admin" ? ROUTE_PATHS.dashboard : "/equipment"}
+      to={
+        role === "super_admin" || role === "admin"
+          ? ROUTE_PATHS.dashboard
+          : "/equipment"
+      }
       replace
     />
   );
@@ -130,17 +135,30 @@ function DefaultRedirect() {
 interface RequirePermissionProps {
   permission?: string;
   adminOnly?: boolean;
+  superAdminOnly?: boolean;
   children: ReactNode;
 }
 
 function RequirePermission({
   permission,
   adminOnly = false,
+  superAdminOnly = false,
   children,
 }: RequirePermissionProps) {
   const { hasPermission, isLoading, isError } = usePermissions();
 
-  const isAdmin = useAppSelector((state) => state.auth.user?.role === "admin");
+  const role = useAppSelector((state) => state.auth.user?.role);
+
+  const isAdmin = role === "super_admin" || role === "admin";
+
+  // Check role restrictions first
+  if (superAdminOnly && role !== "super_admin") {
+    return <AccessDenied />;
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <AccessDenied />;
+  }
 
   if (isLoading) {
     return (
@@ -161,24 +179,30 @@ function RequirePermission({
     return <Typography sx={{ p: 4 }}>Unable to load permissions.</Typography>;
   }
 
-  const allowed = adminOnly
-    ? isAdmin
-    : isAdmin || (permission ? hasPermission(permission) : false);
+  const allowed =
+    superAdminOnly ||
+    adminOnly ||
+    isAdmin ||
+    (permission ? hasPermission(permission) : false);
 
   if (!allowed) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Typography variant="h5" fontWeight={700}>
-          403 - Access Denied
-        </Typography>
-        <Typography color="text.secondary" sx={{ mt: 1 }}>
-          You don't have permission to access this page.
-        </Typography>
-      </Box>
-    );
+    return <AccessDenied />;
   }
 
   return <>{children}</>;
+}
+
+function AccessDenied() {
+  return (
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h5" fontWeight={700}>
+        403 - Access Denied
+      </Typography>
+      <Typography color="text.secondary" sx={{ mt: 1 }}>
+        You don't have permission to access this page.
+      </Typography>
+    </Box>
+  );
 }
 
 // ==========================================
@@ -275,7 +299,7 @@ export const router = createBrowserRouter([
           {
             path: "settings/projects",
             element: (
-              <RequirePermission permission="projects.view">
+              <RequirePermission superAdminOnly>
                 <ProjectPage />
               </RequirePermission>
             ),

@@ -1,47 +1,58 @@
-import { Box } from "@mui/material";
-import { PersonAddAlt1Outlined } from "@mui/icons-material";
 import { useState } from "react";
+import { Box } from "@mui/material";
+import { PersonAddAlt1Outlined, LinkOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
+import { AppSearchInput } from "@/components/ui/AppSearchInput";
+
+import { useDialog } from "@/hooks/useDialog";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+
 import { ContractorsTable } from "../components/ContractorsTable";
 import { ContractorDialog } from "../components/ContractorDialog";
+import { LinkContractorDialog } from "../components/LinkContractorDialog";
+import UnlinkContractorDialog from "../components/UnlinkContractorDialog";
+
 import type { Contractor, ContractorFormValues } from "../types";
-import { useDialog } from "@/hooks/useDialog";
-import { AppSearchInput } from "@/components/ui/AppSearchInput";
-import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
+
 import {
+  useChangeContractorStatusMutation,
   useCreateContractorMutation,
-  useDeleteContractorMutation,
   useGetContractorsQuery,
   useUpdateContractorMutation,
 } from "../services/contractors.api";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useAppSelector } from "@/app/store/hooks";
+import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 
 const LIMIT = 10;
 
 export function ContractorsPage() {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+
   const [selectedContractor, setSelectedContractor] = useState<
     Contractor | undefined
   >();
+
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const dialog = useDialog();
-  const deleteDialog = useDialog();
+  const unlinkDialog = useDialog();
+  const linkDialog = useDialog();
 
   const { data, isLoading, isFetching } = useGetContractorsQuery({
     page,
     limit: LIMIT,
     search: search.trim() || undefined,
   });
+
   const [createContractor] = useCreateContractorMutation();
   const [updateContractor] = useUpdateContractorMutation();
-  const [deleteContractor] = useDeleteContractorMutation();
 
   const contractors = data?.data ?? [];
   const paginationMeta = data?.pagination;
@@ -68,6 +79,46 @@ export function ContractorsPage() {
     setSelectedContractor(undefined);
   };
 
+  const role = useAppSelector((state) => state.auth.user?.role);
+  const isSuperAdmin = role === "super_admin";
+
+  const statusDialog = useDialog();
+
+  const [statusContractor, setStatusContractor] = useState<
+    Contractor | undefined
+  >();
+
+  const [changeContractorStatus, { isLoading: statusLoading }] =
+    useChangeContractorStatusMutation();
+
+  const handleOpenStatusDialog = (contractor: Contractor) => {
+    setStatusContractor(contractor);
+    statusDialog.openDialog();
+  };
+
+  const handleCloseStatusDialog = () => {
+    statusDialog.closeDialog();
+    setStatusContractor(undefined);
+  };
+
+  const handleChangeStatus = async () => {
+    if (!isSuperAdmin || !statusContractor) return;
+
+    const newStatus =
+      statusContractor.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
+    try {
+      await changeContractorStatus({
+        id: statusContractor.id,
+        status: newStatus,
+      }).unwrap();
+
+      handleCloseStatusDialog();
+    } catch (error) {
+      console.error("Failed to change contractor status:", error);
+    }
+  };
+
   const handleSubmit = async (values: ContractorFormValues) => {
     try {
       if (mode === "edit" && selectedContractor) {
@@ -86,29 +137,36 @@ export function ContractorsPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedContractor) {
-      return;
-    }
-    setDeleteLoading(true);
-    try {
-      await deleteContractor(selectedContractor.id).unwrap();
+  const handleOpenUnlink = (contractor: Contractor) => {
+    setSelectedContractor(contractor);
+    unlinkDialog.openDialog();
+  };
 
-      if (contractors.length === 1 && page > 1) {
-        setPage((prev) => Math.max(prev - 1, 1));
-      }
-      deleteDialog.closeDialog();
-      setSelectedContractor(undefined);
-    } catch {
-      // error handled globally
-    } finally {
-      setDeleteLoading(false);
+  const handleCloseUnlink = () => {
+    unlinkDialog.closeDialog();
+    setSelectedContractor(undefined);
+  };
+
+  const handleUnlinkSuccess = () => {
+    // Only go back when the current page becomes empty.
+    // Super Admin may still see the unlinked contractor,
+    // so use the refreshed pagination total when available.
+    const total = paginationMeta?.total;
+
+    if (page > 1 && total !== undefined && total - 1 <= (page - 1) * LIMIT) {
+      setPage(page - 1);
     }
   };
 
   return (
     <PageContainer>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2.5,
+        }}
+      >
         <AppPageHeader
           title={t("contractors")}
           description={t("contractorsDescription")}
@@ -119,6 +177,7 @@ export function ContractorsPage() {
                 onChange={handleSearchChange}
                 placeholder={t("searchContractors")}
               />
+
               {hasPermission("contractors.create") && (
                 <AppButton
                   startIcon={<PersonAddAlt1Outlined />}
@@ -128,9 +187,20 @@ export function ContractorsPage() {
                   {t("addContractor")}
                 </AppButton>
               )}
+
+              {hasPermission("contractors.create") && (
+                <AppButton
+                  startIcon={<LinkOutlined />}
+                  onClick={linkDialog.openDialog}
+                  variant="outlined"
+                >
+                  {t("linkExistingContractor")}
+                </AppButton>
+              )}
             </>
           }
         />
+
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <ContractorsTable
             rows={contractors}
@@ -147,13 +217,35 @@ export function ContractorsPage() {
                 : undefined
             }
             onEdit={handleOpenEdit}
-            onDelete={(contractor) => {
-              setSelectedContractor(contractor);
-              deleteDialog.openDialog();
-            }}
+            onDelete={handleOpenUnlink}
+            isSuperAdmin={isSuperAdmin}
+            onChangeStatus={handleOpenStatusDialog}
           />
         </AppCard>
       </Box>
+
+      <AppConfirmDialog
+        open={statusDialog.open}
+        title={t(
+          statusContractor?.status === "ACTIVE"
+            ? "deactivateContractor"
+            : "activateContractor",
+        )}
+        message={
+          <>
+            {t(
+              statusContractor?.status === "ACTIVE"
+                ? "confirmDeactivateContractor"
+                : "confirmActivateContractor",
+            )}
+            <strong>{` ${statusContractor?.name}؟`}</strong>
+          </>
+        }
+        confirmText={t("confirm")}
+        onClose={handleCloseStatusDialog}
+        onConfirm={handleChangeStatus}
+        loading={statusLoading}
+      />
 
       <ContractorDialog
         open={dialog.open}
@@ -163,19 +255,16 @@ export function ContractorsPage() {
         onSubmit={handleSubmit}
       />
 
-      <AppConfirmDialog
-        open={deleteDialog.open}
-        title={t("deleteContractor")}
-        message={
-          <>
-            {t("deleteContractor")}
-            <strong>{` ${selectedContractor?.name} ?`}</strong>
-          </>
-        }
-        confirmText={t("delete")}
-        onClose={deleteDialog.closeDialog}
-        onConfirm={handleDelete}
-        loading={deleteLoading}
+      <LinkContractorDialog
+        open={linkDialog.open}
+        onClose={linkDialog.closeDialog}
+      />
+
+      <UnlinkContractorDialog
+        open={unlinkDialog.open}
+        contractor={selectedContractor}
+        onClose={handleCloseUnlink}
+        onSuccess={handleUnlinkSuccess}
       />
     </PageContainer>
   );

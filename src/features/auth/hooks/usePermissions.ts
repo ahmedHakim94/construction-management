@@ -16,7 +16,7 @@ export function usePermissions() {
   const hasPermission = (permission: string): boolean => {
     if (!isAuthenticated || isLoading || isError || !data) return false;
 
-    if (role === "admin") return true;
+    if (role === "super_admin" || role === "admin") return true;
 
     return permissions.includes(permission);
   };

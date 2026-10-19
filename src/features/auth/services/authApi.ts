@@ -4,7 +4,8 @@ export type AuthUser = {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "user";
+  role: "super_admin" | "admin" | "user";
+  project_id: number | null;
 };
 
 type LoginRequest = {
