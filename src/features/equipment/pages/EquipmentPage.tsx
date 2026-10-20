@@ -9,7 +9,11 @@ import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import { useDialog } from "@/hooks/useDialog";
 import { EquipmentTable } from "../components/EquipmentTable";
 import { EquipmentDialog } from "../components/EquipmentDialog";
-import type { Equipment, EquipmentFormValues } from "../types";
+import type {
+  Equipment,
+  EquipmentFormValues,
+  EquipmentUpdateValues,
+} from "../types";
 import {
   useCreateEquipmentMutation,
   useDeleteEquipmentMutation,
@@ -68,15 +72,17 @@ export function EquipmentPage() {
     setSelectedEquipment(undefined);
   };
 
-  const handleSubmit = async (values: EquipmentFormValues) => {
+  const handleSubmit = async (
+    values: EquipmentFormValues | EquipmentUpdateValues,
+  ) => {
     try {
       if (mode === "edit" && selectedEquipment) {
         await editEquipment({
           id: selectedEquipment.id,
-          data: values,
+          data: values as EquipmentUpdateValues,
         }).unwrap();
       } else {
-        await addEquipment(values).unwrap();
+        await addEquipment(values as EquipmentFormValues).unwrap();
       }
 
       handleCloseDialog();
@@ -87,21 +93,26 @@ export function EquipmentPage() {
   };
 
   const handleDelete = async () => {
+    if (!selectedEquipment) return;
+
     setDeleteLoading(true);
 
     try {
-      if (!selectedEquipment) {
-        return;
-      }
+      await deleteEquipment({
+        id: selectedEquipment.id,
+        ...(selectedEquipment.projectId
+          ? { project_id: selectedEquipment.projectId }
+          : {}),
+      }).unwrap();
 
-      await deleteEquipment(selectedEquipment.id).unwrap();
       if (equipment.length === 1 && page > 1) {
         setPage((prev) => Math.max(prev - 1, 1));
       }
+
       deleteDialog.closeDialog();
       setSelectedEquipment(undefined);
     } catch {
-      // error handled globally
+      // Error handled globally
     } finally {
       setDeleteLoading(false);
     }
@@ -167,14 +178,22 @@ export function EquipmentPage() {
 
       <AppConfirmDialog
         open={deleteDialog.open}
-        title={t("deleteEquipment")}
+        title={t("unlinkEquipment", {
+          defaultValue: "فك ربط المعدة",
+        })}
         message={
           <>
-            {t("deleteEquipment")}
-            <strong>{` ${selectedEquipment?.model ?? selectedEquipment?.id ?? ""} ?`}</strong>
+            {t("confirmUnlinkEquipment", {
+              defaultValue: "هل أنت متأكد من فك ربط المعدة",
+            })}
+            <strong>
+              {` ${selectedEquipment?.model ?? selectedEquipment?.id ?? ""} ?`}
+            </strong>
           </>
         }
-        confirmText={t("delete")}
+        confirmText={t("unlink", {
+          defaultValue: "فك الربط",
+        })}
         onClose={deleteDialog.closeDialog}
         onConfirm={handleDelete}
         loading={deleteLoading}
@@ -182,4 +201,3 @@ export function EquipmentPage() {
     </PageContainer>
   );
 }
-

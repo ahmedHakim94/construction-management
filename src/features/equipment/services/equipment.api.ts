@@ -1,42 +1,14 @@
 import { baseApi } from "@/core/api/baseApi";
-import type { PaginationParams } from "@/types";
-import type { Equipment, EquipmentFormValues } from "../types";
-
-type EquipmentParams = PaginationParams & {
-  search?: string;
-};
-
-type EquipmentResponse = {
-  success: boolean;
-  message?: string;
-  data: Equipment;
-};
-
-type EquipmentListResponse = {
-  success: boolean;
-  data: Equipment[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
-
-type DeleteEquipmentResponse = {
-  success: boolean;
-  message: string;
-};
-
-export type EquipmentResult = {
-  data: Equipment[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
+import type {
+  DeleteEquipmentResponse,
+  Equipment,
+  EquipmentFormValues,
+  EquipmentListResponse,
+  EquipmentParams,
+  EquipmentResponse,
+  EquipmentResult,
+  EquipmentUpdateValues
+} from "../types";
 
 export const equipmentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -99,7 +71,7 @@ export const equipmentApi = baseApi.injectEndpoints({
     // UPDATE
     updateEquipment: builder.mutation<
       Equipment,
-      { id: number; data: EquipmentFormValues }
+      { id: number; data: EquipmentUpdateValues }
     >({
       query: ({ id, data }) => ({
         url: `/equipments/edit/${id}`,
@@ -113,13 +85,50 @@ export const equipmentApi = baseApi.injectEndpoints({
     }),
 
     // DELETE
-    deleteEquipment: builder.mutation<DeleteEquipmentResponse, number>({
-      query: (id) => ({
+    deleteEquipment: builder.mutation<
+      DeleteEquipmentResponse,
+      { id: number; project_id?: number }
+    >({
+      query: ({ id, project_id }) => ({
         url: `/equipments/delete/${id}`,
         method: "DELETE",
+        params: project_id != null ? { project_id } : {},
       }),
 
       invalidatesTags: ["Equipment", "Contractors"],
+    }),
+
+    // GET AVAILABLE EQUIPMENT
+    getAvailableEquipments: builder.query<
+      Equipment[],
+      { contractorId: number; project_id?: number }
+    >({
+      query: ({ contractorId, project_id }) => ({
+        url: "/equipments/available",
+        params: {
+          contractorId,
+          ...(project_id ? { project_id } : {}),
+        },
+      }),
+
+      transformResponse: (response: { success: boolean; data: Equipment[] }) =>
+        response.data,
+
+      providesTags: ["Equipment"],
+    }),
+
+    // LINK EXISTING EQUIPMENT TO PROJECT
+    linkEquipmentToProject: builder.mutation<
+      { success: boolean; message: string },
+      { equipmentId: number; project_id?: number }
+    >({
+      query: (data) => ({
+        url: "/equipments/link",
+        method: "POST",
+        body: data,
+      }),
+
+      invalidatesTags: ["Equipment"],
     }),
   }),
 });
@@ -131,4 +140,6 @@ export const {
   useCreateEquipmentMutation,
   useUpdateEquipmentMutation,
   useDeleteEquipmentMutation,
+  useGetAvailableEquipmentsQuery,
+  useLinkEquipmentToProjectMutation,
 } = equipmentApi;

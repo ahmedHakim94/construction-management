@@ -47,12 +47,13 @@ export const contractorApi = baseApi.injectEndpoints({
       providesTags: ["Contractors"],
     }),
 
-    getAllContractors: builder.query<Contractor[], void>({
-      query: () => "/contractors/all",
-
+    getAllContractors: builder.query<Contractor[], number | void>({
+      query: (projectId) => ({
+        url: "/contractors/all",
+        params: projectId ? { project_id: projectId } : {},
+      }),
       transformResponse: (response: { success: boolean; data: Contractor[] }) =>
         response.data,
-
       providesTags: ["Contractors"],
     }),
 
