@@ -56,7 +56,7 @@ export function useDailyWorkForm({
     },
   });
 
-  const [contractorId, isExternal, equipmentId, startTime, endTime, hourRate] =
+  const [contractorId, isExternal, equipmentId, startTime, endTime, hourRate , projectId] =
     watch([
       "contractorId",
       "isExternal",
@@ -64,6 +64,7 @@ export function useDailyWorkForm({
       "startTime",
       "endTime",
       "hourRate",
+      "projectId"
     ]);
 
   const workingMinutes = useMemo(() => {
@@ -203,5 +204,6 @@ export function useDailyWorkForm({
     equipmentId,
     workingDuration,
     handleFormSubmit,
+    projectId
   };
 }

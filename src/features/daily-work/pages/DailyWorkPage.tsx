@@ -24,7 +24,6 @@ import {
 } from "../services/dailyWork.api";
 
 import type { DailyWork, CreateDailyWorkPayload } from "../types";
-import { toast } from "react-toastify";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export function DailyWorkPage() {
@@ -104,10 +103,8 @@ export function DailyWorkPage() {
       try {
         await addWorkDaily(values).unwrap();
 
-        toast.success("Daily work added successfully");
         handleCloseDialog();
       } catch (error) {
-        toast.error("Failed to add daily work");
         console.error(error);
         throw error;
       }
@@ -120,10 +117,8 @@ export function DailyWorkPage() {
           payload: values,
         }).unwrap();
 
-        toast.success("Daily work updated successfully");
         handleCloseDialog();
       } catch (error) {
-        toast.error("Failed to update daily work");
         console.error(error);
         throw error;
       }
@@ -134,10 +129,8 @@ export function DailyWorkPage() {
     if (!selectedRecord) return;
     try {
       await deleteWorkDaily(selectedRecord.id).unwrap();
-      toast.success("Daily work deleted successfully");
       handleCloseDelete();
     } catch (error) {
-      toast.error("Failed to delete daily work");
       console.error(error);
       throw error;
     }

@@ -53,6 +53,7 @@ export function DailyWorkDialog({
     equipmentId,
     workingDuration,
     handleFormSubmit,
+    projectId
   } = useDailyWorkForm({
     open,
     dailyWork,
@@ -96,6 +97,7 @@ export function DailyWorkDialog({
             clearErrors={clearErrors}
             contractorId={contractorId}
             isExternal={isExternal}
+            projectId={projectId}
           />
 
           <DailyWorkDetailsFields

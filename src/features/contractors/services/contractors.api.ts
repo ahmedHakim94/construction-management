@@ -58,8 +58,20 @@ export const contractorApi = baseApi.injectEndpoints({
     }),
 
     // GET BY ID
-    getContractorById: builder.query<ContractorDetails, number>({
-      query: (id) => `/contractors/${id}`,
+    getContractorById: builder.query<
+      ContractorDetails,
+      number | { contractorId: number; projectId?: number }
+    >({
+      query: (arg) => {
+        const contractorId = typeof arg === "number" ? arg : arg.contractorId;
+
+        const projectId = typeof arg === "number" ? undefined : arg.projectId;
+
+        return {
+          url: `/contractors/${contractorId}`,
+          params: projectId ? { project_id: projectId } : {},
+        };
+      },
 
       transformResponse: (response: {
         success: boolean;

@@ -22,6 +22,7 @@ interface DailyWorkContractorFieldsProps {
   clearErrors: DailyWorkForm["clearErrors"];
   contractorId: DailyWorkForm["contractorId"];
   isExternal: DailyWorkForm["isExternal"];
+  projectId: DailyWorkForm["projectId"];
 }
 export function DailyWorkContractorFields({
   open,
@@ -30,6 +31,7 @@ export function DailyWorkContractorFields({
   clearErrors,
   contractorId,
   isExternal,
+  projectId,
 }: DailyWorkContractorFieldsProps) {
   const { t } = useTranslation();
   // const [externalContractors, setExternalContractors] = useState<
@@ -41,7 +43,12 @@ export function DailyWorkContractorFields({
   const [creatingExternal, setCreatingExternal] = useState(false);
   const [equipments, setEquipments] = useState<Equipment[]>([]);
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const { data: contractors } = useGetAllContractorsQuery();
+  // const { data: contractors } = useGetAllContractorsQuery();
+
+  const { data: contractors = [] } = useGetAllContractorsQuery(projectId!, {
+    skip: !open || !projectId || isExternal,
+  });
+
   const { data: externalContractors } = useGetExternalContractorsQuery(
     undefined,
     { skip: !open || !isExternal },
@@ -49,11 +56,15 @@ export function DailyWorkContractorFields({
   const [addExternalContractor] = useCreateExternalContractorMutation();
 
   const { data: contractorData } = useGetContractorByIdQuery(
-    Number(contractorId),
     {
-      skip: !open || !contractorId || Boolean(isExternal),
+      contractorId: Number(contractorId),
+      projectId: projectId ? Number(projectId) : undefined,
+    },
+    {
+      skip: !open || !contractorId || !projectId || Boolean(isExternal),
     },
   );
+  console.log("🚀 ~ DailyWorkContractorFields ~ contractorData:", contractorData)
 
   useEffect(() => {
     if (externalContractors) {
@@ -74,10 +85,11 @@ export function DailyWorkContractorFields({
   }, [isAddingExternal, clearErrors]);
 
   useEffect(() => {
+    
     if (contractorData?.equipment) {
       setEquipments(contractorData?.equipment);
     }
-  }, [contractorData?.equipment]);
+  }, [contractorData]);
 
   const equipmentOptions = useMemo(
     () =>
@@ -185,7 +197,11 @@ export function DailyWorkContractorFields({
                   });
                 }}
                 placeholder={t("selectContractor")}
-                error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
+                error={
+                  fieldState.error?.message
+                    ? t(fieldState.error.message)
+                    : undefined
+                }
               />
             )}
           />
@@ -209,7 +225,11 @@ export function DailyWorkContractorFields({
                   });
                 }}
                 placeholder={t("selectEquipment")}
-                error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
+                error={
+                  fieldState.error?.message
+                    ? t(fieldState.error.message)
+                    : undefined
+                }
               />
             )}
           />
@@ -233,7 +253,13 @@ export function DailyWorkContractorFields({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder={t("selectExternalContractor")}
-                error={isAddingExternal ? undefined : (fieldState.error?.message ? t(fieldState.error.message) : undefined)}
+                error={
+                  isAddingExternal
+                    ? undefined
+                    : fieldState.error?.message
+                      ? t(fieldState.error.message)
+                      : undefined
+                }
               />
             )}
           />
@@ -361,7 +387,11 @@ export function DailyWorkContractorFields({
                 required
                 {...field}
                 error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message ? t(fieldState.error.message) : undefined}
+                helperText={
+                  fieldState.error?.message
+                    ? t(fieldState.error.message)
+                    : undefined
+                }
               />
             )}
           />
