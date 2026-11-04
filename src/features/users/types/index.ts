@@ -16,7 +16,9 @@ export interface User {
   /** `null` only for `super_admin`; required for `admin` and `user`. */
   projectId: number | null;
   projectName?: string | null;
+  project_name?: string | null;
   status: UserStatus;
+  is_active?: number | boolean;
   createdAt: string;
 }
 

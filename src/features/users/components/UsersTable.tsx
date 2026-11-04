@@ -87,7 +87,7 @@ export function UsersTable({
 
           return (
             <Typography variant="body2">
-              {row.project_name || "—"}
+              {row.projectName || "—"}
             </Typography>
           );
         },
@@ -99,7 +99,7 @@ export function UsersTable({
         minWidth: 120,
         renderCell: ({ row }: { row: User }) => (
           <AppBadge
-            label={t(row.is_active === 1 ? "active" : "inactive")}
+            label={t(row.status === "ACTIVE" ? "active" : "inactive")}
             color={USER_STATUS_COLORS[row.status] ?? "default"}
             size="small"
           />

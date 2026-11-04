@@ -20,8 +20,10 @@ export const mapBackendUser = (item: BackendUserItem): User => ({
       ? Number(item.project_id)
       : null,
   projectName: item.project_name ?? null,
+  project_name: item.project_name ?? null,
   status:
     item.is_active === 1 || item.is_active === true ? "ACTIVE" : "INACTIVE",
+  is_active: item.is_active === 1 || item.is_active === true ? 1 : 0,
   createdAt: item.created_at,
 });
 
