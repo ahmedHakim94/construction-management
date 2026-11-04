@@ -4,7 +4,6 @@ import { AppTable, type AppTableColDef } from "@/components/ui";
 import type { Equipment } from "../types";
 import { AppActions } from "@/components/ui/AppActions";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { LinkOff } from "@mui/icons-material";
 interface EquipmentTableProps {
   rows: Equipment[];
   onEdit: (equipment: Equipment) => void;

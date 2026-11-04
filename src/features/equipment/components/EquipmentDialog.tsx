@@ -182,7 +182,7 @@ export function EquipmentDialog({
     clearErrors();
   };
 
-  const handleProjectChange = (value: string) => {
+  const handleProjectChange = (value: string | number) => {
     setValue("project_id", value ? Number(value) : undefined);
     setValue("contractorId", 0);
     setSelectedEquipmentId(0);
@@ -190,7 +190,7 @@ export function EquipmentDialog({
     clearErrors("project_id");
   };
 
-  const handleContractorChange = (value: string) => {
+  const handleContractorChange = (value: string | number) => {
     setValue("contractorId", value ? Number(value) : 0);
     setSelectedEquipmentId(0);
     setEquipmentError("");

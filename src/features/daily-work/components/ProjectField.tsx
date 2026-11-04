@@ -1,10 +1,10 @@
 import { AppSelect } from "@/components/ui";
 import { useGetProjectsQuery } from "@/features/settings/projects/services/projects.api";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-function ProjectField({ control }) {
+function ProjectField({ control }: { control: any }) {
   const { t } = useTranslation();
 
   const { data: projects } = useGetProjectsQuery();

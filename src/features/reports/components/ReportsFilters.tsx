@@ -42,9 +42,9 @@ export function ReportsFilters({
         label={t("reports:projectFilter")}
         options={projectOptions}
         value={projectId}
-        onChange={onProjectIdChange}
+        onChange={(val) => onProjectIdChange(String(val))}
         placeholder={t("reports:allProjects")}
-        width={{ xs: "100%", sm: "260px" }}
+        width={260}
       />
 
       <AppDatePicker

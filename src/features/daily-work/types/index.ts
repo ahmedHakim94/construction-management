@@ -1,5 +1,3 @@
-import { z } from "zod";
-import { dailyWorkSchema } from "../schemas/dailyWork.schema";
 
 export interface DailyWork {
   id: string;

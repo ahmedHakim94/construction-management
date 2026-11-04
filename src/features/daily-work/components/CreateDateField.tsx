@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AppDatePicker } from "@/components/ui/AppDatePicker";
 import dayjs from "dayjs";
 
-function CreateDateField({ control }) {
+function CreateDateField({ control }: { control: any }) {
   const { t } = useTranslation();
 
   return (
@@ -19,7 +19,8 @@ function CreateDateField({ control }) {
           }
           format="DD/MM/YYYY"
           disabled={false}
-          error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
+          error={Boolean(fieldState.error)}
+          helperText={fieldState.error?.message ? t(fieldState.error.message) : undefined}
         />
       )}
     />

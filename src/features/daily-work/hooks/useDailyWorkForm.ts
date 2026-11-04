@@ -21,7 +21,7 @@ export function useDailyWorkForm({
   dailyWork,
   onSubmit,
 }: UseDailyWorkFormProps) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +31,7 @@ export function useDailyWorkForm({
     reset,
     setValue,
     watch,
-    setError,
     clearErrors,
-    formState: { errors },
   } = useForm<DailyWorkFormValues>({
     resolver: zodResolver(dailyWorkSchema),
     defaultValues: {

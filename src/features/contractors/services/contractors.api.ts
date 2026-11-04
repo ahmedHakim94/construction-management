@@ -1,5 +1,4 @@
 import { baseApi } from "@/core/api/baseApi";
-import type { PaginationParams } from "@/types";
 import type {
   AvailableContractor,
   ChangeContractorStatusPayload,
@@ -11,7 +10,6 @@ import type {
   ContractorsParams,
   ContractorsResponse,
   ContractorsResult,
-  DeleteContractorResponse,
   ExternalContractor,
   LinkContractorPayload,
   LinkContractorResponse,

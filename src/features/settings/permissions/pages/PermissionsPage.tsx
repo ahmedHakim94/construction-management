@@ -65,7 +65,6 @@ export function PermissionsPage() {
   } = useGetUsersQuery();
 
   const {
-    data,
     currentData,
     isLoading,
     isFetching,

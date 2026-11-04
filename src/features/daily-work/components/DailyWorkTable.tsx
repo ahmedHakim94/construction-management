@@ -5,7 +5,7 @@ import { AppActions } from "@/components/ui/AppActions";
 import { AppTable, type AppTableColDef } from "@/components/ui";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import type { TablePaginationProps } from "@/types";
-import type { DailyWork, DailyWorkList } from "../types";
+import type { DailyWorkList } from "../types";
 
 export type DailyWorkRow = DailyWorkList & {
   contractorName?: string;

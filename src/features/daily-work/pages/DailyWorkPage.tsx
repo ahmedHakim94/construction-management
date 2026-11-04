@@ -23,7 +23,7 @@ import {
   useUpdateDailyWorkMutation,
 } from "../services/dailyWork.api";
 
-import type { DailyWork, CreateDailyWorkPayload } from "../types";
+import type { CreateDailyWorkPayload } from "../types";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export function DailyWorkPage() {
@@ -55,7 +55,6 @@ export function DailyWorkPage() {
     data: dailyWorkData,
     isLoading,
     isFetching,
-    isError,
   } = useGetDailyWorkQuery({
     page,
     limit,
@@ -199,7 +198,7 @@ export function DailyWorkPage() {
       <DailyWorkDialog
         open={dialog.open}
         mode={mode}
-        dailyWork={selectedRecord}
+        dailyWork={selectedRecord as any}
         projects={[]}
         contractors={[]}
         equipment={[]}

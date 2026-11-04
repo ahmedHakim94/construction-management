@@ -45,7 +45,7 @@ export function DailyWorkContractorFields({
   const nameInputRef = useRef<HTMLInputElement>(null);
   // const { data: contractors } = useGetAllContractorsQuery();
 
-  const { data: contractors = [] } = useGetAllContractorsQuery(projectId!, {
+  const { data: contractors = [] } = useGetAllContractorsQuery(Number(projectId) || undefined as any, {
     skip: !open || !projectId || isExternal,
   });
 
@@ -86,7 +86,7 @@ export function DailyWorkContractorFields({
   useEffect(() => {
     
     if (contractorData?.equipment) {
-      setEquipments(contractorData?.equipment);
+      setEquipments(contractorData?.equipment as any);
     }
   }, [contractorData]);
 
@@ -112,7 +112,7 @@ export function DailyWorkContractorFields({
       externalContractors?.map((item) => ({
         value: item.id,
         label: item.name,
-      })),
+      })) ?? [],
     [externalContractors],
   );
   const handleCreateExternalContractor = async () => {

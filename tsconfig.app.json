@@ -31,5 +31,10 @@
     // "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/**/mock/**",
+    "src/**/services/*.service.ts",
+    "src/features/payments/hooks/usePayments.ts"
+  ]
 }

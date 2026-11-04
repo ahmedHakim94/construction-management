@@ -34,9 +34,9 @@ export function DailyWorkDialog({
   open,
   mode,
   dailyWork,
-  contractors,
+  contractors: _contractors,
   equipment,
-  tasks,
+  tasks: _tasks,
   onClose,
   onSubmit,
 }: DailyWorkDialogProps) {
@@ -90,8 +90,6 @@ export function DailyWorkDialog({
 
           <DailyWorkContractorFields
             open={open}
-            contractors={contractors}
-            equipment={equipment}
             control={control}
             setValue={setValue}
             clearErrors={clearErrors}

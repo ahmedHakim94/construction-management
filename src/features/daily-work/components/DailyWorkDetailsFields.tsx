@@ -21,8 +21,7 @@ export function DailyWorkDetailsFields({
   control,
   isExternal,
   workingDuration,
-  selectedEquipment,
-  open,
+    open,
 }: DailyWorkDetailsFieldsProps) {
   console.log("🚀 ~ DailyWorkDetailsFields ~ isExternal:", isExternal)
   const { t } = useTranslation();
