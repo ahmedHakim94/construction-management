@@ -64,7 +64,6 @@ export function DailyWorkContractorFields({
       skip: !open || !contractorId || !projectId || Boolean(isExternal),
     },
   );
-  console.log("🚀 ~ DailyWorkContractorFields ~ contractorData:", contractorData)
 
   useEffect(() => {
     if (externalContractors) {

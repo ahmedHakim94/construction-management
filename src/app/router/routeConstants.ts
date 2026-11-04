@@ -17,6 +17,7 @@ export const ROUTE_PATHS = {
   tasks: "/settings/tasks",
   projects: "/settings/projects",
   permissions: "/settings/permissions",
+  users: "/settings/users",
 } as const;
 
 export const ROUTE_NAMES = {
@@ -38,4 +39,5 @@ export const ROUTE_NAMES = {
   tasks: "Tasks",
   projects: "Projects",
   permissions: "Permissions",
+  users: "Users",
 } as const;

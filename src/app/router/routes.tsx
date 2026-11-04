@@ -1,4 +1,3 @@
-
 import { lazy, type ReactNode } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
@@ -106,6 +105,12 @@ const ProjectPage = lazy(() =>
 const PermissionsPage = lazy(() =>
   import("@/features/settings/permissions/pages/PermissionsPage").then((m) => ({
     default: m.PermissionsPage,
+  })),
+);
+
+const UsersPage = lazy(() =>
+  import("@/features/users/pages/UsersPage").then((m) => ({
+    default: m.UsersPage,
   })),
 );
 
@@ -309,6 +314,14 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission adminOnly>
                 <PermissionsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "settings/users",
+            element: (
+              <RequirePermission adminOnly>
+                <UsersPage />
               </RequirePermission>
             ),
           },

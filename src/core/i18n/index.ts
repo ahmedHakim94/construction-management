@@ -11,6 +11,7 @@ import paymentsEn from "@/locales/en/payments.json";
 import reportsEn from "@/locales/en/reports.json";
 import settingsEn from "@/locales/en/settings.json";
 import hrEn from "@/locales/en/hr.json";
+import usersEn from "@/locales/en/users.json";
 
 import commonAr from "@/locales/ar/common.json";
 import authAr from "@/locales/ar/auth.json";
@@ -22,6 +23,7 @@ import paymentsAr from "@/locales/ar/payments.json";
 import reportsAr from "@/locales/ar/reports.json";
 import settingsAr from "@/locales/ar/settings.json";
 import hrAr from "@/locales/ar/hr.json";
+import usersAr from "@/locales/ar/users.json";
 
 const resources = {
   en: {
@@ -35,6 +37,7 @@ const resources = {
     reports: reportsEn,
     settings: settingsEn,
     hr: hrEn,
+    users: usersEn,
   },
   ar: {
     common: commonAr,
@@ -47,6 +50,7 @@ const resources = {
     reports: reportsAr,
     settings: settingsAr,
     hr: hrAr,
+    users: usersAr,
   },
 };
 
@@ -66,6 +70,7 @@ void i18n.use(initReactI18next).init({
     "reports",
     "settings",
     "hr",
+    "users",
   ],
   interpolation: {
     escapeValue: false,

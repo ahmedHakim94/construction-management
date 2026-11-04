@@ -14,12 +14,12 @@ interface AppSelectProps {
   required?: boolean;
   options: readonly SelectOption[];
   value?: string | number;
-  onChange?: (value: any) => void;
+  onChange?: (value: string | number) => void;
   placeholder?: string;
   error?: string;
   className?: string;
-  width?: any;
-  menuPlacement?: "auto" | "bottom" | "top";
+  width?: string | number;
+  menuPlacement?: "auto" | "top" | "bottom";
   maxMenuHeight?: number;
 }
 
@@ -48,6 +48,11 @@ export function AppSelect({
         : `${label} *`
       : label;
 
+  const selectedOption =
+    value !== undefined && value !== null && value !== ""
+      ? options?.find((item) => String(item.value) === String(value)) ?? null
+      : null;
+
   return (
     <Box width={width}>
       {finalLabel && (
@@ -59,7 +64,7 @@ export function AppSelect({
       <Box dir={isRtl ? "rtl" : "ltr"}>
         <Select
           options={options}
-          value={options?.find((item) => item.value === value) ?? null}
+          value={selectedOption}
           onChange={(option) => onChange?.(option?.value ?? "")}
           placeholder={placeholder}
           isRtl={isRtl}

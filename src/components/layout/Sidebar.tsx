@@ -8,6 +8,7 @@ import {
   ExpandLess,
   ExpandMore,
   Handyman,
+  ManageAccounts,
   MoneyOff,
   Paid,
   Payments,
@@ -150,8 +151,13 @@ const navigationItems: SidebarItem[] = [
         key: "projects",
         path: "/settings/projects",
         icon: Build,
-        // permission: "projects.view",
         superAdminOnly: true,
+      },
+      {
+        key: "users",
+        path: "/settings/users",
+        icon: ManageAccounts,
+        adminOnly: true,
       },
       {
         key: "permissions",

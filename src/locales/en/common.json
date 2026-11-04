@@ -25,5 +25,6 @@
   "updatedSuccessfully": "Updated successfully",
   "home": "Dashboard",
   "external": "External",
-  "permissions": "Permissions"
+  "permissions": "Permissions",
+  "users": "Users"
 }
