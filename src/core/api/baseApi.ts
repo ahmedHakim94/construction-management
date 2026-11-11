@@ -10,6 +10,7 @@ import { API_CONFIG } from "../config/api";
 import { notify } from "@/shared/utils/notify";
 import { logout } from "@/features/auth/store/authSlice";
 import type { RootState } from "@/app/store/store";
+import i18n from "@/core/i18n";
 
 type ApiResponse = {
   success?: boolean;
@@ -26,6 +27,9 @@ const rawBaseQuery = fetchBaseQuery({
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
+
+    const currentLang = i18n.language || "ar";
+    headers.set("Accept-Language", currentLang);
 
     return headers;
   },

@@ -7,6 +7,7 @@ import {
   AccessTimeOutlined,
   PaidOutlined,
   AccountBalanceOutlined,
+  LocalOffer,
 } from "@mui/icons-material";
 import type { ReportSummary } from "../types";
 
@@ -41,6 +42,13 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
       Icon: AccountBalanceWalletOutlined,
     },
     {
+      label: t("reports:totalDeductions"),
+      value: summary.totalDeductions,
+      color: "primary.light",
+      bg: "action.hover",
+      Icon: LocalOffer,
+    },
+    {
       label: t("reports:totalPaidAmount"),
       value: summary.totalPaidAmount,
       color: "success.main",
@@ -58,7 +66,10 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
 
   return (
     <AppCard sx={{ p: { xs: 2.5, md: 3 } }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, textAlign: "start" }}>
+      <Typography
+        variant="h6"
+        sx={{ fontWeight: 700, mb: 3, textAlign: "start" }}
+      >
         {t("reports:reportsSummary")}
       </Typography>
 
@@ -75,11 +86,11 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
             <Box
               key={index}
               sx={{
-                flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)", md: "1 1 calc(20% - 20px)" },
-                minWidth: 185,
                 display: "flex",
-                alignItems: "center",
+                flexWrap: "wrap",
                 gap: 2,
+                minWidth: 185,
+                alignItems: "center",
                 p: 2,
                 borderRadius: 2,
                 border: "1px solid",
@@ -102,7 +113,11 @@ export function ReportsSummary({ summary, isLoading }: ReportsSummaryProps) {
               </Box>
 
               <Box sx={{ textAlign: "start" }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
                   {item.label}
                 </Typography>
                 {isLoading ? (
