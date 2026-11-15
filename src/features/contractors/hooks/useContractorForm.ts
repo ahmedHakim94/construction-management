@@ -3,10 +3,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import type { SelectOption } from "@/components/ui/AppSelect";
+import { useAppSelector } from "@/app/store/hooks";
 import { contractorSchema } from "../schemas/contractor.schema";
 import type { Contractor, ContractorFormValues } from "../types";
 import { useGetAllEquipmentTypeQuery } from "@/features/settings/equipment-type/services/equipmentType.api";
-import { useGetContractorByIdQuery } from "../services/contractors.api";
+import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
+import {
+  useGetContractorByIdQuery,
+  useGetContractorProjectsQuery,
+} from "../services/contractors.api";
 
 interface UseContractorFormProps {
   open: boolean;
@@ -17,6 +22,7 @@ interface UseContractorFormProps {
 }
 
 const DEFAULT_VALUES: ContractorFormValues = {
+  project_id: undefined,
   name: "",
   phone: "",
   notes: "",
@@ -35,15 +41,21 @@ export function useContractorForm({
   const [loading, setLoading] = useState(false);
 
   const isArabic = i18n.language === "ar";
+  const role = useAppSelector((state) => state.auth.user?.role);
+  const isSuperAdmin = role === "super_admin";
 
   const methods = useForm<ContractorFormValues>({
     resolver: zodResolver(contractorSchema),
     defaultValues: DEFAULT_VALUES,
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, setError, setValue, getValues } = methods;
 
-  const { data: equipmentTypes = [] } = useGetAllEquipmentTypeQuery(undefined, {
+  const { data: projects } = useGetAllProjectsQuery(undefined, {
+    skip: !open || !isSuperAdmin,
+  });
+
+  const { data: equipmentTypes } = useGetAllEquipmentTypeQuery(undefined, {
     skip: !open,
   });
 
@@ -54,9 +66,27 @@ export function useContractorForm({
     },
   );
 
+  const { data: contractorProjects } = useGetContractorProjectsQuery(
+    contractor?.id ?? 0,
+    {
+      skip: !open || mode !== "edit" || !contractor?.id || !isSuperAdmin,
+    },
+  );
+
+  const defaultProjectId = contractorProjects?.[0]?.id;
+
+  const projectOptions = useMemo<readonly SelectOption[]>(
+    () =>
+      (projects ?? []).map((item) => ({
+        value: item.id,
+        label: item.name,
+      })),
+    [projects],
+  );
+
   const equipmentTypeOptions = useMemo<readonly SelectOption[]>(
     () =>
-      equipmentTypes.map((item) => ({
+      (equipmentTypes ?? []).map((item) => ({
         value: item.id,
         label: item.name,
       })),
@@ -74,6 +104,7 @@ export function useContractorForm({
     if (!contractorDetails) return;
 
     reset({
+      project_id: isSuperAdmin ? defaultProjectId : undefined,
       name: contractorDetails.name,
       phone: contractorDetails.phone,
       notes: contractorDetails.notes ?? "",
@@ -88,12 +119,36 @@ export function useContractorForm({
         notes: item.notes ?? "",
       })),
     });
-  }, [open, mode, contractorDetails, reset]);
+  }, [open, mode, contractorDetails, isSuperAdmin, reset]);
+
+  useEffect(() => {
+    if (
+      open &&
+      mode === "edit" &&
+      isSuperAdmin &&
+      defaultProjectId &&
+      !getValues("project_id")
+    ) {
+      setValue("project_id", defaultProjectId);
+    }
+  }, [open, mode, isSuperAdmin, defaultProjectId, getValues, setValue]);
+
   const submit = async (values: ContractorFormValues) => {
+    if (isSuperAdmin && !values.project_id) {
+      setError("project_id", {
+        type: "manual",
+        message: t("selectProject"),
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await onSubmit(values);
+      const payload: ContractorFormValues = isSuperAdmin
+        ? values
+        : { ...values, project_id: undefined };
+      await onSubmit(payload);
       reset(DEFAULT_VALUES);
       onClose();
     } catch (error) {
@@ -106,6 +161,8 @@ export function useContractorForm({
   return {
     methods,
     loading,
+    isSuperAdmin,
+    projectOptions,
     equipmentTypeOptions,
     submit,
     handleSubmit,

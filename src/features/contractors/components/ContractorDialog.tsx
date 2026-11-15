@@ -33,6 +33,8 @@ export function ContractorDialog(props: ContractorDialogProps) {
   const {
     methods,
     loading,
+    isSuperAdmin,
+    projectOptions,
     equipmentTypeOptions,
     submit,
     handleSubmit,
@@ -132,7 +134,10 @@ export function ContractorDialog(props: ContractorDialogProps) {
               pt: 1,
             }}
           >
-            <ContractorInfoSection />
+            <ContractorInfoSection
+              isSuperAdmin={isSuperAdmin}
+              projectOptions={projectOptions}
+            />
 
             {/* Equipment Data Section Wrapper */}
             <Box

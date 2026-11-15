@@ -17,6 +17,7 @@ export const contractorEquipmentSchema = z.object({
 });
 
 export const contractorSchema = z.object({
+  project_id: z.number().optional(),
   name: z.string().trim().min(2, "Name is required"),
   phone: z.string().trim().min(2, "Phone is required"),
   notes: z.string(),

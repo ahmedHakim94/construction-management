@@ -7,9 +7,18 @@ import {
   AssignmentOutlined as NoteIcon,
 } from "@mui/icons-material";
 import { AppInput, AppSelect, AppTextarea } from "@/components/ui";
+import type { SelectOption } from "@/components/ui/AppSelect";
 import type { ContractorFormValues } from "../types";
 
-export function ContractorInfoSection() {
+interface ContractorInfoSectionProps {
+  isSuperAdmin: boolean;
+  projectOptions: readonly SelectOption[];
+}
+
+export function ContractorInfoSection({
+  isSuperAdmin,
+  projectOptions,
+}: ContractorInfoSectionProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
   const { control } = useFormContext<ContractorFormValues>();
@@ -58,12 +67,49 @@ export function ContractorInfoSection() {
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
+            md: isSuperAdmin ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
           },
           gap: 2.5,
           alignItems: "start",
         }}
       >
+        {isSuperAdmin && (
+          <Box sx={{ position: "relative" }}>
+            <Typography
+              component="label"
+              sx={{
+                position: "absolute",
+                top: "-9px",
+                left: isArabic ? "auto" : "12px",
+                right: isArabic ? "12px" : "auto",
+                bgcolor: "background.paper",
+                px: 0.8,
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                color: "text.secondary",
+                zIndex: 10,
+                pointerEvents: "none",
+              }}
+            >
+              {isArabic ? `* ${t("selectProject")}` : `${t("selectProject")} *`}
+            </Typography>
+
+            <Controller
+              name="project_id"
+              control={control}
+              render={({ field, fieldState }) => (
+                <AppSelect
+                  label=""
+                  required
+                  options={projectOptions}
+                  value={field.value ?? ""}
+                  onChange={(value) => field.onChange(Number(value))}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          </Box>
+        )}
         <Box>
           <Controller
             name="name"
