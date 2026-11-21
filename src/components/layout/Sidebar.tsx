@@ -1,22 +1,20 @@
-import {
-  Assessment,
-  Badge,
-  Build,
-  DashboardRounded,
-  EventAvailable,
-  EventBusy,
-  ExpandLess,
-  ExpandMore,
-  Handyman,
-  ManageAccounts,
-  MoneyOff,
-  Paid,
-  Payments,
-  People,
-  Settings,
-  Shield,
-  WorkHistory,
-} from "@mui/icons-material";
+import Assessment from "@mui/icons-material/Assessment";
+import Badge from "@mui/icons-material/Badge";
+import Build from "@mui/icons-material/Build";
+import DashboardRounded from "@mui/icons-material/DashboardRounded";
+import EventAvailable from "@mui/icons-material/EventAvailable";
+import EventBusy from "@mui/icons-material/EventBusy";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import Handyman from "@mui/icons-material/Handyman";
+import ManageAccounts from "@mui/icons-material/ManageAccounts";
+import MoneyOff from "@mui/icons-material/MoneyOff";
+import Paid from "@mui/icons-material/Paid";
+import Payments from "@mui/icons-material/Payments";
+import People from "@mui/icons-material/People";
+import Settings from "@mui/icons-material/Settings";
+import Shield from "@mui/icons-material/Shield";
+import WorkHistory from "@mui/icons-material/WorkHistory";
 import {
   Box,
   Collapse,

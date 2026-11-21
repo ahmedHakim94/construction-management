@@ -1,10 +1,8 @@
 import { Box, Typography, InputAdornment, Collapse } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  MonetizationOnOutlined as MoneyIcon,
-  ExpandMore as ExpandMoreIcon,
-} from "@mui/icons-material";
+import MoneyIcon from "@mui/icons-material/MonetizationOnOutlined";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { AppButton, AppInput, AppSelect } from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
 import type { ContractorFormValues } from "../types";

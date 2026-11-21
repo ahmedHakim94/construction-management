@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
-import { PersonAddAlt1Outlined, LinkOutlined } from "@mui/icons-material";
+import PersonAddAlt1Outlined from "@mui/icons-material/PersonAddAlt1Outlined";
+import LinkOutlined from "@mui/icons-material/LinkOutlined";
 import { useTranslation } from "react-i18next";
 
 import { PageContainer } from "@/components/layout/PageContainer";

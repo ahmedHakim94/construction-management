@@ -1,11 +1,9 @@
 import { Box, Typography, InputAdornment } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  PersonOutline as PersonIcon,
-  LocalPhoneOutlined as PhoneIcon,
-  AssignmentOutlined as NoteIcon,
-} from "@mui/icons-material";
+import PersonIcon from "@mui/icons-material/PersonOutline";
+import PhoneIcon from "@mui/icons-material/LocalPhoneOutlined";
+import NoteIcon from "@mui/icons-material/AssignmentOutlined";
 import { AppInput, AppSelect, AppTextarea } from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
 import type { ContractorFormValues } from "../types";

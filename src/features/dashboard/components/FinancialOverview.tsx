@@ -1,11 +1,9 @@
 import { Box, Typography, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppCard } from "@/components/ui";
-import {
-  AccountBalanceWalletOutlined,
-  PaidOutlined,
-  TrendingDownOutlined,
-} from "@mui/icons-material";
+import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
+import PaidOutlined from "@mui/icons-material/PaidOutlined";
+import TrendingDownOutlined from "@mui/icons-material/TrendingDownOutlined";
 
 interface FinancialOverviewProps {
   totalCost: number;

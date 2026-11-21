@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Box } from "@mui/material";
-import { PersonAddAlt1Outlined } from "@mui/icons-material";
+import PersonAddAlt1Outlined from "@mui/icons-material/PersonAddAlt1Outlined";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
@@ -82,7 +82,7 @@ export function UsersPage() {
   };
 
   // RTK Query: fetch real projects for filtering
-  const { data: projects = [] } = useGetAllProjectsQuery();
+  const { data: projects } = useGetAllProjectsQuery();
 
   // RTK Query Mutations
   const [createUser] = useCreateUserMutation();
@@ -110,7 +110,7 @@ export function UsersPage() {
   const projectOptions: SelectOption[] = useMemo(
     () => [
       { value: "", label: t("allProjects") },
-      ...projects.map((project) => ({
+      ...(projects ?? []).map((project) => ({
         value: Number(project.id),
         label: project.name,
       })),

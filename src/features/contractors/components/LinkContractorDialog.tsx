@@ -18,6 +18,10 @@ import {
 } from "../services/contractors.api";
 import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import type { Project } from "@/features/settings/projects/types";
+import type { AvailableContractor } from "../types";
+
+const EMPTY_PROJECTS: Project[] = [];
+const EMPTY_CONTRACTORS: AvailableContractor[] = [];
 
 type Props = {
   open: boolean;
@@ -32,7 +36,7 @@ export function LinkContractorDialog({ open, onClose }: Props) {
   const [project, setProject] = useState<Project | null>(null);
   const [contractorId, setContractorId] = useState<number | null>(null);
 
-  const { data: projects = [], isFetching: projectsLoading } =
+  const { data: projects = EMPTY_PROJECTS, isFetching: projectsLoading } =
     useGetAllProjectsQuery(undefined, {
       skip: !open || !isSuperAdmin,
     });
@@ -40,7 +44,7 @@ export function LinkContractorDialog({ open, onClose }: Props) {
   const projectId =
     isSuperAdmin && project ? Number(project.id) : undefined;
 
-  const { data: contractors = [], isFetching } =
+  const { data: contractors = EMPTY_CONTRACTORS, isFetching } =
     useGetAvailableContractorsQuery(projectId, {
       skip: !open || (isSuperAdmin && !projectId),
     });

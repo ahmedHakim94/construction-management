@@ -1,5 +1,7 @@
 import { Avatar, Box, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
-import { Logout, Menu as MenuIcon, PersonOutlined } from "@mui/icons-material";
+import Logout from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

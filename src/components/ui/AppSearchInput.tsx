@@ -1,5 +1,5 @@
 import { InputAdornment } from "@mui/material";
-import { SearchOutlined } from "@mui/icons-material";
+import SearchOutlined from "@mui/icons-material/SearchOutlined";
 
 import { AppInput } from "./AppInput";
 

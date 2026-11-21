@@ -16,7 +16,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { SaveOutlined } from "@mui/icons-material";
+import SaveOutlined from "@mui/icons-material/SaveOutlined";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppCard, AppPageHeader } from "@/components/ui";

@@ -1,6 +1,6 @@
 
 import { Box, Typography } from "@mui/material";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { AppCard, AppPageHeader } from "@/components/ui";
@@ -13,8 +13,6 @@ import { ReportsSummary } from "../components/ReportsSummary";
 import { DailyWorkReportTable } from "../components/DailyWorkReportTable";
 import { ContractorsReportTable } from "../components/ContractorsReportTable";
 import { ExportButtonMenu } from "../components/ExportButtonMenu";
-import { exportToExcel } from "../utils/exportExcel";
-import { exportToPdf } from "../utils/exportPdf";
 import type { ExportColumnDef } from "../utils/export.types";
 import {
   getProjectsReportColumns,
@@ -95,12 +93,18 @@ export function ReportsPage() {
     [t],
   );
 
+  const [isExporting, setIsExporting] = useState(false);
+  const isExportingRef = useRef(false);
+
   const handleExport = async <T,>(
     format: "excel" | "pdf",
     title: string,
     columns: ExportColumnDef<T>[],
     data: T[],
   ) => {
+    if (isExportingRef.current) return;
+    isExportingRef.current = true;
+    setIsExporting(true);
     try {
       const options = {
         title,
@@ -113,13 +117,18 @@ export function ReportsPage() {
       };
 
       if (format === "excel") {
+        const { exportToExcel } = await import("../utils/exportExcel");
         await exportToExcel(options);
       } else {
+        const { exportToPdf } = await import("../utils/exportPdf");
         await exportToPdf(options);
       }
     } catch (error) {
       console.error(error);
       notify.error(t("common:somethingWentWrong"));
+    } finally {
+      isExportingRef.current = false;
+      setIsExporting(false);
     }
   };
 
@@ -175,7 +184,7 @@ export function ReportsPage() {
 
             {canExport && (
               <ExportButtonMenu
-                disabled={reports.length === 0 || isLoading}
+                disabled={reports.length === 0 || isLoading || isExporting}
                 onExportExcel={() =>
                   handleExport(
                     "excel",
@@ -223,7 +232,9 @@ export function ReportsPage() {
 
             {canExport && (
               <ExportButtonMenu
-                disabled={dailyWorkReports.length === 0 || isLoading}
+                disabled={
+                  dailyWorkReports.length === 0 || isLoading || isExporting
+                }
                 onExportExcel={() =>
                   handleExport(
                     "excel",
@@ -271,7 +282,9 @@ export function ReportsPage() {
 
             {canExport && (
               <ExportButtonMenu
-                disabled={contractorReports.length === 0 || isLoading}
+                disabled={
+                  contractorReports.length === 0 || isLoading || isExporting
+                }
                 onExportExcel={() =>
                   handleExport(
                     "excel",

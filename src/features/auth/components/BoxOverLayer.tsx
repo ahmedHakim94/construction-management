@@ -1,10 +1,8 @@
 import { Box, Stack, Typography } from "@mui/material";
-import {
-  AssessmentOutlined,
-  BusinessOutlined,
-  ConstructionOutlined,
-  GroupsOutlined,
-} from "@mui/icons-material";
+import AssessmentOutlined from "@mui/icons-material/AssessmentOutlined";
+import BusinessOutlined from "@mui/icons-material/BusinessOutlined";
+import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
+import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
 import { useTranslation } from "react-i18next";
 
 function BoxOverLayer() {

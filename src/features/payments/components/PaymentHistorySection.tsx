@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { Payment as PaymentIcon } from "@mui/icons-material";
+import PaymentIcon from "@mui/icons-material/Payment";
 import {
   Box,
   Typography,
@@ -15,8 +15,6 @@ import { useTranslation } from "react-i18next";
 import { AppButton } from "@/components/ui";
 import { notify } from "@/shared/utils/notify";
 import { ExportButtonMenu } from "@/features/reports/components/ExportButtonMenu";
-import { exportToExcel } from "@/features/reports/utils/exportExcel";
-import { exportToPdf } from "@/features/reports/utils/exportPdf";
 import type { ExportColumnDef } from "@/features/reports/utils/export.types";
 import type {
   PaymentDetails,
@@ -106,12 +104,20 @@ export function PaymentHistorySection({
     return { items };
   }, [summary, t]);
 
+  const [isExporting, setIsExporting] = useState(false);
+  const isExportingRef = useRef(false);
+
   const handleExportExcel = async () => {
-    if (transactions.length === 0) return;
+    if (transactions.length === 0 || isExportingRef.current) return;
+    isExportingRef.current = true;
+    setIsExporting(true);
     try {
       const sanitizedContractor = summary.contractorName
         ? `${summary.contractorName.replace(/[\\/:*?"<>|]/g, "_")}_`
         : "";
+      const { exportToExcel } = await import(
+        "@/features/reports/utils/exportExcel"
+      );
       await exportToExcel({
         title: t("paymentHistory"),
         filename: `${t("paymentHistory")}_${sanitizedContractor}${dayjs().format("YYYY-MM-DD")}`,
@@ -124,15 +130,23 @@ export function PaymentHistorySection({
     } catch (error) {
       console.error(error);
       notify.error(t("common:somethingWentWrong", t("somethingWentWrong")));
+    } finally {
+      isExportingRef.current = false;
+      setIsExporting(false);
     }
   };
 
   const handleExportPdf = async () => {
-    if (transactions.length === 0) return;
+    if (transactions.length === 0 || isExportingRef.current) return;
+    isExportingRef.current = true;
+    setIsExporting(true);
     try {
       const sanitizedContractor = summary.contractorName
         ? `${summary.contractorName.replace(/[\\/:*?"<>|]/g, "_")}_`
         : "";
+      const { exportToPdf } = await import(
+        "@/features/reports/utils/exportPdf"
+      );
       await exportToPdf({
         title: t("paymentHistory"),
         filename: `${t("paymentHistory")}_${sanitizedContractor}${dayjs().format("YYYY-MM-DD")}`,
@@ -145,6 +159,9 @@ export function PaymentHistorySection({
     } catch (error) {
       console.error(error);
       notify.error(t("common:somethingWentWrong", t("somethingWentWrong")));
+    } finally {
+      isExportingRef.current = false;
+      setIsExporting(false);
     }
   };
 
@@ -180,7 +197,7 @@ export function PaymentHistorySection({
           {t("paymentHistory")}
         </Typography>
         <ExportButtonMenu
-          disabled={loading || transactions.length === 0}
+          disabled={loading || transactions.length === 0 || isExporting}
           onExportExcel={handleExportExcel}
           onExportPdf={handleExportPdf}
         />

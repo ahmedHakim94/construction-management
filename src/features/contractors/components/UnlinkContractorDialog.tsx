@@ -19,6 +19,9 @@ import {
   useUnlinkContractorMutation,
   useGetContractorProjectsQuery,
 } from "../services/contractors.api";
+import type { ContractorProject } from "../types";
+
+const EMPTY_PROJECTS: ContractorProject[] = [];
 
 type Props = {
   open: boolean;
@@ -40,7 +43,7 @@ export default function UnlinkContractorDialog({
   const [selectedProjects, setSelectedProjects] = useState<number[]>([]);
 
   const {
-    data: projects = [],
+    data: projects = EMPTY_PROJECTS,
     isLoading,
     isError,
   } = useGetContractorProjectsQuery(contractor?.id ?? 0, {

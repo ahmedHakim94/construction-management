@@ -1,14 +1,12 @@
 import { Box, Typography, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppCard } from "@/components/ui";
-import {
-  AccountBalanceWalletOutlined,
-  AssignmentOutlined,
-  AccessTimeOutlined,
-  PaidOutlined,
-  AccountBalanceOutlined,
-  LocalOffer,
-} from "@mui/icons-material";
+import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
+import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
+import AccessTimeOutlined from "@mui/icons-material/AccessTimeOutlined";
+import PaidOutlined from "@mui/icons-material/PaidOutlined";
+import AccountBalanceOutlined from "@mui/icons-material/AccountBalanceOutlined";
+import LocalOffer from "@mui/icons-material/LocalOffer";
 import type { ReportSummary } from "../types";
 
 export interface ReportsSummaryProps {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
-import { Construction } from "@mui/icons-material";
+import Construction from "@mui/icons-material/Construction";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppButton, AppCard, AppPageHeader } from "@/components/ui";

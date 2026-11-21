@@ -51,7 +51,9 @@ export function UserDialog({
   const actor = useAppSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(false);
 
-  const { data: projects = [] } = useGetAllProjectsQuery();
+  const { data: projects } = useGetAllProjectsQuery(undefined, {
+    skip: !open,
+  });
 
   const isSuperAdmin = actor?.role === "super_admin";
   const actorProjectId = getUserProjectId(actor);
@@ -163,7 +165,7 @@ export function UserDialog({
 
   const projectOptions: SelectOption[] = useMemo(
     () =>
-      projects.map((project) => ({
+      (projects ?? []).map((project) => ({
         value: Number(project.id),
         label: project.name,
       })),
@@ -184,7 +186,7 @@ export function UserDialog({
 
   const displayProjectName = useMemo(() => {
     if (!effectiveProjectId) return "—";
-    const found = projects.find(
+    const found = (projects ?? []).find(
       (p) => Number(p.id) === Number(effectiveProjectId),
     );
     return (

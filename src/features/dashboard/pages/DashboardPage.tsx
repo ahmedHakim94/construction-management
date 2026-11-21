@@ -1,10 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Box } from "@mui/material";
-import {
-  Business as BusinessIcon,
-  People as PeopleIcon,
-  Construction as ConstructionIcon,
-} from "@mui/icons-material";
+import BusinessIcon from "@mui/icons-material/Business";
+import PeopleIcon from "@mui/icons-material/People";
+import ConstructionIcon from "@mui/icons-material/Construction";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AppPageContainer, AppPageHeader } from "@/components/ui";
 import SharedTotalNumber from "../components/SharedTotalNumber";

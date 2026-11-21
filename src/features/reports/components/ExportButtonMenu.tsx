@@ -1,11 +1,9 @@
-import { useState, type MouseEvent } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
-import {
-  FileDownloadOutlined,
-  KeyboardArrowDown,
-  TableChartOutlined,
-  PictureAsPdfOutlined,
-} from "@mui/icons-material";
+import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import TableChartOutlined from "@mui/icons-material/TableChartOutlined";
+import PictureAsPdfOutlined from "@mui/icons-material/PictureAsPdfOutlined";
 import { useTranslation } from "react-i18next";
 import { AppButton } from "@/components/ui";
 
@@ -22,11 +20,13 @@ export function ExportButtonMenu({
 }: ExportButtonMenuProps) {
   const { t } = useTranslation(["reports"]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [exporting, setExporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const isExportingRef = useRef(false);
 
   const isOpen = Boolean(anchorEl);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (disabled || isExportingRef.current) return;
     setAnchorEl(event.currentTarget);
   };
 
@@ -35,12 +35,15 @@ export function ExportButtonMenu({
   };
 
   const handleExport = async (action: () => Promise<void> | void) => {
+    if (disabled || isExportingRef.current) return;
+    isExportingRef.current = true;
     handleClose();
-    setExporting(true);
+    setIsExporting(true);
     try {
       await action();
     } finally {
-      setExporting(false);
+      isExportingRef.current = false;
+      setIsExporting(false);
     }
   };
 
@@ -49,8 +52,8 @@ export function ExportButtonMenu({
       <AppButton
         variant="outlined"
         size="small"
-        disabled={disabled || exporting}
-        loading={exporting}
+        disabled={disabled || isExporting}
+        loading={isExporting}
         startIcon={<FileDownloadOutlined fontSize="small" />}
         endIcon={<KeyboardArrowDown fontSize="small" />}
         onClick={handleClick}
@@ -90,6 +93,7 @@ export function ExportButtonMenu({
         }}
       >
         <MenuItem
+          disabled={disabled || isExporting}
           onClick={() => handleExport(onExportExcel)}
           sx={{ py: 1, gap: 1 }}
         >
@@ -103,6 +107,7 @@ export function ExportButtonMenu({
         </MenuItem>
 
         <MenuItem
+          disabled={disabled || isExporting}
           onClick={() => handleExport(onExportPdf)}
           sx={{ py: 1, gap: 1 }}
         >

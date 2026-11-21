@@ -4,7 +4,8 @@ import {
   InputAdornment,
   type TextFieldProps,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { AppInput } from "./AppInput";
 
 export function AppPasswordInput(props: TextFieldProps) {

@@ -1,12 +1,10 @@
 import { Stack, IconButton, Tooltip } from "@mui/material";
-import {
-  EditOutlined,
-  DeleteOutlined,
-  VisibilityOutlined,
-  LinkOffOutlined,
-  CheckCircleOutline,
-  BlockOutlined,
-} from "@mui/icons-material";
+import EditOutlined from "@mui/icons-material/EditOutlined";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
+import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
+import LinkOffOutlined from "@mui/icons-material/LinkOffOutlined";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import BlockOutlined from "@mui/icons-material/BlockOutlined";
 
 interface AppActionsProps {
   onView?: () => void;

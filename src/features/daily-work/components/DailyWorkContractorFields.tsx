@@ -12,6 +12,8 @@ import {
   useGetExternalContractorsQuery,
 } from "@/features/contractors/services/contractors.api";
 
+const EMPTY_EQUIPMENTS: Equipment[] = [];
+
 type DailyWorkForm = ReturnType<typeof useDailyWorkForm>;
 interface DailyWorkContractorFieldsProps {
   open: boolean;
@@ -41,11 +43,10 @@ export function DailyWorkContractorFields({
   const [newExternalName, setNewExternalName] = useState("");
   const [newExternalPhone, setNewExternalPhone] = useState("");
   const [creatingExternal, setCreatingExternal] = useState(false);
-  const [equipments, setEquipments] = useState<Equipment[]>([]);
   const nameInputRef = useRef<HTMLInputElement>(null);
   // const { data: contractors } = useGetAllContractorsQuery();
 
-  const { data: contractors = [] } = useGetAllContractorsQuery(Number(projectId) || undefined as any, {
+  const { data: contractors } = useGetAllContractorsQuery(Number(projectId) || undefined as any, {
     skip: !open || !projectId || isExternal,
   });
 
@@ -83,16 +84,16 @@ export function DailyWorkContractorFields({
     }
   }, [isAddingExternal, clearErrors]);
 
-  useEffect(() => {
-    
-    if (contractorData?.equipment) {
-      setEquipments(contractorData?.equipment as any);
-    }
-  }, [contractorData]);
+  const equipments = useMemo(
+    () =>
+      (contractorData?.equipment as unknown as Equipment[] | undefined) ??
+      EMPTY_EQUIPMENTS,
+    [contractorData],
+  );
 
   const equipmentOptions = useMemo(
     () =>
-      equipments?.map((item) => ({
+      equipments.map((item) => ({
         value: item.id,
         label: `${item.equipmentTypeName}`,
       })),
@@ -101,7 +102,7 @@ export function DailyWorkContractorFields({
 
   const contractorOptions = useMemo(
     () =>
-      contractors?.map((item) => ({
+      (contractors ?? []).map((item) => ({
         value: item.id,
         label: item.name,
       })),

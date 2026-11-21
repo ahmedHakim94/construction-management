@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import { Today } from "@mui/icons-material";
+import Today from "@mui/icons-material/Today";
 import { useTranslation } from "react-i18next";
 import type { Dayjs } from "dayjs";
 import { PageContainer } from "@/components/layout/PageContainer";

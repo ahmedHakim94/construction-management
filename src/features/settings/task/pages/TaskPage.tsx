@@ -8,7 +8,7 @@ import { useDialog } from "@/hooks/useDialog";
 import { TaskTable } from "../components/TaskTable";
 import { TaskDialog } from "../components/TaskDialog";
 import type { Task, TaskFormValues } from "../types";
-import { AddTask } from "@mui/icons-material";
+import AddTask from "@mui/icons-material/AddTask";
 import {
   useCreateTaskMutation,
   useDeleteTaskMutation,

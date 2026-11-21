@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   DialogActions,
@@ -98,22 +98,22 @@ export function EquipmentDialog({
     name: "contractorId",
   });
 
-  const { data: projects = [] } = useGetAllProjectsQuery(undefined, {
+  const { data: projects } = useGetAllProjectsQuery(undefined, {
     skip: !open || !isSuperAdminCreate,
   });
 
-  const { data: contractors = [] } = useGetAllContractorsQuery(
+  const { data: contractors } = useGetAllContractorsQuery(
     isSuperAdminCreate ? selectedProjectId : undefined,
     {
       skip: !open || (isSuperAdminCreate && !selectedProjectId),
     },
   );
 
-  const { data: equipmentTypes = [] } = useGetAllEquipmentTypeQuery(undefined, {
+  const { data: equipmentTypes } = useGetAllEquipmentTypeQuery(undefined, {
     skip: !open || isLinkMode,
   });
 
-  const { data: availableEquipments = [], isFetching: loadingEquipments } =
+  const { data: availableEquipments, isFetching: loadingEquipments } =
     useGetAvailableEquipmentsQuery(
       {
         contractorId: selectedContractorId,
@@ -132,29 +132,43 @@ export function EquipmentDialog({
 
   const [linkEquipment] = useLinkEquipmentToProjectMutation();
 
-  const projectOptions: SelectOption[] = projects.map((item) => ({
-    value: String(item.id),
-    label: item.name,
-  }));
+  const projectOptions = useMemo<SelectOption[]>(
+    () =>
+      (projects ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+    [projects],
+  );
 
-  const contractorOptions: SelectOption[] = contractors.map((item) => ({
-    value: String(item.id),
-    label: item.name,
-  }));
+  const contractorOptions = useMemo<SelectOption[]>(
+    () =>
+      (contractors ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+    [contractors],
+  );
 
-  const equipmentTypeOptions: SelectOption[] = equipmentTypes.map((item) => ({
-    value: String(item.id),
-    label: item.name,
-  }));
+  const equipmentTypeOptions = useMemo<SelectOption[]>(
+    () =>
+      (equipmentTypes ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+    [equipmentTypes],
+  );
 
-  const availableEquipmentOptions: SelectOption[] = availableEquipments.map(
-    (item) => ({
-      value: String(item.id),
-      label:
-        [item.equipmentTypeName, item.model, item.plateNumber]
-          .filter(Boolean)
-          .join(" - ") || `#${item.id}`,
-    }),
+  const availableEquipmentOptions = useMemo<SelectOption[]>(
+    () =>
+      (availableEquipments ?? []).map((item) => ({
+        value: String(item.id),
+        label:
+          [item.equipmentTypeName, item.model, item.plateNumber]
+            .filter(Boolean)
+            .join(" - ") || `#${item.id}`,
+      })),
+    [availableEquipments],
   );
 
   useEffect(() => {

@@ -7,12 +7,10 @@ import {
   Box,
 } from "@mui/material";
 import { FormProvider, useFieldArray } from "react-hook-form";
-import {
-  Close as CloseIcon,
-  PersonAddAlt1Outlined as AddContractorIcon,
-  SettingsOutlined as GearIcon,
-  Add as AddIcon,
-} from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
+import AddContractorIcon from "@mui/icons-material/PersonAddAlt1Outlined";
+import GearIcon from "@mui/icons-material/SettingsOutlined";
+import AddIcon from "@mui/icons-material/Add";
 import { AppButton, AppDialog } from "@/components/ui";
 import type { Contractor, ContractorFormValues } from "../types";
 import { ContractorInfoSection } from "./ContractorInfoSection";
@@ -51,31 +49,38 @@ export function ContractorDialog(props: ContractorDialogProps) {
 
   const prevFieldsRef = useRef(fields);
   useEffect(() => {
-    if (expandedId === null && fields.length > 0) {
-      setExpandedId(fields[0].id);
-    } else if (fields.length > prevFieldsRef.current.length) {
-      const addedField = fields.find(
-        (f) => !prevFieldsRef.current.some((pf) => pf.id === f.id),
-      );
-      if (addedField) {
-        setExpandedId(addedField.id);
+    const prevFields = prevFieldsRef.current;
+
+    setExpandedId((currentExpandedId) => {
+      if (currentExpandedId === null && fields.length > 0) {
+        return fields[0].id;
       }
-    } else if (fields.length < prevFieldsRef.current.length) {
-      const wasExpandedDeleted = !fields.some((f) => f.id === expandedId);
-      if (wasExpandedDeleted) {
-        const deletedIndex = prevFieldsRef.current.findIndex(
-          (pf) => pf.id === expandedId,
+      if (fields.length > prevFields.length) {
+        const addedField = fields.find(
+          (f) => !prevFields.some((pf) => pf.id === f.id),
         );
-        if (fields.length > 0) {
-          const newExpandIndex = Math.min(deletedIndex, fields.length - 1);
-          setExpandedId(fields[newExpandIndex].id);
-        } else {
-          setExpandedId(null);
+        return addedField ? addedField.id : currentExpandedId;
+      }
+      if (fields.length < prevFields.length) {
+        const wasExpandedDeleted = !fields.some(
+          (f) => f.id === currentExpandedId,
+        );
+        if (wasExpandedDeleted) {
+          const deletedIndex = prevFields.findIndex(
+            (pf) => pf.id === currentExpandedId,
+          );
+          if (fields.length > 0) {
+            const newExpandIndex = Math.min(deletedIndex, fields.length - 1);
+            return fields[newExpandIndex].id;
+          }
+          return null;
         }
       }
-    }
+      return currentExpandedId;
+    });
+
     prevFieldsRef.current = fields;
-  }, [fields, expandedId]);
+  }, [fields]);
 
   return (
     <AppDialog
