@@ -301,18 +301,41 @@ export function AttendanceDialog({
             />
 
             {isSuperAdmin ? (
-              <AppSelect
-                label={t("hr:attendanceProject")}
-                required
-                options={projectOptions}
-                value={selectedProjectId}
-                onChange={(value) => {
-                  setSelectedProjectId(Number(value));
-                  if (projectError) setProjectError("");
-                }}
-                placeholder={t("hr:selectAttendanceProject")}
-                error={projectError}
-              />
+              <Box sx={{ position: "relative" }}>
+                <Typography
+                  component="label"
+                  sx={{
+                    position: "absolute",
+                    top: "-9px",
+                    left: isArabic ? "auto" : "12px",
+                    right: isArabic ? "12px" : "auto",
+                    bgcolor: "background.paper",
+                    px: 0.8,
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    color: "text.secondary",
+                    zIndex: 10,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {isArabic
+                    ? `* ${t("hr:attendanceProject")}`
+                    : `${t("hr:attendanceProject")} *`}
+                </Typography>
+
+                <AppSelect
+                  label=""
+                  required
+                  options={projectOptions}
+                  value={selectedProjectId}
+                  onChange={(value) => {
+                    setSelectedProjectId(Number(value));
+                    if (projectError) setProjectError("");
+                  }}
+                  placeholder={t("hr:selectAttendanceProject")}
+                  error={projectError}
+                />
+              </Box>
             ) : (
               <AppInput
                 label={t("hr:attendanceProject")}
