@@ -1,3 +1,4 @@
+import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
 import Assessment from "@mui/icons-material/Assessment";
 import Badge from "@mui/icons-material/Badge";
 import Build from "@mui/icons-material/Build";
@@ -119,6 +120,12 @@ const navigationItems: SidebarItem[] = [
         path: "/hr/deductions",
         icon: MoneyOff,
         permission: "deductions.view",
+      },
+      {
+        key: "loans",
+        path: "/hr/loans",
+        icon: AccountBalanceWalletOutlined,
+        permission: "loans.view",
       },
       {
         key: "payroll",

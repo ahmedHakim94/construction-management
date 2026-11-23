@@ -76,6 +76,12 @@ const DeductionsPage = lazy(() =>
   })),
 );
 
+const LoansPage = lazy(() =>
+  import("@/features/hr/loans/pages/LoansPage").then((m) => ({
+    default: m.LoansPage,
+  })),
+);
+
 const PayrollPage = lazy(() =>
   import("@/features/hr/payroll/pages/PayrollPage").then((m) => ({
     default: m.PayrollPage,
@@ -382,6 +388,14 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission permission="deductions.view">
                 <DeductionsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "hr/loans",
+            element: (
+              <RequirePermission permission="loans.view">
+                <LoansPage />
               </RequirePermission>
             ),
           },

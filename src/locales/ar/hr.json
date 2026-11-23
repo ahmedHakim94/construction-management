@@ -79,5 +79,22 @@
   "transactionDateRequired": "التاريخ مطلوب",
   "transactionDateOutOfRange": "يجب أن يكون التاريخ ضمن الشهر الحالي ولا يتجاوز تاريخ اليوم",
   "payroll": "الرواتب",
-  "payrollDescription": "معالجة ومراجعة مسيرات الرواتب والمستحقات."
+  "payrollDescription": "معالجة ومراجعة مسيرات الرواتب والمستحقات.",
+  "loans": "السلف",
+  "loansDescription": "إدارة سلف الموظفين.",
+  "addLoan": "إضافة سلفة",
+  "editLoan": "تعديل سلفة",
+  "deleteLoan": "حذف سلفة",
+  "deleteLoanConfirm": "هل أنت متأكد من رغبتك في حذف هذه السلفة؟",
+  "loanProject": "المشروع",
+  "selectLoanProject": "اختر المشروع",
+  "selectLoanEmployee": "اختر الموظف",
+  "loanAmount": "المبلغ",
+  "loanDate": "التاريخ",
+  "noLoansFound": "لا توجد سلف لعرضها",
+  "loanProjectRequired": "المشروع مطلوب",
+  "loanEmployeeRequired": "الموظف مطلوب",
+  "loanAmountRequired": "المبلغ مطلوب",
+  "loanAmountInvalid": "يجب أن يكون المبلغ أكبر من صفر",
+  "loanDateRequired": "التاريخ مطلوب"
 }

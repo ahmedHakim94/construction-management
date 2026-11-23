@@ -28,6 +28,7 @@ export function Breadcrumb() {
       attendance: "attendance",
       leaves: "leaves",
       deductions: "deductions",
+      loans: "loans",
       payroll: "payroll",
     };
 
