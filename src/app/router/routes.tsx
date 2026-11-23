@@ -402,7 +402,7 @@ export const router = createBrowserRouter([
           {
             path: "hr/payroll",
             element: (
-              <RequirePermission permission="payroll.view">
+              <RequirePermission superAdminOnly>
                 <PayrollPage />
               </RequirePermission>
             ),

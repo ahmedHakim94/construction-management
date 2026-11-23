@@ -131,6 +131,7 @@ const navigationItems: SidebarItem[] = [
         key: "payroll",
         path: "/hr/payroll",
         icon: Payments,
+        superAdminOnly: true,
         permission: "payroll.view",
       },
     ],
