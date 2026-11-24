@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import PersonAddAlt1Outlined from "@mui/icons-material/PersonAddAlt1Outlined";
 import { useTranslation } from "react-i18next";
@@ -11,162 +11,204 @@ import { useDialog } from "@/hooks/useDialog";
 import { EmployeeDialog } from "../components/EmployeeDialog";
 import { EmployeesTable } from "../components/EmployeesTable";
 import {
-  MOCK_EMPLOYEES,
-  MOCK_EMPLOYEE_PROJECTS,
-} from "../mock/employees.mock";
+  useCreateEmployeeMutation,
+  useDeleteEmployeeMutation,
+  useGetEmployeesQuery,
+  useUpdateEmployeeMutation,
+} from "../services/employees.api";
 import type {
   Employee,
   EmployeeDialogMode,
   EmployeeFormValues,
+  EmployeeMutationPayload,
 } from "../types";
 
-function getNextEmployeeCode(employees: Employee[]): string {
-  const maxNumber = employees.reduce((max, employee) => {
-    const match = /^EMP-(\d+)$/.exec(employee.code);
-    const num = match ? Number(match[1]) : 0;
-    return Math.max(max, num);
-  }, 0);
-  return `EMP-${String(maxNumber + 1).padStart(3, "0")}`;
-}
+const PAGE_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+const EMPTY_EMPLOYEES: Employee[] = [];
 
 export function EmployeesPage() {
   const { t } = useTranslation(["hr", "common"]);
-  const user = useAppSelector((state) => state.auth.user);
+  const userRole = useAppSelector((state) => state.auth.user?.role);
 
-  const isSuperAdmin = user?.role === "super_admin";
-  const isAdmin = user?.role === "admin";
+  const isSuperAdmin = userRole === "super_admin";
+  const isAdmin = userRole === "admin";
   const canView = isSuperAdmin || isAdmin;
-  const adminProjectId =
-    isAdmin && user?.project_id != null ? Number(user.project_id) : null;
 
-  const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dialogMode, setDialogMode] = useState<EmployeeDialogMode>("view");
   const [selectedEmployee, setSelectedEmployee] = useState<
     Employee | undefined
   >();
 
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const formDialog = useDialog();
   const deleteDialog = useDialog();
 
-  const projectNameById = useMemo(
-    () =>
-      new Map(
-        MOCK_EMPLOYEE_PROJECTS.map((project) => [
-          project.id,
-          project.name.toLowerCase(),
-        ]),
-      ),
-    [],
-  );
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
 
-  const visibleEmployees = useMemo(() => {
-    let scoped: Employee[] = [];
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
 
-    if (isSuperAdmin) {
-      scoped = employees;
-    } else if (isAdmin && adminProjectId !== null) {
-      scoped = employees.filter((employee) =>
-        employee.projectIds.includes(adminProjectId),
-      );
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
     }
 
-    const query = search.trim().toLowerCase();
-    if (!query) return scoped;
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(value.trim());
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+  }, []);
 
-    return scoped.filter((employee) => {
-      const matchesProjects = employee.projectIds.some((projectId) =>
-        (projectNameById.get(projectId) ?? "").includes(query),
-      );
+  const { data, isLoading, isFetching } = useGetEmployeesQuery(
+    {
+      page,
+      limit: PAGE_LIMIT,
+      search: debouncedSearch || undefined,
+    },
+    {
+      skip: !canView,
+    },
+  );
 
-      return (
-        employee.code.toLowerCase().includes(query) ||
-        employee.name.toLowerCase().includes(query) ||
-        employee.phone.toLowerCase().includes(query) ||
-        employee.jobTitle.toLowerCase().includes(query) ||
-        matchesProjects
-      );
-    });
-  }, [employees, isSuperAdmin, isAdmin, adminProjectId, search, projectNameById]);
+  const [createEmployee, { isLoading: isCreating }] =
+    useCreateEmployeeMutation();
+  const [updateEmployee, { isLoading: isUpdating }] =
+    useUpdateEmployeeMutation();
+  const [deleteEmployee, { isLoading: isDeleting }] =
+    useDeleteEmployeeMutation();
 
-  const handleOpenCreate = () => {
+  const employees = data?.data ?? EMPTY_EMPLOYEES;
+  const paginationMeta = data?.pagination;
+
+  const pagination = useMemo(
+    () =>
+      paginationMeta
+        ? {
+            page: paginationMeta.page,
+            limit: paginationMeta.limit,
+            total: paginationMeta.total,
+            totalPages: paginationMeta.totalPages,
+            onPageChange: setPage,
+          }
+        : undefined,
+    [paginationMeta],
+  );
+
+  const handleOpenCreate = useCallback(() => {
     if (!isSuperAdmin) return;
     setDialogMode("create");
     setSelectedEmployee(undefined);
     formDialog.openDialog();
-  };
+  }, [isSuperAdmin, formDialog.openDialog]);
 
-  const handleOpenView = (employee: Employee) => {
-    if (!canView) return;
-    setDialogMode("view");
-    setSelectedEmployee(employee);
-    formDialog.openDialog();
-  };
+  const handleOpenView = useCallback(
+    (employee: Employee) => {
+      if (!canView) return;
+      setDialogMode("view");
+      setSelectedEmployee(employee);
+      formDialog.openDialog();
+    },
+    [canView, formDialog.openDialog],
+  );
 
-  const handleOpenEdit = (employee: Employee) => {
-    if (!isSuperAdmin) return;
-    setDialogMode("edit");
-    setSelectedEmployee(employee);
-    formDialog.openDialog();
-  };
+  const handleOpenEdit = useCallback(
+    (employee: Employee) => {
+      if (!isSuperAdmin) return;
+      setDialogMode("edit");
+      setSelectedEmployee(employee);
+      formDialog.openDialog();
+    },
+    [isSuperAdmin, formDialog.openDialog],
+  );
 
-  const handleOpenDelete = (employee: Employee) => {
-    if (!isSuperAdmin) return;
-    setSelectedEmployee(employee);
-    deleteDialog.openDialog();
-  };
+  const handleOpenDelete = useCallback(
+    (employee: Employee) => {
+      if (!isSuperAdmin) return;
+      setSelectedEmployee(employee);
+      deleteDialog.openDialog();
+    },
+    [isSuperAdmin, deleteDialog.openDialog],
+  );
 
-  const handleCloseFormDialog = () => {
+  const handleCloseFormDialog = useCallback(() => {
     formDialog.closeDialog();
     setSelectedEmployee(undefined);
-  };
+  }, [formDialog.closeDialog]);
 
-  const handleCloseDeleteDialog = () => {
+  const handleCloseDeleteDialog = useCallback(() => {
     deleteDialog.closeDialog();
     setSelectedEmployee(undefined);
-  };
+  }, [deleteDialog.closeDialog]);
 
-  const handleSubmit = (values: EmployeeFormValues) => {
-    if (!isSuperAdmin) return;
+  const handleSubmit = useCallback(
+    async (values: EmployeeFormValues) => {
+      if (!isSuperAdmin) return;
 
-    const uniqueProjectIds = Array.from(new Set(values.projectIds));
+      const payload: EmployeeMutationPayload = {
+        name: values.name,
+        phone: values.phone,
+        address: values.address || null,
+        salary: values.basicSalary,
+        status: values.status,
+        job_title: values.jobTitle || null,
+        hire_date: values.hireDate || null,
+        project_ids: Array.from(new Set(values.projectIds)),
+      };
 
-    if (dialogMode === "edit" && selectedEmployee) {
-      setEmployees((prev) =>
-        prev.map((item) =>
-          item.id === selectedEmployee.id
-            ? {
-                ...item,
-                ...values,
-                projectIds: uniqueProjectIds,
-              }
-            : item,
-        ),
-      );
-    } else if (dialogMode === "create") {
-      setEmployees((prev) => {
-        const nextId =
-          prev.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-        const newEmployee: Employee = {
-          id: nextId,
-          code: getNextEmployeeCode(prev),
-          ...values,
-          projectIds: uniqueProjectIds,
-        };
-        return [newEmployee, ...prev];
-      });
-    }
+      try {
+        if (dialogMode === "edit" && selectedEmployee) {
+          await updateEmployee({
+            id: selectedEmployee.id,
+            data: payload,
+          }).unwrap();
+        } else if (dialogMode === "create") {
+          await createEmployee(payload).unwrap();
+        }
+        handleCloseFormDialog();
+      } catch {
+        // Error notification handled globally by baseApi
+      }
+    },
+    [
+      isSuperAdmin,
+      dialogMode,
+      selectedEmployee,
+      updateEmployee,
+      createEmployee,
+      handleCloseFormDialog,
+    ],
+  );
 
-    handleCloseFormDialog();
-  };
-
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!isSuperAdmin || !selectedEmployee) return;
-    setEmployees((prev) =>
-      prev.filter((item) => item.id !== selectedEmployee.id),
-    );
-    handleCloseDeleteDialog();
-  };
+
+    try {
+      await deleteEmployee(selectedEmployee.id).unwrap();
+      if (employees.length === 1 && page > 1) {
+        setPage((prev) => Math.max(prev - 1, 1));
+      }
+      handleCloseDeleteDialog();
+    } catch {
+      // Error notification handled globally by baseApi
+    }
+  }, [
+    isSuperAdmin,
+    selectedEmployee,
+    deleteEmployee,
+    employees.length,
+    page,
+    handleCloseDeleteDialog,
+  ]);
 
   return (
     <PageContainer>
@@ -190,15 +232,16 @@ export function EmployeesPage() {
         <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
           <Box sx={{ mb: 2 }}>
             <AppSearchInput
-              value={search}
-              onChange={setSearch}
+              value={searchInput}
+              onChange={handleSearchChange}
               placeholder={t("hr:searchEmployees")}
             />
           </Box>
 
           <EmployeesTable
-            rows={visibleEmployees}
-            projects={MOCK_EMPLOYEE_PROJECTS}
+            rows={employees}
+            loading={isLoading || isFetching}
+            pagination={pagination}
             canView={canView}
             canManage={isSuperAdmin}
             onView={handleOpenView}
@@ -211,25 +254,26 @@ export function EmployeesPage() {
           open={formDialog.open}
           mode={dialogMode}
           employee={selectedEmployee}
-          projects={MOCK_EMPLOYEE_PROJECTS}
           isSuperAdmin={isSuperAdmin}
+          submitting={isCreating || isUpdating}
           onClose={handleCloseFormDialog}
           onSubmit={handleSubmit}
         />
 
-        {isSuperAdmin && (
+        {isSuperAdmin ? (
           <AppConfirmDialog
             open={deleteDialog.open}
             title={t("hr:deleteEmployee")}
             message={t("hr:deleteEmployeeConfirm", {
               name: selectedEmployee?.name ?? "",
             })}
+            loading={isDeleting}
             confirmText={t("common:delete")}
             cancelText={t("common:cancel")}
             onClose={handleCloseDeleteDialog}
             onConfirm={handleConfirmDelete}
           />
-        )}
+        ) : null}
       </Box>
     </PageContainer>
   );

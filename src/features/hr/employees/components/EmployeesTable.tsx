@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import {
   Box,
   Chip,
@@ -6,29 +6,79 @@ import {
   Stack,
   Tooltip,
   Typography,
+  type Theme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { AppBadge, AppTable, type AppTableColDef } from "@/components/ui";
 import { AppActions } from "@/components/ui/AppActions";
+import type { TablePaginationProps } from "@/types";
 import type { Employee, EmployeeProject } from "../types";
 
 const MAX_VISIBLE_PROJECTS = 2;
 
+const SALARY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const PROJECTS_WRAPPER_SX = {
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: 0.75,
+  py: 1,
+  width: "100%",
+} as const;
+
+const SALARY_TEXT_SX = {
+  direction: "ltr",
+  fontVariantNumeric: "tabular-nums",
+} as const;
+
+const getProjectChipSx = (theme: Theme) => ({
+  height: 24,
+  fontSize: "0.75rem",
+  fontWeight: 500,
+  borderRadius: 1.5,
+  bgcolor: alpha(theme.palette.primary.main, 0.08),
+  color: theme.palette.primary.main,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  "& .MuiChip-label": {
+    px: 1,
+  },
+});
+
+const getMoreChipSx = (theme: Theme) => ({
+  height: 24,
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  borderRadius: 1.5,
+  cursor: "pointer",
+  direction: "ltr",
+  bgcolor: alpha(theme.palette.primary.main, 0.16),
+  color: theme.palette.primary.dark,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.35)}`,
+  "&:hover": {
+    bgcolor: alpha(theme.palette.primary.main, 0.24),
+  },
+  "& .MuiChip-label": {
+    px: 0.9,
+  },
+});
+
 interface EmployeeProjectsCellProps {
-  projectIds: number[];
-  projectNameById: Map<number, string>;
+  projects: EmployeeProject[];
   emptyLabel: string;
 }
 
-function EmployeeProjectsCell({
-  projectIds,
-  projectNameById,
+const EmployeeProjectsCell = memo(function EmployeeProjectsCell({
+  projects,
   emptyLabel,
 }: EmployeeProjectsCellProps) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  if (!projectIds.length) {
+  if (projects.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
         {emptyLabel}
@@ -36,41 +86,21 @@ function EmployeeProjectsCell({
     );
   }
 
-  const visibleProjectIds = projectIds.slice(0, MAX_VISIBLE_PROJECTS);
-  const remainingCount = projectIds.length - MAX_VISIBLE_PROJECTS;
+  const visibleProjects = projects.slice(0, MAX_VISIBLE_PROJECTS);
+  const remainingCount = projects.length - MAX_VISIBLE_PROJECTS;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 0.75,
-        py: 1,
-        width: "100%",
-      }}
-    >
-      {visibleProjectIds.map((projectId) => (
+    <Box sx={PROJECTS_WRAPPER_SX}>
+      {visibleProjects.map((project) => (
         <Chip
-          key={projectId}
+          key={project.id}
           size="small"
-          label={projectNameById.get(projectId) ?? `#${projectId}`}
-          sx={(theme) => ({
-            height: 24,
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            borderRadius: 1.5,
-            bgcolor: alpha(theme.palette.primary.main, 0.08),
-            color: theme.palette.primary.main,
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-            "& .MuiChip-label": {
-              px: 1,
-            },
-          })}
+          label={project.name}
+          sx={getProjectChipSx}
         />
       ))}
 
-      {remainingCount > 0 && (
+      {remainingCount > 0 ? (
         <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
           <Box sx={{ display: "inline-flex" }}>
             <Tooltip
@@ -83,13 +113,13 @@ function EmployeeProjectsCell({
               placement="top"
               title={
                 <Stack spacing={0.5} sx={{ py: 0.25 }}>
-                  {projectIds.map((projectId) => (
+                  {projects.map((project) => (
                     <Typography
-                      key={projectId}
+                      key={project.id}
                       variant="caption"
                       sx={{ display: "block", color: "inherit" }}
                     >
-                      • {projectNameById.get(projectId) ?? `#${projectId}`}
+                      • {project.name}
                     </Typography>
                   ))}
                 </Stack>
@@ -102,35 +132,20 @@ function EmployeeProjectsCell({
                   event.stopPropagation();
                   setTooltipOpen((prev) => !prev);
                 }}
-                sx={(theme) => ({
-                  height: 24,
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  borderRadius: 1.5,
-                  cursor: "pointer",
-                  direction: "ltr",
-                  bgcolor: alpha(theme.palette.primary.main, 0.16),
-                  color: theme.palette.primary.dark,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.35)}`,
-                  "&:hover": {
-                    bgcolor: alpha(theme.palette.primary.main, 0.24),
-                  },
-                  "& .MuiChip-label": {
-                    px: 0.9,
-                  },
-                })}
+                sx={getMoreChipSx}
               />
             </Tooltip>
           </Box>
         </ClickAwayListener>
-      )}
+      ) : null}
     </Box>
   );
-}
+});
 
 interface EmployeesTableProps {
   rows: Employee[];
-  projects: EmployeeProject[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   canView: boolean;
   canManage: boolean;
   onView?: (employee: Employee) => void;
@@ -138,9 +153,13 @@ interface EmployeesTableProps {
   onDelete?: (employee: Employee) => void;
 }
 
-export function EmployeesTable({
+const EMPTY_PROJECTS: EmployeeProject[] = [];
+const getAutoRowHeight = () => "auto" as const;
+
+export const EmployeesTable = memo(function EmployeesTable({
   rows,
-  projects,
+  loading = false,
+  pagination,
   canView,
   canManage,
   onView,
@@ -149,26 +168,17 @@ export function EmployeesTable({
 }: EmployeesTableProps) {
   const { t } = useTranslation(["hr", "common"]);
 
-  const projectNameById = useMemo(
-    () => new Map(projects.map((project) => [project.id, project.name])),
-    [projects],
-  );
-
-  const salaryFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [],
-  );
-
   const columns = useMemo<AppTableColDef[]>(
     () => [
       {
-        field: "code",
+        field: "id",
         headerName: t("hr:employeeCode"),
-        width: 120,
+        width: 100,
+        renderCell: ({ row }: { row: Employee }) => (
+          <Typography variant="body2" fontWeight={600} sx={SALARY_TEXT_SX}>
+            #{row.id}
+          </Typography>
+        ),
       },
       {
         field: "name",
@@ -186,7 +196,15 @@ export function EmployeesTable({
         field: "jobTitle",
         headerName: t("hr:jobTitle"),
         flex: 1,
-        minWidth: 150,
+        minWidth: 140,
+        renderCell: ({ row }: { row: Employee }) => (
+          <Typography
+            variant="body2"
+            color={row.jobTitle ? "text.primary" : "text.secondary"}
+          >
+            {row.jobTitle || "—"}
+          </Typography>
+        ),
       },
       {
         field: "projectIds",
@@ -196,8 +214,7 @@ export function EmployeesTable({
         sortable: false,
         renderCell: ({ row }: { row: Employee }) => (
           <EmployeeProjectsCell
-            projectIds={row.projectIds}
-            projectNameById={projectNameById}
+            projects={row.projects ?? EMPTY_PROJECTS}
             emptyLabel={t("hr:noProjectsAssigned")}
           />
         ),
@@ -208,12 +225,8 @@ export function EmployeesTable({
         flex: 0.8,
         minWidth: 120,
         renderCell: ({ row }: { row: Employee }) => (
-          <Typography
-            variant="body2"
-            fontWeight={600}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
-          >
-            {salaryFormatter.format(row.basicSalary)}
+          <Typography variant="body2" fontWeight={600} sx={SALARY_TEXT_SX}>
+            {SALARY_FORMATTER.format(row.basicSalary)}
           </Typography>
         ),
       },
@@ -250,25 +263,17 @@ export function EmployeesTable({
         ),
       },
     ],
-    [
-      t,
-      projectNameById,
-      salaryFormatter,
-      canView,
-      canManage,
-      onView,
-      onEdit,
-      onDelete,
-    ],
+    [t, canView, canManage, onView, onEdit, onDelete],
   );
 
   return (
     <AppTable
       rows={rows}
       columns={columns}
-      getRowHeight={() => "auto"}
-      showPagination
+      loading={loading}
+      pagination={pagination}
+      getRowHeight={getAutoRowHeight}
       emptyMessage={t("hr:noEmployeesFound")}
     />
   );
-}
+});

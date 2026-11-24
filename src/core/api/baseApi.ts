@@ -110,6 +110,7 @@ export const baseApi = createApi({
     "DailyWork",
     "Payments",
     "Users",
+    "Employees",
   ],
 
   endpoints: () => ({}),
