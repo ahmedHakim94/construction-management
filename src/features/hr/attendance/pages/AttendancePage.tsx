@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -7,28 +7,34 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { type Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { AppButton, AppCard, AppPageHeader } from "@/components/ui";
+import {
+  AppButton,
+  AppCard,
+  AppPageHeader,
+  AppSelect,
+} from "@/components/ui";
+import type { SelectOption } from "@/components/ui/AppSelect";
 import { AppSearchInput } from "@/components/ui/AppSearchInput";
 import { useAppSelector } from "@/app/store/hooks";
 import { useDialog } from "@/hooks/useDialog";
-import {
-  MOCK_EMPLOYEES,
-  MOCK_EMPLOYEE_PROJECTS,
-} from "@/features/hr/employees/mock/employees.mock";
-import type { Employee } from "@/features/hr/employees/types";
+import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import { AttendanceDetailsDialog } from "../components/AttendanceDetailsDialog";
 import { AttendanceDialog } from "../components/AttendanceDialog";
 import { AttendanceTable } from "../components/AttendanceTable";
 import {
-  MOCK_ATTENDANCE_RECORDS,
-  buildAttendanceRecordId,
-} from "../mock/attendance.mock";
+  useCreateBulkAttendanceMutation,
+  useGetAttendanceQuery,
+  useUpdateBulkAttendanceMutation,
+} from "../services/attendance.api";
 import type {
   AttendanceDialogMode,
-  AttendanceRecord,
   AttendanceSavePayload,
   EmployeeAttendanceSummary,
 } from "../types";
+
+const PAGE_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+const EMPTY_ROWS: EmployeeAttendanceSummary[] = [];
 
 export function AttendancePage() {
   const { t } = useTranslation(["hr", "common"]);
@@ -36,191 +42,191 @@ export function AttendancePage() {
 
   const isSuperAdmin = user?.role === "super_admin";
   const isAdmin = user?.role === "admin";
+  const canView = isSuperAdmin || isAdmin;
   const canManage = isSuperAdmin || isAdmin;
   const adminProjectId =
     isAdmin && user?.project_id != null ? Number(user.project_id) : null;
 
+  const [page, setPage] = useState(1);
   const [selectedMonthDate, setSelectedMonthDate] = useState<Dayjs | null>(
     dayjs(),
   );
-  const [search, setSearch] = useState("");
-  const [records, setRecords] = useState<AttendanceRecord[]>(
-    MOCK_ATTENDANCE_RECORDS,
-  );
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedProjectFilter, setSelectedProjectFilter] = useState<
+    number | ""
+  >("");
   const [dialogMode, setDialogMode] =
     useState<AttendanceDialogMode>("register");
   const [selectedEmployee, setSelectedEmployee] = useState<
-    Employee | undefined
+    EmployeeAttendanceSummary | undefined
   >();
   const [detailsEmployee, setDetailsEmployee] = useState<
     EmployeeAttendanceSummary | undefined
   >();
 
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const registerDialog = useDialog();
   const detailsDialog = useDialog();
+
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
 
   const selectedMonth =
     selectedMonthDate && selectedMonthDate.isValid()
       ? selectedMonthDate.format("YYYY-MM")
       : dayjs().format("YYYY-MM");
 
-  const scopedEmployees = useMemo(() => {
-    if (isSuperAdmin) return MOCK_EMPLOYEES;
-    if (isAdmin && adminProjectId !== null) {
-      return MOCK_EMPLOYEES.filter((employee) =>
-        employee.projectIds.includes(adminProjectId),
-      );
+  const handleMonthChange = useCallback((value: Dayjs | null) => {
+    setSelectedMonthDate(value);
+    setPage(1);
+  }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
     }
-    return [];
-  }, [isSuperAdmin, isAdmin, adminProjectId]);
 
-  const employeeById = useMemo(
-    () => new Map(scopedEmployees.map((employee) => [employee.id, employee])),
-    [scopedEmployees],
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(value.trim());
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+  }, []);
+
+  const handleProjectFilterChange = useCallback((value: string | number) => {
+    setSelectedProjectFilter(value === "" ? "" : Number(value));
+    setPage(1);
+  }, []);
+
+  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
+    skip: !isSuperAdmin,
+  });
+
+  const projectFilterOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: "", label: t("hr:allProjects") },
+      ...(rawProjects ?? []).map((project) => ({
+        value: Number(project.id),
+        label: project.name,
+      })),
+    ],
+    [rawProjects, t],
   );
 
-  const monthScopedRecords = useMemo(
+  const activeProjectFilterId =
+    isSuperAdmin && selectedProjectFilter !== ""
+      ? Number(selectedProjectFilter)
+      : undefined;
+
+  const { data, isLoading, isFetching } = useGetAttendanceQuery(
+    {
+      page,
+      limit: PAGE_LIMIT,
+      month: selectedMonth,
+      search: debouncedSearch || undefined,
+      project_id: activeProjectFilterId,
+    },
+    {
+      skip: !canView,
+    },
+  );
+
+  const [createBulkAttendance, { isLoading: isCreating }] =
+    useCreateBulkAttendanceMutation();
+  const [updateBulkAttendance, { isLoading: isUpdating }] =
+    useUpdateBulkAttendanceMutation();
+
+  const rows = data?.data ?? EMPTY_ROWS;
+  const paginationMeta = data?.pagination;
+
+  const pagination = useMemo(
     () =>
-      records.filter((record) => {
-        if (!record.date.startsWith(selectedMonth)) return false;
-        if (isSuperAdmin) return true;
-        if (isAdmin && adminProjectId !== null) {
-          return record.projectId === adminProjectId;
-        }
-        return false;
-      }),
-    [records, selectedMonth, isSuperAdmin, isAdmin, adminProjectId],
+      paginationMeta
+        ? {
+            page: paginationMeta.page,
+            limit: paginationMeta.limit,
+            total: paginationMeta.total,
+            totalPages: paginationMeta.totalPages,
+            onPageChange: setPage,
+          }
+        : undefined,
+    [paginationMeta],
   );
 
-  const rows = useMemo<EmployeeAttendanceSummary[]>(() => {
-    const presentDatesByEmployee = new Map<number, Set<string>>();
-    const absentDatesByEmployee = new Map<number, Set<string>>();
-
-    monthScopedRecords.forEach((record) => {
-      const targetMap =
-        record.status === "PRESENT"
-          ? presentDatesByEmployee
-          : absentDatesByEmployee;
-
-      let dates = targetMap.get(record.employeeId);
-      if (!dates) {
-        dates = new Set<string>();
-        targetMap.set(record.employeeId, dates);
-      }
-      dates.add(record.date);
-    });
-
-    const query = search.trim().toLowerCase();
-
-    return scopedEmployees
-      .filter((employee) => {
-        if (!query) return true;
-        return (
-          employee.code.toLowerCase().includes(query) ||
-          employee.name.toLowerCase().includes(query) ||
-          employee.jobTitle.toLowerCase().includes(query)
-        );
-      })
-      .map((employee) => ({
-        id: employee.id,
-        code: employee.code,
-        name: employee.name,
-        jobTitle: employee.jobTitle,
-        projectIds: employee.projectIds,
-        // Unique dates ensure attending multiple projects on the same day counts as 1 overall day.
-        presentDays: presentDatesByEmployee.get(employee.id)?.size ?? 0,
-        absentDays: absentDatesByEmployee.get(employee.id)?.size ?? 0,
-      }));
-  }, [scopedEmployees, monthScopedRecords, search]);
-
-  const detailsAbsenceRecords = useMemo(() => {
-    if (!detailsEmployee) return [];
-    return monthScopedRecords.filter(
-      (record) =>
-        record.employeeId === detailsEmployee.id && record.status === "ABSENT",
-    );
-  }, [detailsEmployee, monthScopedRecords]);
-
-  const handleOpenRegister = () => {
+  const handleOpenRegister = useCallback(() => {
     if (!canManage) return;
     setDialogMode("register");
     setSelectedEmployee(undefined);
     registerDialog.openDialog();
-  };
+  }, [canManage, registerDialog.openDialog]);
 
-  const handleOpenEdit = (summary: EmployeeAttendanceSummary) => {
-    if (!canManage) return;
-    const employee = employeeById.get(summary.id);
-    if (!employee) return;
-    setDialogMode("edit");
-    setSelectedEmployee(employee);
-    registerDialog.openDialog();
-  };
+  const handleOpenEdit = useCallback(
+    (summary: EmployeeAttendanceSummary) => {
+      if (!canManage) return;
+      setDialogMode("edit");
+      setSelectedEmployee(summary);
+      registerDialog.openDialog();
+    },
+    [canManage, registerDialog.openDialog],
+  );
 
-  const handleOpenDetails = (summary: EmployeeAttendanceSummary) => {
-    if (!canManage) return;
-    setDetailsEmployee(summary);
-    detailsDialog.openDialog();
-  };
+  const handleOpenDetails = useCallback(
+    (summary: EmployeeAttendanceSummary) => {
+      if (!canView) return;
+      setDetailsEmployee(summary);
+      detailsDialog.openDialog();
+    },
+    [canView, detailsDialog.openDialog],
+  );
 
-  const handleCloseRegisterDialog = () => {
+  const handleCloseRegisterDialog = useCallback(() => {
     registerDialog.closeDialog();
     setSelectedEmployee(undefined);
-  };
+  }, [registerDialog.closeDialog]);
 
-  const handleCloseDetailsDialog = () => {
+  const handleCloseDetailsDialog = useCallback(() => {
     detailsDialog.closeDialog();
     setDetailsEmployee(undefined);
-  };
+  }, [detailsDialog.closeDialog]);
 
-  const handleSaveAttendance = (payload: AttendanceSavePayload) => {
-    if (!canManage) return;
+  const handleSaveAttendance = useCallback(
+    async (payload: AttendanceSavePayload) => {
+      if (!canManage) return;
 
-    // Enforce Admin project boundary
-    if (isAdmin && payload.projectId !== adminProjectId) return;
+      const body = {
+        attendance_date: payload.attendanceDate,
+        project_id: isSuperAdmin ? payload.projectId : adminProjectId ?? undefined,
+        records: payload.records,
+      };
 
-    setRecords((prev) => {
-      const recordMap = new Map(prev.map((record) => [record.id, record]));
-
-      // In Edit mode, if date or project changed, remove the original record to prevent stale duplicates.
-      if (payload.mode === "edit" && payload.replaceRecord) {
-        const oldId = buildAttendanceRecordId(
-          payload.replaceRecord.employeeId,
-          payload.replaceRecord.projectId,
-          payload.replaceRecord.date,
-        );
-        recordMap.delete(oldId);
-      }
-
-      payload.entries.forEach(({ employeeId, status }) => {
-        // In Edit mode, only allow modifying the targeted employee.
-        if (
-          payload.mode === "edit" &&
-          selectedEmployee &&
-          employeeId !== selectedEmployee.id
-        ) {
-          return;
+      try {
+        if (payload.mode === "edit") {
+          await updateBulkAttendance(body).unwrap();
+        } else {
+          await createBulkAttendance(body).unwrap();
         }
-
-        const id = buildAttendanceRecordId(
-          employeeId,
-          payload.projectId,
-          payload.date,
-        );
-        recordMap.set(id, {
-          id,
-          employeeId,
-          projectId: payload.projectId,
-          date: payload.date,
-          status,
-        });
-      });
-
-      return Array.from(recordMap.values());
-    });
-
-    handleCloseRegisterDialog();
-  };
+        handleCloseRegisterDialog();
+      } catch {
+        // Error notification handled globally by baseApi
+      }
+    },
+    [
+      canManage,
+      isSuperAdmin,
+      adminProjectId,
+      updateBulkAttendance,
+      createBulkAttendance,
+      handleCloseRegisterDialog,
+    ],
+  );
 
   return (
     <PageContainer>
@@ -258,7 +264,7 @@ export function AttendancePage() {
                 openTo="month"
                 format="YYYY-MM"
                 value={selectedMonthDate}
-                onChange={(value) => setSelectedMonthDate(value)}
+                onChange={handleMonthChange}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -268,15 +274,29 @@ export function AttendancePage() {
               />
             </LocalizationProvider>
 
+            {isSuperAdmin ? (
+              <Box sx={{ minWidth: 210 }}>
+                <AppSelect
+                  options={projectFilterOptions}
+                  value={selectedProjectFilter}
+                  onChange={handleProjectFilterChange}
+                  placeholder={t("hr:allProjects")}
+                />
+              </Box>
+            ) : null}
+
             <AppSearchInput
-              value={search}
-              onChange={setSearch}
+              value={searchInput}
+              onChange={handleSearchChange}
               placeholder={t("hr:searchAttendance")}
             />
           </Box>
 
           <AttendanceTable
             rows={rows}
+            loading={isLoading || isFetching}
+            pagination={pagination}
+            canView={canView}
             canManage={canManage}
             onViewDetails={handleOpenDetails}
             onEdit={handleOpenEdit}
@@ -288,11 +308,9 @@ export function AttendancePage() {
           mode={dialogMode}
           selectedMonth={selectedMonth}
           targetEmployee={selectedEmployee}
-          employees={scopedEmployees}
-          projects={MOCK_EMPLOYEE_PROJECTS}
-          records={records}
           isSuperAdmin={isSuperAdmin}
           adminProjectId={adminProjectId}
+          submitting={isCreating || isUpdating}
           onClose={handleCloseRegisterDialog}
           onSave={handleSaveAttendance}
         />
@@ -300,9 +318,8 @@ export function AttendancePage() {
         <AttendanceDetailsDialog
           open={detailsDialog.open}
           employee={detailsEmployee}
-          monthLabel={selectedMonth}
-          absenceRecords={detailsAbsenceRecords}
-          projects={MOCK_EMPLOYEE_PROJECTS}
+          month={selectedMonth}
+          projectId={activeProjectFilterId}
           onClose={handleCloseDetailsDialog}
         />
       </Box>

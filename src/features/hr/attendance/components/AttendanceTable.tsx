@@ -1,39 +1,54 @@
-import { useMemo } from "react";
-import { Typography } from "@mui/material";
+import { memo, useMemo } from "react";
+import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppBadge, AppTable, type AppTableColDef } from "@/components/ui";
 import { AppActions } from "@/components/ui/AppActions";
+import type { TablePaginationProps } from "@/types";
 import type { EmployeeAttendanceSummary } from "../types";
+
+const NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 0,
+});
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
 
 interface AttendanceTableProps {
   rows: EmployeeAttendanceSummary[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
+  canView: boolean;
   canManage: boolean;
   onViewDetails: (employee: EmployeeAttendanceSummary) => void;
   onEdit: (employee: EmployeeAttendanceSummary) => void;
 }
 
-export function AttendanceTable({
+export const AttendanceTable = memo(function AttendanceTable({
   rows,
+  loading = false,
+  pagination,
+  canView,
   canManage,
   onViewDetails,
   onEdit,
 }: AttendanceTableProps) {
   const { t } = useTranslation(["hr", "common"]);
 
-  const numberFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 0,
-      }),
-    [],
-  );
-
   const columns = useMemo<AppTableColDef[]>(
     () => [
       {
-        field: "code",
+        field: "id",
         headerName: t("hr:employeeCode"),
-        width: 120,
+        width: 110,
+        renderCell: ({ row }: { row: EmployeeAttendanceSummary }) => (
+          <Typography variant="body2" fontWeight={600}>
+            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+              {row.id}
+            </Box>
+          </Typography>
+        ),
       },
       {
         field: "name",
@@ -46,6 +61,14 @@ export function AttendanceTable({
         headerName: t("hr:jobTitle"),
         flex: 1.1,
         minWidth: 150,
+        renderCell: ({ row }: { row: EmployeeAttendanceSummary }) => (
+          <Typography
+            variant="body2"
+            color={row.jobTitle ? "text.primary" : "text.secondary"}
+          >
+            {row.jobTitle || "—"}
+          </Typography>
+        ),
       },
       {
         field: "presentDays",
@@ -54,10 +77,13 @@ export function AttendanceTable({
         minWidth: 130,
         renderCell: ({ row }: { row: EmployeeAttendanceSummary }) => (
           <AppBadge
-            label={numberFormatter.format(row.presentDays)}
+            label={
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {NUMBER_FORMATTER.format(row.presentDays)}
+              </Box>
+            }
             color="success"
             size="small"
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           />
         ),
       },
@@ -71,9 +97,10 @@ export function AttendanceTable({
             variant="body2"
             fontWeight={600}
             color={row.absentDays > 0 ? "error.main" : "text.secondary"}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {numberFormatter.format(row.absentDays)}
+            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+              {NUMBER_FORMATTER.format(row.absentDays)}
+            </Box>
           </Typography>
         ),
       },
@@ -85,7 +112,7 @@ export function AttendanceTable({
         width: 120,
         renderCell: ({ row }: { row: EmployeeAttendanceSummary }) => (
           <AppActions
-            onView={canManage ? () => onViewDetails(row) : undefined}
+            onView={canView ? () => onViewDetails(row) : undefined}
             onEdit={canManage ? () => onEdit(row) : undefined}
             viewTooltip={t("hr:absenceDetails")}
             editTooltip={t("hr:editAttendance")}
@@ -93,15 +120,16 @@ export function AttendanceTable({
         ),
       },
     ],
-    [t, numberFormatter, canManage, onViewDetails, onEdit],
+    [t, canView, canManage, onViewDetails, onEdit],
   );
 
   return (
     <AppTable
       rows={rows}
       columns={columns}
-      showPagination
+      loading={loading}
+      pagination={pagination}
       emptyMessage={t("hr:noAttendanceEmployees")}
     />
   );
-}
+});

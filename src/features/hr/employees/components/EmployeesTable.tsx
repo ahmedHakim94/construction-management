@@ -176,7 +176,7 @@ export const EmployeesTable = memo(function EmployeesTable({
         width: 100,
         renderCell: ({ row }: { row: Employee }) => (
           <Typography variant="body2" fontWeight={600} sx={SALARY_TEXT_SX}>
-            #{row.id}
+            {row.id}
           </Typography>
         ),
       },

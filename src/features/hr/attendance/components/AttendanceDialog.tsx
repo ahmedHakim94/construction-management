@@ -1,41 +1,61 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   Box,
+  Chip,
+  CircularProgress,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   FormControlLabel,
+  IconButton,
   Radio,
   RadioGroup,
   Stack,
   Typography,
 } from "@mui/material";
+import Close from "@mui/icons-material/Close";
 import dayjs, { type Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import { AppButton, AppDialog, AppInput, AppSelect } from "@/components/ui";
 import { AppDatePicker } from "@/components/ui/AppDatePicker/AppDatePicker";
 import type { SelectOption } from "@/components/ui/AppSelect";
-import type { Employee, EmployeeProject } from "@/features/hr/employees/types";
+import { useGetEmployeesQuery } from "@/features/hr/employees/services/employees.api";
+import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
+import { useGetEmployeeAttendanceDetailsQuery } from "../services/attendance.api";
 import type {
   AttendanceDialogMode,
-  AttendanceRecord,
+  AttendanceProject,
   AttendanceSavePayload,
   AttendanceStatus,
+  EmployeeAttendanceRecord,
+  EmployeeAttendanceSummary,
 } from "../types";
+
+interface DialogEmployeeItem {
+  id: number;
+  name: string;
+  jobTitle: string;
+}
+
+const EMPTY_EDIT_RECORDS: EmployeeAttendanceRecord[] = [];
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
 
 interface AttendanceDialogProps {
   open: boolean;
   mode: AttendanceDialogMode;
   selectedMonth: string; // YYYY-MM
-  targetEmployee?: Employee;
-  employees: Employee[];
-  projects: EmployeeProject[];
-  records: AttendanceRecord[];
+  targetEmployee?: EmployeeAttendanceSummary;
   isSuperAdmin: boolean;
   adminProjectId: number | null;
+  submitting?: boolean;
   onClose: () => void;
-  onSave: (payload: AttendanceSavePayload) => void;
+  onSave: (payload: AttendanceSavePayload) => Promise<void> | void;
 }
 
 export function AttendanceDialog({
@@ -43,11 +63,9 @@ export function AttendanceDialog({
   mode,
   selectedMonth,
   targetEmployee,
-  employees,
-  projects,
-  records,
   isSuperAdmin,
   adminProjectId,
+  submitting = false,
   onClose,
   onSave,
 }: AttendanceDialogProps) {
@@ -61,25 +79,61 @@ export function AttendanceDialog({
   >({});
   const [projectError, setProjectError] = useState("");
   const [dateError, setDateError] = useState("");
+  const [recordsError, setRecordsError] = useState("");
+  const initializedEditSelectionRef = useRef(false);
 
-  // Tracks the originally loaded record in Edit mode so moving date/project replaces it cleanly without leaving stale duplicates.
-  const originalEditRecordRef = useRef<{
-    employeeId: number;
-    projectId: number;
-    date: string;
-  } | null>(null);
+  const formattedDate =
+    selectedDate && selectedDate.isValid()
+      ? selectedDate.format("YYYY-MM-DD")
+      : "";
 
-  const availableProjects = useMemo(() => {
+  const activeQueryMonth =
+    selectedDate && selectedDate.isValid()
+      ? selectedDate.format("YYYY-MM")
+      : selectedMonth;
+
+  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
+    skip: !open,
+  });
+
+  // In Edit mode, load the employee's real monthly records so we preload saved statuses & cross-project state
+  const { data: editEmployeeDetails, isFetching: editDetailsLoading } =
+    useGetEmployeeAttendanceDetailsQuery(
+      {
+        employeeId: targetEmployee?.id ?? 0,
+        month: activeQueryMonth,
+      },
+      {
+        skip: !open || mode !== "edit" || !targetEmployee,
+      },
+    );
+
+  const editRecords = editEmployeeDetails?.records ?? EMPTY_EDIT_RECORDS;
+
+  const allProjects = useMemo<AttendanceProject[]>(
+    () =>
+      (rawProjects ?? []).map((project) => ({
+        id: Number(project.id),
+        name: project.name,
+      })),
+    [rawProjects],
+  );
+
+  const availableProjects = useMemo<AttendanceProject[]>(() => {
     if (!isSuperAdmin) {
-      return projects.filter((project) => project.id === adminProjectId);
+      return allProjects.filter((project) => project.id === adminProjectId);
     }
+
     if (mode === "edit" && targetEmployee) {
-      return projects.filter((project) =>
-        targetEmployee.projectIds.includes(project.id),
-      );
+      if (targetEmployee.projects.length > 0) {
+        return targetEmployee.projects;
+      }
+      const allowedSet = new Set(targetEmployee.projectIds);
+      return allProjects.filter((project) => allowedSet.has(project.id));
     }
-    return projects;
-  }, [isSuperAdmin, adminProjectId, mode, targetEmployee, projects]);
+
+    return allProjects;
+  }, [isSuperAdmin, adminProjectId, mode, targetEmployee, allProjects]);
 
   const projectOptions = useMemo<SelectOption[]>(
     () =>
@@ -90,11 +144,31 @@ export function AttendanceDialog({
     [availableProjects],
   );
 
-  const lockedAdminProjectName = useMemo(
-    () =>
-      projects.find((project) => project.id === adminProjectId)?.name ?? "",
-    [projects, adminProjectId],
-  );
+  const lockedAdminProjectName = useMemo(() => {
+    const found = allProjects.find((project) => project.id === adminProjectId);
+    if (found) return found.name;
+    return adminProjectId ? `#${adminProjectId}` : "";
+  }, [allProjects, adminProjectId]);
+
+  const effectiveProjectId = isSuperAdmin
+    ? selectedProjectId
+      ? Number(selectedProjectId)
+      : null
+    : adminProjectId;
+
+  // Fetch assigned employees for the chosen project in Register mode
+  const { data: projectEmployeesData, isFetching: employeesLoading } =
+    useGetEmployeesQuery(
+      {
+        page: 1,
+        limit: 100,
+        project_id:
+          isSuperAdmin && effectiveProjectId ? effectiveProjectId : undefined,
+      },
+      {
+        skip: !open || mode === "edit" || !effectiveProjectId,
+      },
+    );
 
   // Initialize dialog state on open
   useEffect(() => {
@@ -102,110 +176,131 @@ export function AttendanceDialog({
 
     setProjectError("");
     setDateError("");
-    originalEditRecordRef.current = null;
-
-    if (mode === "edit" && targetEmployee) {
-      const matchingMonthRecords = records
-        .filter(
-          (record) =>
-            record.employeeId === targetEmployee.id &&
-            record.date.startsWith(selectedMonth) &&
-            (isSuperAdmin || record.projectId === adminProjectId),
-        )
-        .sort((a, b) => b.date.localeCompare(a.date));
-
-      const latestRecord = matchingMonthRecords[0];
-
-      if (latestRecord) {
-        setSelectedDate(dayjs(latestRecord.date));
-        setSelectedProjectId(latestRecord.projectId);
-        setStatusMap({ [targetEmployee.id]: latestRecord.status });
-        originalEditRecordRef.current = {
-          employeeId: targetEmployee.id,
-          projectId: latestRecord.projectId,
-          date: latestRecord.date,
-        };
-      } else {
-        const defaultProjectId = isSuperAdmin
-          ? (targetEmployee.projectIds[0] ?? "")
-          : (adminProjectId ?? "");
-        setSelectedDate(dayjs());
-        setSelectedProjectId(defaultProjectId);
-        setStatusMap({});
-      }
-      return;
-    }
-
-    // Register mode
-    setSelectedDate(dayjs());
-    setSelectedProjectId(isSuperAdmin ? "" : (adminProjectId ?? ""));
+    setRecordsError("");
     setStatusMap({});
-  }, [
-    open,
-    mode,
-    targetEmployee,
-    selectedMonth,
-    isSuperAdmin,
-    adminProjectId,
-    records,
-  ]);
+    initializedEditSelectionRef.current = false;
 
-  const displayedEmployees = useMemo(() => {
-    if (mode === "edit" && targetEmployee) {
-      return [targetEmployee];
-    }
-    if (!selectedProjectId) return [];
-    return employees.filter((employee) =>
-      employee.projectIds.includes(Number(selectedProjectId)),
-    );
-  }, [mode, targetEmployee, selectedProjectId, employees]);
+    const today = dayjs();
+    const initialDate =
+      today.format("YYYY-MM") === selectedMonth
+        ? today
+        : dayjs(`${selectedMonth}-01`);
 
-  const formattedDate =
-    selectedDate && selectedDate.isValid()
-      ? selectedDate.format("YYYY-MM-DD")
-      : "";
+    setSelectedDate(initialDate.isValid() ? initialDate : today);
 
-  // Preload existing statuses whenever (project, date) changes
-  useEffect(() => {
-    if (!open || !selectedProjectId || !formattedDate) return;
-
-    const projectIdNum = Number(selectedProjectId);
-    const nextMap: Record<number, AttendanceStatus | ""> = {};
-
-    displayedEmployees.forEach((employee) => {
-      const existing = records.find(
-        (record) =>
-          record.employeeId === employee.id &&
-          record.projectId === projectIdNum &&
-          record.date === formattedDate,
-      );
-      if (existing) {
-        nextMap[employee.id] = existing.status;
-      }
-    });
-
-    if (mode === "edit" && targetEmployee) {
-      // If an existing record exists at the newly selected (project, date), preload it;
-      // otherwise preserve the current selection so the user can move the original record cleanly.
-      if (nextMap[targetEmployee.id]) {
-        setStatusMap(nextMap);
-      }
+    if (!isSuperAdmin) {
+      setSelectedProjectId(adminProjectId ?? "");
       return;
     }
 
-    setStatusMap(nextMap);
+    if (mode === "edit" && targetEmployee) {
+      const firstProjectId =
+        targetEmployee.projects[0]?.id ?? targetEmployee.projectIds[0] ?? "";
+      setSelectedProjectId(firstProjectId);
+      return;
+    }
+
+    setSelectedProjectId("");
+  }, [open, mode, targetEmployee, selectedMonth, isSuperAdmin, adminProjectId]);
+
+  // In Edit mode, once saved records arrive on open, focus the most recent recorded date & project (preferring PRESENT on that date)
+  useEffect(() => {
+    if (
+      !open ||
+      mode !== "edit" ||
+      !targetEmployee ||
+      editDetailsLoading ||
+      initializedEditSelectionRef.current
+    ) {
+      return;
+    }
+
+    initializedEditSelectionRef.current = true;
+    if (editRecords.length === 0) return;
+
+    const latestDate = editRecords[0].attendanceDate;
+    const recordsOnLatestDate = editRecords.filter(
+      (rec) => rec.attendanceDate === latestDate,
+    );
+    const preferredRecord =
+      recordsOnLatestDate.find((rec) => rec.status === "PRESENT") ??
+      recordsOnLatestDate[0];
+
+    if (preferredRecord) {
+      setSelectedDate(dayjs(preferredRecord.attendanceDate));
+      if (isSuperAdmin) {
+        setSelectedProjectId(preferredRecord.projectId);
+      }
+      setStatusMap({ [targetEmployee.id]: preferredRecord.status });
+    }
+  }, [open, mode, targetEmployee, editDetailsLoading, editRecords, isSuperAdmin]);
+
+  // In Edit mode, keep the radio selection synced whenever date or project changes
+  useEffect(() => {
+    if (
+      !open ||
+      mode !== "edit" ||
+      !targetEmployee ||
+      !formattedDate ||
+      !effectiveProjectId
+    ) {
+      return;
+    }
+
+    const matching = editRecords.find(
+      (rec) =>
+        rec.attendanceDate === formattedDate &&
+        rec.projectId === effectiveProjectId,
+    );
+
+    setStatusMap({
+      [targetEmployee.id]: matching ? matching.status : "",
+    });
   }, [
     open,
     mode,
     targetEmployee,
-    selectedProjectId,
     formattedDate,
-    displayedEmployees,
-    records,
+    effectiveProjectId,
+    editRecords,
   ]);
+
+  const recordsOnSelectedDate = useMemo(() => {
+    if (mode !== "edit" || !formattedDate) return EMPTY_EDIT_RECORDS;
+    return editRecords.filter((rec) => rec.attendanceDate === formattedDate);
+  }, [mode, formattedDate, editRecords]);
+
+  const otherProjectPresentOnDate = useMemo(() => {
+    if (!isSuperAdmin || mode !== "edit" || !effectiveProjectId) return false;
+    return recordsOnSelectedDate.some(
+      (rec) =>
+        rec.projectId !== effectiveProjectId && rec.status === "PRESENT",
+    );
+  }, [isSuperAdmin, mode, effectiveProjectId, recordsOnSelectedDate]);
+
+  const displayedEmployees = useMemo<DialogEmployeeItem[]>(() => {
+    if (mode === "edit" && targetEmployee) {
+      return [
+        {
+          id: targetEmployee.id,
+          name: targetEmployee.name,
+          jobTitle: targetEmployee.jobTitle,
+        },
+      ];
+    }
+
+    if (!effectiveProjectId) return [];
+
+    return (projectEmployeesData?.data ?? []).map((emp) => ({
+      id: emp.id,
+      name: emp.name,
+      jobTitle: emp.jobTitle,
+    }));
+  }, [mode, targetEmployee, effectiveProjectId, projectEmployeesData?.data]);
 
   const handleSelectAllPresent = () => {
     if (displayedEmployees.length === 0) return;
+    setRecordsError("");
     setStatusMap((prev) => {
       const next = { ...prev };
       displayedEmployees.forEach((employee) => {
@@ -216,13 +311,15 @@ export function AttendanceDialog({
   };
 
   const handleStatusChange = (employeeId: number, status: AttendanceStatus) => {
+    if (recordsError) setRecordsError("");
     setStatusMap((prev) => ({
       ...prev,
       [employeeId]: status,
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (submitting) return;
     let hasError = false;
 
     if (!formattedDate) {
@@ -232,10 +329,6 @@ export function AttendanceDialog({
       setDateError("");
     }
 
-    const effectiveProjectId = isSuperAdmin
-      ? Number(selectedProjectId)
-      : Number(adminProjectId);
-
     if (!effectiveProjectId || Number.isNaN(effectiveProjectId)) {
       setProjectError(t("hr:attendanceProjectRequired"));
       hasError = true;
@@ -243,39 +336,64 @@ export function AttendanceDialog({
       setProjectError("");
     }
 
-    if (hasError) return;
-
-    const entries: AttendanceSavePayload["entries"] = [];
+    const records: AttendanceSavePayload["records"] = [];
     displayedEmployees.forEach((employee) => {
       const status = statusMap[employee.id];
       if (status === "PRESENT" || status === "ABSENT") {
-        entries.push({ employeeId: employee.id, status });
+        records.push({ employee_id: employee.id, status });
       }
     });
 
-    const original = originalEditRecordRef.current;
-    const shouldReplaceOld =
-      mode === "edit" &&
-      original !== null &&
-      entries.length > 0 &&
-      (original.projectId !== effectiveProjectId ||
-        original.date !== formattedDate);
+    if (records.length === 0) {
+      setRecordsError(t("hr:attendanceRecordsRequired"));
+      hasError = true;
+    } else {
+      setRecordsError("");
+    }
 
-    onSave({
+    if (hasError || !effectiveProjectId) return;
+
+    await onSave({
       mode,
       projectId: effectiveProjectId,
-      date: formattedDate,
-      entries,
-      replaceRecord: shouldReplaceOld ? original : undefined,
+      attendanceDate: formattedDate,
+      records,
     });
   };
 
+  const isLoadingList =
+    mode === "register" ? employeesLoading : editDetailsLoading;
+
   return (
-    <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle dir={isArabic ? "rtl" : "ltr"}>
-        {mode === "edit"
-          ? t("hr:editAttendance")
-          : t("hr:registerAttendance")}
+    <AppDialog
+      open={open}
+      onClose={submitting ? undefined : onClose}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle
+        dir={isArabic ? "rtl" : "ltr"}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1.5,
+        }}
+      >
+        <span>
+          {mode === "edit"
+            ? t("hr:editAttendance")
+            : t("hr:registerAttendance")}
+        </span>
+        <IconButton
+          size="small"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label={t("hr:close")}
+          sx={{ color: "text.secondary" }}
+        >
+          <Close fontSize="small" />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent dir={isArabic ? "rtl" : "ltr"}>
@@ -292,6 +410,7 @@ export function AttendanceDialog({
               label={t("hr:attendanceDate")}
               value={selectedDate}
               onChange={(value) => {
+                initializedEditSelectionRef.current = true;
                 setSelectedDate(value);
                 if (dateError) setDateError("");
               }}
@@ -329,8 +448,14 @@ export function AttendanceDialog({
                   options={projectOptions}
                   value={selectedProjectId}
                   onChange={(value) => {
-                    setSelectedProjectId(Number(value));
+                    initializedEditSelectionRef.current = true;
+                    const nextId = Number(value);
+                    setSelectedProjectId(nextId);
+                    if (mode === "register") {
+                      setStatusMap({});
+                    }
                     if (projectError) setProjectError("");
+                    if (recordsError) setRecordsError("");
                   }}
                   placeholder={t("hr:selectAttendanceProject")}
                   error={projectError}
@@ -344,6 +469,62 @@ export function AttendanceDialog({
               />
             )}
           </Box>
+
+          {/* In Edit mode for SuperAdmin, show all recorded project statuses on this date */}
+          {mode === "edit" &&
+          isSuperAdmin &&
+          recordsOnSelectedDate.length > 0 ? (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1.5,
+                bgcolor: "background.default",
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+                sx={{ display: "block", mb: 1 }}
+              >
+                {t("hr:recordedOnDate")}
+              </Typography>
+              <Stack
+                direction="row"
+                spacing={0.85}
+                useFlexGap
+                flexWrap="wrap"
+              >
+                {recordsOnSelectedDate.map((rec) => {
+                  const isSelected = rec.projectId === effectiveProjectId;
+                  return (
+                    <Chip
+                      key={rec.id}
+                      size="small"
+                      clickable
+                      onClick={() => {
+                        initializedEditSelectionRef.current = true;
+                        setSelectedProjectId(rec.projectId);
+                      }}
+                      color={rec.status === "PRESENT" ? "success" : "error"}
+                      variant={isSelected ? "filled" : "outlined"}
+                      label={`${rec.projectName}: ${t(
+                        rec.status === "PRESENT" ? "hr:present" : "hr:absent",
+                      )}`}
+                      sx={{ fontWeight: isSelected ? 700 : 500 }}
+                    />
+                  );
+                })}
+              </Stack>
+              {otherProjectPresentOnDate ? (
+                <Alert severity="info" sx={{ mt: 1.25, py: 0.25 }}>
+                  {t("hr:presentPriorityHint")}
+                </Alert>
+              ) : null}
+            </Box>
+          ) : null}
 
           <Divider />
 
@@ -360,21 +541,39 @@ export function AttendanceDialog({
               {t("hr:employees")}
             </Typography>
 
-            {displayedEmployees.length > 0 && (
+            {displayedEmployees.length > 0 && !isLoadingList ? (
               <AppButton
                 size="small"
                 variant="outlined"
                 onClick={handleSelectAllPresent}
+                disabled={submitting}
               >
                 {t("hr:selectAllPresent")}
               </AppButton>
-            )}
+            ) : null}
           </Box>
 
-          {!selectedProjectId && isSuperAdmin ? (
+          {recordsError ? (
+            <Alert severity="error" sx={{ py: 0.25 }}>
+              {recordsError}
+            </Alert>
+          ) : null}
+
+          {!effectiveProjectId && isSuperAdmin ? (
             <Typography variant="body2" color="text.secondary">
               {t("hr:selectProjectToLoadEmployees")}
             </Typography>
+          ) : isLoadingList ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: 4,
+              }}
+            >
+              <CircularProgress size={26} />
+            </Box>
           ) : displayedEmployees.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
               {t("hr:noEmployeesInProject")}
@@ -404,7 +603,10 @@ export function AttendanceDialog({
                         {employee.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {employee.code} • {employee.jobTitle}
+                        <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                          #{employee.id}
+                        </Box>
+                        {employee.jobTitle ? ` • ${employee.jobTitle}` : ""}
                       </Typography>
                     </Box>
 
@@ -420,11 +622,13 @@ export function AttendanceDialog({
                     >
                       <FormControlLabel
                         value="PRESENT"
+                        disabled={submitting}
                         control={<Radio size="small" color="success" />}
                         label={t("hr:present")}
                       />
                       <FormControlLabel
                         value="ABSENT"
+                        disabled={submitting}
                         control={<Radio size="small" color="error" />}
                         label={t("hr:absent")}
                       />
@@ -437,15 +641,21 @@ export function AttendanceDialog({
         </Stack>
       </DialogContent>
 
-      <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={{ px: 3, pb: 2 }}>
+      <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={{ px: 2.5, py: 1.5 }}>
         <AppButton
           variant="contained"
           onClick={handleSubmit}
-          disabled={displayedEmployees.length === 0}
+          loading={submitting}
+          disabled={isLoadingList || displayedEmployees.length === 0}
         >
           {t("common:save")}
         </AppButton>
-        <AppButton variant="outlined" color="inherit" onClick={onClose}>
+        <AppButton
+          variant="outlined"
+          color="inherit"
+          onClick={onClose}
+          disabled={submitting}
+        >
           {t("common:cancel")}
         </AppButton>
       </DialogActions>
