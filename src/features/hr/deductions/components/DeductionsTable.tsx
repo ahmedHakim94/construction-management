@@ -1,85 +1,78 @@
-import { useMemo } from "react";
-import { Chip, Typography } from "@mui/material";
+import { memo, useMemo } from "react";
+import { Box, Chip, Typography, type Theme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { AppBadge, AppTable, type AppTableColDef } from "@/components/ui";
 import { AppActions } from "@/components/ui/AppActions";
-import type { Employee, EmployeeProject } from "@/features/hr/employees/types";
-import { isCurrentMonthDate } from "../mock/deductions.mock";
+import type { TablePaginationProps } from "@/types";
 import type { FinancialTransaction } from "../types";
+import { isCurrentMonthDate } from "../utils/transactionDates";
+
+const AMOUNT_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
+
+const getProjectChipSx = (theme: Theme) => ({
+  height: 24,
+  fontSize: "0.75rem",
+  fontWeight: 500,
+  borderRadius: 1.5,
+  bgcolor: alpha(theme.palette.primary.main, 0.08),
+  color: theme.palette.primary.main,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  "& .MuiChip-label": {
+    px: 1,
+  },
+});
 
 interface DeductionsTableProps {
   rows: FinancialTransaction[];
-  employees: Employee[];
-  projects: EmployeeProject[];
+  loading?: boolean;
+  pagination?: TablePaginationProps;
   canManage: boolean;
   onEdit: (transaction: FinancialTransaction) => void;
   onDelete: (transaction: FinancialTransaction) => void;
 }
 
-export function DeductionsTable({
+export const DeductionsTable = memo(function DeductionsTable({
   rows,
-  employees,
-  projects,
+  loading = false,
+  pagination,
   canManage,
   onEdit,
   onDelete,
 }: DeductionsTableProps) {
   const { t } = useTranslation(["hr", "common"]);
 
-  const employeeNameById = useMemo(
-    () => new Map(employees.map((employee) => [employee.id, employee.name])),
-    [employees],
-  );
-
-  const projectNameById = useMemo(
-    () => new Map(projects.map((project) => [project.id, project.name])),
-    [projects],
-  );
-
-  const amountFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [],
-  );
-
   const columns = useMemo<AppTableColDef[]>(
     () => [
       {
-        field: "employeeId",
+        field: "employeeName",
         headerName: t("hr:employeeName"),
         flex: 1.2,
         minWidth: 160,
         renderCell: ({ row }: { row: FinancialTransaction }) => (
           <Typography variant="body2" fontWeight={500}>
-            {employeeNameById.get(row.employeeId) ?? `#${row.employeeId}`}
+            {row.employeeName || `#${row.employeeId}`}
           </Typography>
         ),
       },
       {
-        field: "projectId",
+        field: "projectName",
         headerName: t("hr:transactionProject"),
         flex: 1.2,
-        minWidth: 170,
+        minWidth: 165,
         renderCell: ({ row }: { row: FinancialTransaction }) => (
           <Chip
             size="small"
-            label={projectNameById.get(row.projectId) ?? `#${row.projectId}`}
-            sx={(theme) => ({
-              height: 24,
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              borderRadius: 1.5,
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
-              color: theme.palette.primary.main,
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-              "& .MuiChip-label": {
-                px: 1,
-              },
-            })}
+            label={row.projectName || `#${row.projectId}`}
+            sx={getProjectChipSx}
           />
         ),
       },
@@ -110,28 +103,36 @@ export function DeductionsTable({
             variant="body2"
             fontWeight={600}
             color={row.type === "BONUS" ? "success.main" : "error.main"}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {amountFormatter.format(row.amount)}
+            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+              {AMOUNT_FORMATTER.format(row.amount)}
+            </Box>
           </Typography>
         ),
       },
       {
         field: "reason",
         headerName: t("hr:transactionReason"),
-        flex: 1.6,
-        minWidth: 200,
+        flex: 1.5,
+        minWidth: 180,
+        renderCell: ({ row }: { row: FinancialTransaction }) => (
+          <Typography
+            variant="body2"
+            color={row.reason ? "text.primary" : "text.secondary"}
+          >
+            {row.reason || "—"}
+          </Typography>
+        ),
       },
       {
         field: "date",
         headerName: t("hr:transactionDate"),
         width: 125,
         renderCell: ({ row }: { row: FinancialTransaction }) => (
-          <Typography
-            variant="body2"
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
-          >
-            {row.date}
+          <Typography variant="body2">
+            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+              {row.date}
+            </Box>
           </Typography>
         ),
       },
@@ -144,42 +145,31 @@ export function DeductionsTable({
         renderCell: ({ row }: { row: FinancialTransaction }) => {
           const canModifyRecord = canManage && isCurrentMonthDate(row.date);
 
-          if (!canModifyRecord) {
-            return (
-              <Typography variant="caption" color="text.disabled">
-                —
-              </Typography>
-            );
-          }
-
-          return (
+          return canModifyRecord ? (
             <AppActions
               onEdit={() => onEdit(row)}
               onDelete={() => onDelete(row)}
               editTooltip={t("hr:editTransaction")}
               deleteTooltip={t("hr:deleteTransaction")}
             />
+          ) : (
+            <Typography variant="caption" color="text.disabled">
+              —
+            </Typography>
           );
         },
       },
     ],
-    [
-      t,
-      employeeNameById,
-      projectNameById,
-      amountFormatter,
-      canManage,
-      onEdit,
-      onDelete,
-    ],
+    [t, canManage, onEdit, onDelete],
   );
 
   return (
     <AppTable
       rows={rows}
       columns={columns}
-      showPagination
+      loading={loading}
+      pagination={pagination}
       emptyMessage={t("hr:noTransactionsFound")}
     />
   );
-}
+});

@@ -74,6 +74,7 @@
   "selectProjectFirst": "اختر المشروع أولًا",
   "selectTransactionEmployee": "اختر الموظف",
   "transactionType": "نوع الحركة",
+  "allTransactionTypes": "جميع الأنواع",
   "transactionTypeDeduction": "خصم",
   "transactionTypeBonus": "مكافأة",
   "transactionAmount": "المبلغ",

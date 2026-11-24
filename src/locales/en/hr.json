@@ -74,6 +74,7 @@
   "selectProjectFirst": "Select project first",
   "selectTransactionEmployee": "Select employee",
   "transactionType": "Transaction Type",
+  "allTransactionTypes": "All Types",
   "transactionTypeDeduction": "Deduction",
   "transactionTypeBonus": "Bonus",
   "transactionAmount": "Amount",
