@@ -1,4 +1,5 @@
-import { Box, FormHelperText, useTheme } from "@mui/material";
+import { useCallback, useMemo } from "react";
+import { Box, CircularProgress, FormHelperText, useTheme } from "@mui/material";
 import Select from "react-select";
 import { useTranslation } from "react-i18next";
 
@@ -8,6 +9,26 @@ export interface SelectOption {
   value: string | number;
   label: string;
 }
+
+const EMPTY_OPTIONS: readonly SelectOption[] = [];
+
+const LOADING_INDICATOR_SX = {
+  display: "inline-flex",
+  alignItems: "center",
+  px: 0.75,
+} as const;
+
+function LoadingIndicator() {
+  return (
+    <Box sx={LOADING_INDICATOR_SX}>
+      <CircularProgress size={16} color="primary" />
+    </Box>
+  );
+}
+
+const SELECT_COMPONENTS = {
+  LoadingIndicator,
+};
 
 interface AppSelectProps {
   label?: string;
@@ -21,6 +42,10 @@ interface AppSelectProps {
   width?: string | number;
   menuPlacement?: "auto" | "top" | "bottom";
   maxMenuHeight?: number;
+  loading?: boolean;
+  disabled?: boolean;
+  loadingText?: string;
+  emptyText?: string;
 }
 
 export function AppSelect({
@@ -35,8 +60,12 @@ export function AppSelect({
   width = "100%",
   menuPlacement = "auto",
   maxMenuHeight,
+  loading = false,
+  disabled = false,
+  loadingText,
+  emptyText,
 }: AppSelectProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation("common");
   const theme = useTheme();
 
   const isRtl = i18n.language === "ar";
@@ -53,6 +82,24 @@ export function AppSelect({
       ? options?.find((item) => String(item.value) === String(value)) ?? null
       : null;
 
+  const styles = useMemo(
+    () => reactSelectStyles(theme, error),
+    [theme, error],
+  );
+
+  const resolvedLoadingText = loadingText ?? t("common:loading");
+  const resolvedEmptyText = emptyText ?? t("common:noData");
+
+  const getLoadingMessage = useCallback(
+    () => resolvedLoadingText,
+    [resolvedLoadingText],
+  );
+
+  const getNoOptionsMessage = useCallback(
+    () => resolvedEmptyText,
+    [resolvedEmptyText],
+  );
+
   return (
     <Box width={width}>
       {finalLabel && (
@@ -63,14 +110,19 @@ export function AppSelect({
 
       <Box dir={isRtl ? "rtl" : "ltr"}>
         <Select
-          options={options}
+          options={loading ? EMPTY_OPTIONS : options}
           value={selectedOption}
           onChange={(option) => onChange?.(option?.value ?? "")}
           placeholder={placeholder}
           isRtl={isRtl}
+          isLoading={loading}
+          isDisabled={disabled}
+          loadingMessage={getLoadingMessage}
+          noOptionsMessage={getNoOptionsMessage}
+          components={SELECT_COMPONENTS}
           menuPlacement={menuPlacement}
           maxMenuHeight={maxMenuHeight}
-          styles={reactSelectStyles(theme, error)}
+          styles={styles}
           classNamePrefix="shared_Select"
           className={className}
         />

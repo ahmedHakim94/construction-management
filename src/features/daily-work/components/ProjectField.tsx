@@ -4,10 +4,20 @@ import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-function ProjectField({ control }: { control: any }) {
+function ProjectField({
+  control,
+  open = true,
+}: {
+  control: any;
+  open?: boolean;
+}) {
   const { t } = useTranslation();
 
-  const { data: projects } = useGetProjectsQuery();
+  const {
+    data: projects,
+    isLoading,
+    isFetching,
+  } = useGetProjectsQuery(undefined, { skip: !open });
 
   const projectOptions = useMemo(
     () =>
@@ -29,8 +39,11 @@ function ProjectField({ control }: { control: any }) {
           options={projectOptions}
           value={field.value}
           onChange={field.onChange}
+          loading={isLoading || isFetching}
           placeholder={t("selectProject")}
-          error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
+          error={
+            fieldState.error?.message ? t(fieldState.error.message) : undefined
+          }
         />
       )}
     />

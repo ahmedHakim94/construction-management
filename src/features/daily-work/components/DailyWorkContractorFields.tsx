@@ -46,25 +46,25 @@ export function DailyWorkContractorFields({
   const nameInputRef = useRef<HTMLInputElement>(null);
   // const { data: contractors } = useGetAllContractorsQuery();
 
-  const { data: contractors } = useGetAllContractorsQuery(Number(projectId) || undefined as any, {
-    skip: !open || !projectId || isExternal,
-  });
+  const { data: contractors, isFetching: contractorsLoading } =
+    useGetAllContractorsQuery((Number(projectId) || undefined) as any, {
+      skip: !open || !projectId || isExternal,
+    });
 
-  const { data: externalContractors } = useGetExternalContractorsQuery(
-    undefined,
-    { skip: !open || !isExternal },
-  );
+  const { data: externalContractors, isFetching: externalContractorsLoading } =
+    useGetExternalContractorsQuery(undefined, { skip: !open || !isExternal });
   const [addExternalContractor] = useCreateExternalContractorMutation();
 
-  const { data: contractorData } = useGetContractorByIdQuery(
-    {
-      contractorId: Number(contractorId),
-      projectId: projectId ? Number(projectId) : undefined,
-    },
-    {
-      skip: !open || !contractorId || !projectId || Boolean(isExternal),
-    },
-  );
+  const { data: contractorData, isFetching: contractorDataLoading } =
+    useGetContractorByIdQuery(
+      {
+        contractorId: Number(contractorId),
+        projectId: projectId ? Number(projectId) : undefined,
+      },
+      {
+        skip: !open || !contractorId || !projectId || Boolean(isExternal),
+      },
+    );
 
   useEffect(() => {
     if (externalContractors) {
@@ -188,6 +188,8 @@ export function DailyWorkContractorFields({
                 required
                 options={contractorOptions}
                 value={field.value}
+                loading={contractorsLoading}
+                disabled={!projectId}
                 onChange={(value) => {
                   field.onChange(value);
                   setValue("equipmentId", "");
@@ -214,6 +216,8 @@ export function DailyWorkContractorFields({
                 required
                 options={equipmentOptions}
                 value={field.value}
+                loading={contractorDataLoading}
+                disabled={!contractorId}
                 onChange={(value) => {
                   field.onChange(value);
                   const selected = equipments?.find(
@@ -251,6 +255,7 @@ export function DailyWorkContractorFields({
                 required
                 options={externalContractorOptions}
                 value={field.value}
+                loading={externalContractorsLoading}
                 onChange={field.onChange}
                 placeholder={t("selectExternalContractor")}
                 error={

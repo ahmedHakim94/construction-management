@@ -140,20 +140,22 @@ export function DeductionsPage() {
       : undefined;
 
   // Parallel independent queries with conditional skip (async-parallel)
-  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
-    skip: !isSuperAdmin,
-  });
+  const { data: rawProjects, isFetching: projectsLoading } =
+    useGetAllProjectsQuery(undefined, {
+      skip: !isSuperAdmin,
+    });
 
-  const { data: employeesResponse } = useGetEmployeesQuery(
-    {
-      page: 1,
-      limit: 100,
-      project_id: activeProjectFilterId,
-    },
-    {
-      skip: !canView,
-    },
-  );
+  const { data: employeesResponse, isFetching: employeesLoading } =
+    useGetEmployeesQuery(
+      {
+        page: 1,
+        limit: 100,
+        project_id: activeProjectFilterId,
+      },
+      {
+        skip: !canView,
+      },
+    );
 
   const { data, isLoading, isFetching } = useGetEmployeeTransactionsQuery(
     {
@@ -405,6 +407,7 @@ export function DeductionsPage() {
                   options={projectFilterOptions}
                   value={selectedProjectFilter}
                   onChange={handleProjectFilterChange}
+                  loading={projectsLoading}
                   placeholder={t("hr:allProjects")}
                 />
               </Box>
@@ -415,6 +418,7 @@ export function DeductionsPage() {
                 options={employeeFilterOptions}
                 value={selectedEmployeeFilter}
                 onChange={handleEmployeeFilterChange}
+                loading={employeesLoading}
                 placeholder={t("hr:allEmployees")}
               />
             </Box>

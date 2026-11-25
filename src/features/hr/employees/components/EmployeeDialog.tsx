@@ -34,8 +34,10 @@ import {
   AppDialog,
   AppInput,
   AppSelect,
+  DialogLoadingOverlay,
 } from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
+import { useInitialEditLoading } from "@/hooks/useInitialEditLoading";
 import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import type {
   Employee,
@@ -242,10 +244,22 @@ export function EmployeeDialog({
   const isViewMode = mode === "view" || !isSuperAdmin;
 
   // Fetch projects only when SuperAdmin opens Add/Edit dialog
-  const { data: rawProjects, isFetching: projectsLoading } =
-    useGetAllProjectsQuery(undefined, {
-      skip: !open || isViewMode || !isSuperAdmin,
-    });
+  const {
+    data: rawProjects,
+    isFetching: projectsLoading,
+    isError: projectsError,
+  } = useGetAllProjectsQuery(undefined, {
+    skip: !open || isViewMode || !isSuperAdmin,
+  });
+
+  const isInitialEditLoading = useInitialEditLoading({
+    open,
+    isEdit: mode === "edit" && isSuperAdmin,
+    recordKey: employee?.id,
+    isFetching: projectsLoading,
+    isReady: Boolean(rawProjects),
+    hasError: projectsError,
+  });
 
   const projects = useMemo<EmployeeProject[]>(
     () =>
@@ -615,7 +629,15 @@ export function EmployeeDialog({
           onSubmit={handleSubmit(handleFormSubmit)}
           noValidate
         >
-          <DialogContent dir={isArabic ? "rtl" : "ltr"}>
+          <DialogContent
+            dir={isArabic ? "rtl" : "ltr"}
+            sx={{
+              position: "relative",
+              minHeight: isInitialEditLoading ? 260 : undefined,
+            }}
+          >
+            <DialogLoadingOverlay loading={isInitialEditLoading} />
+
             <Stack spacing={2.25} sx={{ pt: 1 }}>
               <Controller
                 name="name"
@@ -790,7 +812,12 @@ export function EmployeeDialog({
           </DialogContent>
 
           <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={{ px: 3, pb: 2 }}>
-            <AppButton type="submit" variant="contained" loading={submitting}>
+            <AppButton
+              type="submit"
+              variant="contained"
+              loading={submitting}
+              disabled={isInitialEditLoading}
+            >
               {t("common:save")}
             </AppButton>
             <AppButton

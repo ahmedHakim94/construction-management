@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import type { SelectOption } from "@/components/ui/AppSelect";
 import { useAppSelector } from "@/app/store/hooks";
+import { useInitialEditLoading } from "@/hooks/useInitialEditLoading";
 import { contractorSchema } from "../schemas/contractor.schema";
 import type { Contractor, ContractorFormValues } from "../types";
 import { useGetAllEquipmentTypeQuery } from "@/features/settings/equipment-type/services/equipmentType.api";
@@ -51,27 +52,55 @@ export function useContractorForm({
 
   const { handleSubmit, reset, setError, setValue, getValues } = methods;
 
-  const { data: projects } = useGetAllProjectsQuery(undefined, {
+  const {
+    data: projects,
+    isFetching: projectsLoading,
+    isError: projectsError,
+  } = useGetAllProjectsQuery(undefined, {
     skip: !open || !isSuperAdmin,
   });
 
-  const { data: equipmentTypes } = useGetAllEquipmentTypeQuery(undefined, {
+  const {
+    data: equipmentTypes,
+    isFetching: equipmentTypesLoading,
+    isError: equipmentTypesError,
+  } = useGetAllEquipmentTypeQuery(undefined, {
     skip: !open,
   });
 
-  const { data: contractorDetails } = useGetContractorByIdQuery(
-    contractor?.id ?? 0,
-    {
-      skip: !open || mode !== "edit" || !contractor?.id,
-    },
-  );
+  const {
+    data: contractorDetails,
+    isFetching: contractorDetailsLoading,
+    isError: contractorDetailsError,
+  } = useGetContractorByIdQuery(contractor?.id ?? 0, {
+    skip: !open || mode !== "edit" || !contractor?.id,
+  });
 
-  const { data: contractorProjects } = useGetContractorProjectsQuery(
-    contractor?.id ?? 0,
-    {
-      skip: !open || mode !== "edit" || !contractor?.id || !isSuperAdmin,
-    },
-  );
+  const {
+    data: contractorProjects,
+    isFetching: contractorProjectsLoading,
+    isError: contractorProjectsError,
+  } = useGetContractorProjectsQuery(contractor?.id ?? 0, {
+    skip: !open || mode !== "edit" || !contractor?.id || !isSuperAdmin,
+  });
+
+  const isInitialEditLoading = useInitialEditLoading({
+    open,
+    isEdit: mode === "edit",
+    recordKey: contractor?.id,
+    isFetching:
+      contractorDetailsLoading ||
+      equipmentTypesLoading ||
+      (isSuperAdmin && (projectsLoading || contractorProjectsLoading)),
+    isReady:
+      Boolean(contractorDetails) &&
+      Boolean(equipmentTypes) &&
+      (!isSuperAdmin || (Boolean(projects) && Boolean(contractorProjects))),
+    hasError:
+      contractorDetailsError ||
+      equipmentTypesError ||
+      (isSuperAdmin && (projectsError || contractorProjectsError)),
+  });
 
   const defaultProjectId = contractorProjects?.[0]?.id;
 
@@ -161,6 +190,9 @@ export function useContractorForm({
   return {
     methods,
     loading,
+    isInitialEditLoading,
+    projectsLoading,
+    equipmentTypesLoading,
     isSuperAdmin,
     projectOptions,
     equipmentTypeOptions,

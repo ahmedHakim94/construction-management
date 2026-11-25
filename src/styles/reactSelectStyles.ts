@@ -24,15 +24,18 @@ export const reactSelectStyles = (
       ...base,
       minHeight: 40,
       borderRadius: theme?.shape.borderRadius ? Number(theme.shape.borderRadius) - 2 : 8,
-      cursor: "pointer",
+      cursor: state.isDisabled ? "not-allowed" : "pointer",
       boxShadow: "none",
-      backgroundColor: theme?.palette.background.paper ?? "#FFFFFF",
+      backgroundColor: state.isDisabled
+        ? theme?.palette.background.default ?? "#F4F6F9"
+        : theme?.palette.background.paper ?? "#FFFFFF",
+      opacity: state.isDisabled ? 0.75 : 1,
       borderColor,
       borderWidth: state.isFocused ? 1.5 : 1,
       fontSize: "0.875rem",
       fontFamily: theme?.typography.fontFamily,
       "&:hover": {
-        borderColor: hoverBorderColor,
+        borderColor: state.isDisabled ? borderColor : hoverBorderColor,
       },
     };
   },
@@ -89,5 +92,21 @@ export const reactSelectStyles = (
         ? theme?.palette.primary.main ?? "#244A64"
         : theme?.palette.action.selected ?? "rgba(15, 30, 54, 0.08)",
     },
+  }),
+
+  loadingMessage: (base) => ({
+    ...base,
+    color: theme?.palette.text.secondary ?? "#64748B",
+    fontSize: "0.875rem",
+    fontFamily: theme?.typography.fontFamily,
+    padding: "10px 12px",
+  }),
+
+  noOptionsMessage: (base) => ({
+    ...base,
+    color: theme?.palette.text.secondary ?? "#64748B",
+    fontSize: "0.875rem",
+    fontFamily: theme?.typography.fontFamily,
+    padding: "10px 12px",
   }),
 });

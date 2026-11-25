@@ -18,9 +18,16 @@ import {
 import Close from "@mui/icons-material/Close";
 import dayjs, { type Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
-import { AppButton, AppDialog, AppInput, AppSelect } from "@/components/ui";
+import {
+  AppButton,
+  AppDialog,
+  AppInput,
+  AppSelect,
+  DialogLoadingOverlay,
+} from "@/components/ui";
 import { AppDatePicker } from "@/components/ui/AppDatePicker/AppDatePicker";
 import type { SelectOption } from "@/components/ui/AppSelect";
+import { useInitialEditLoading } from "@/hooks/useInitialEditLoading";
 import { useGetEmployeesQuery } from "@/features/hr/employees/services/employees.api";
 import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import { useGetEmployeeAttendanceDetailsQuery } from "../services/attendance.api";
@@ -92,21 +99,37 @@ export function AttendanceDialog({
       ? selectedDate.format("YYYY-MM")
       : selectedMonth;
 
-  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
+  const {
+    data: rawProjects,
+    isFetching: projectsLoading,
+    isError: projectsError,
+  } = useGetAllProjectsQuery(undefined, {
     skip: !open,
   });
 
   // In Edit mode, load the employee's real monthly records so we preload saved statuses & cross-project state
-  const { data: editEmployeeDetails, isFetching: editDetailsLoading } =
-    useGetEmployeeAttendanceDetailsQuery(
-      {
-        employeeId: targetEmployee?.id ?? 0,
-        month: activeQueryMonth,
-      },
-      {
-        skip: !open || mode !== "edit" || !targetEmployee,
-      },
-    );
+  const {
+    data: editEmployeeDetails,
+    isFetching: editDetailsLoading,
+    isError: editDetailsError,
+  } = useGetEmployeeAttendanceDetailsQuery(
+    {
+      employeeId: targetEmployee?.id ?? 0,
+      month: activeQueryMonth,
+    },
+    {
+      skip: !open || mode !== "edit" || !targetEmployee,
+    },
+  );
+
+  const isInitialEditLoading = useInitialEditLoading({
+    open,
+    isEdit: mode === "edit",
+    recordKey: `${targetEmployee?.id ?? ""}-${selectedMonth}`,
+    isFetching: projectsLoading || editDetailsLoading,
+    isReady: Boolean(rawProjects) && Boolean(editEmployeeDetails),
+    hasError: projectsError || editDetailsError,
+  });
 
   const editRecords = editEmployeeDetails?.records ?? EMPTY_EDIT_RECORDS;
 
@@ -396,7 +419,15 @@ export function AttendanceDialog({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dir={isArabic ? "rtl" : "ltr"}>
+      <DialogContent
+        dir={isArabic ? "rtl" : "ltr"}
+        sx={{
+          position: "relative",
+          minHeight: isInitialEditLoading ? 260 : undefined,
+        }}
+      >
+        <DialogLoadingOverlay loading={isInitialEditLoading} />
+
         <Stack spacing={2.25} sx={{ pt: 1 }}>
           <Box
             sx={{
@@ -457,6 +488,7 @@ export function AttendanceDialog({
                     if (projectError) setProjectError("");
                     if (recordsError) setRecordsError("");
                   }}
+                  loading={projectsLoading}
                   placeholder={t("hr:selectAttendanceProject")}
                   error={projectError}
                 />
@@ -646,7 +678,11 @@ export function AttendanceDialog({
           variant="contained"
           onClick={handleSubmit}
           loading={submitting}
-          disabled={isLoadingList || displayedEmployees.length === 0}
+          disabled={
+            isInitialEditLoading ||
+            isLoadingList ||
+            displayedEmployees.length === 0
+          }
         >
           {t("common:save")}
         </AppButton>

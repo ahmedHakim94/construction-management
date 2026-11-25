@@ -10,6 +10,7 @@ import type { ContractorFormValues } from "../types";
 interface EquipmentSectionProps {
   index: number;
   equipmentTypeOptions: readonly SelectOption[];
+  equipmentTypesLoading?: boolean;
   onDelete: () => void;
   isExpanded: boolean;
   onToggle: () => void;
@@ -18,6 +19,7 @@ interface EquipmentSectionProps {
 export function EquipmentSection({
   index,
   equipmentTypeOptions,
+  equipmentTypesLoading = false,
   onDelete,
   isExpanded,
   onToggle,
@@ -141,6 +143,7 @@ export function EquipmentSection({
                   options={equipmentTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
+                  loading={equipmentTypesLoading}
                   error={fieldState.error?.message}
                   placeholder={t("selectPlaceholder")}
                   menuPlacement="top"

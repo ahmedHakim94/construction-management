@@ -9,9 +9,11 @@ import {
   AppInput,
   AppPasswordInput,
   AppSelect,
+  DialogLoadingOverlay,
 } from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
 import { useAppSelector } from "@/app/store/hooks";
+import { useInitialEditLoading } from "@/hooks/useInitialEditLoading";
 import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import {
   createUserSchema,
@@ -51,7 +53,11 @@ export function UserDialog({
   const actor = useAppSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(false);
 
-  const { data: projects } = useGetAllProjectsQuery(undefined, {
+  const {
+    data: projects,
+    isFetching: projectsLoading,
+    isError: projectsError,
+  } = useGetAllProjectsQuery(undefined, {
     skip: !open,
   });
 
@@ -151,6 +157,18 @@ export function UserDialog({
   const role = useWatch({ control, name: "role" });
   const showProject = isProjectRequired(role);
 
+  const needsProjectInEdit =
+    mode === "edit" && isProjectRequired(user?.role ?? "user");
+
+  const isInitialEditLoading = useInitialEditLoading({
+    open,
+    isEdit: needsProjectInEdit,
+    recordKey: user?.id,
+    isFetching: projectsLoading,
+    isReady: Boolean(projects),
+    hasError: projectsError,
+  });
+
   // If role is explicitly switched to super_admin, clear projectId
   useEffect(() => {
     if (role === "super_admin") {
@@ -240,7 +258,14 @@ export function UserDialog({
     >
       <DialogTitle>{mode === "create" ? t("addUser") : t("editUser")}</DialogTitle>
 
-      <DialogContent>
+      <DialogContent
+        sx={{
+          position: "relative",
+          minHeight: isInitialEditLoading ? 260 : undefined,
+        }}
+      >
+        <DialogLoadingOverlay loading={isInitialEditLoading} />
+
         <form
           onSubmit={handleSubmit(submit, (errors) => {
             console.error("Form validation errors:", errors);
@@ -376,6 +401,7 @@ export function UserDialog({
                         value === "" || value === null ? null : Number(value),
                       )
                     }
+                    loading={projectsLoading}
                     placeholder={t("selectProject")}
                     error={fieldState.error?.message}
                   />
@@ -439,6 +465,7 @@ export function UserDialog({
         <AppButton
           variant="contained"
           loading={loading}
+          disabled={isInitialEditLoading}
           onClick={handleSubmit(submit, (errors) => {
             console.error("Form validation errors:", errors);
           })}

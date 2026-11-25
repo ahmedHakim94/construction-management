@@ -5,6 +5,7 @@ export * from "./AppSelect";
 export * from "./AppTextarea";
 export * from "./AppCard";
 export * from "./AppDialog";
+export * from "./DialogLoadingOverlay";
 export * from "./AppDrawer";
 export * from "./AppTable";
 export * from "./AppCustomTable";

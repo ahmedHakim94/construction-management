@@ -11,11 +11,13 @@ import type { ContractorFormValues } from "../types";
 interface ContractorInfoSectionProps {
   isSuperAdmin: boolean;
   projectOptions: readonly SelectOption[];
+  projectsLoading?: boolean;
 }
 
 export function ContractorInfoSection({
   isSuperAdmin,
   projectOptions,
+  projectsLoading = false,
 }: ContractorInfoSectionProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
@@ -102,6 +104,7 @@ export function ContractorInfoSection({
                   options={projectOptions}
                   value={field.value ?? ""}
                   onChange={(value) => field.onChange(Number(value))}
+                  loading={projectsLoading}
                   error={fieldState.error?.message}
                 />
               )}

@@ -16,8 +16,15 @@ import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
-import { AppButton, AppDialog, AppInput, AppSelect } from "@/components/ui";
+import {
+  AppButton,
+  AppDialog,
+  AppInput,
+  AppSelect,
+  DialogLoadingOverlay,
+} from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
+import { useInitialEditLoading } from "@/hooks/useInitialEditLoading";
 import { useGetEmployeesQuery } from "@/features/hr/employees/services/employees.api";
 import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import type { Loan, LoanDialogMode, LoanFormValues } from "../types";
@@ -109,12 +116,20 @@ export function LoanDialog({
     : adminProjectId;
 
   // Fetch live projects (scoped by backend: all for SuperAdmin, own project for Admin)
-  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
+  const {
+    data: rawProjects,
+    isFetching: projectsLoading,
+    isError: projectsError,
+  } = useGetAllProjectsQuery(undefined, {
     skip: !open,
   });
 
   // Fetch live employees belonging to the selected project
-  const { data: employeesResponse } = useGetEmployeesQuery(
+  const {
+    data: employeesResponse,
+    isFetching: employeesLoading,
+    isError: employeesError,
+  } = useGetEmployeesQuery(
     {
       page: 1,
       limit: 100,
@@ -125,6 +140,15 @@ export function LoanDialog({
       skip: !open || !effectiveProjectId,
     },
   );
+
+  const isInitialEditLoading = useInitialEditLoading({
+    open,
+    isEdit: mode === "edit",
+    recordKey: loan?.id,
+    isFetching: projectsLoading || employeesLoading,
+    isReady: Boolean(rawProjects) && Boolean(employeesResponse),
+    hasError: projectsError || employeesError,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -249,7 +273,15 @@ export function LoanDialog({
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-        <DialogContent dir={isArabic ? "rtl" : "ltr"}>
+        <DialogContent
+          dir={isArabic ? "rtl" : "ltr"}
+          sx={{
+            position: "relative",
+            minHeight: isInitialEditLoading ? 260 : undefined,
+          }}
+        >
+          <DialogLoadingOverlay loading={isInitialEditLoading} />
+
           <Stack spacing={2.25} sx={{ pt: 1 }}>
             {isSuperAdmin ? (
               <Controller
@@ -263,6 +295,7 @@ export function LoanDialog({
                     value={field.value || ""}
                     onChange={(value) => handleProjectChange(Number(value))}
                     placeholder={t("hr:selectLoanProject")}
+                    loading={projectsLoading}
                     error={fieldState.error?.message}
                   />
                 )}
@@ -285,6 +318,8 @@ export function LoanDialog({
                   options={employeeOptions}
                   value={field.value || ""}
                   onChange={(value) => field.onChange(Number(value))}
+                  loading={employeesLoading}
+                  disabled={isSuperAdmin && !effectiveProjectId}
                   placeholder={
                     isSuperAdmin && !effectiveProjectId
                       ? t("hr:selectProjectFirst")
@@ -351,7 +386,12 @@ export function LoanDialog({
         </DialogContent>
 
         <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={DIALOG_ACTIONS_SX}>
-          <AppButton type="submit" variant="contained" loading={submitting}>
+          <AppButton
+            type="submit"
+            variant="contained"
+            loading={submitting}
+            disabled={isInitialEditLoading}
+          >
             {t("common:save")}
           </AppButton>
           <AppButton

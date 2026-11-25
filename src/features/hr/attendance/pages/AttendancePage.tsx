@@ -106,9 +106,10 @@ export function AttendancePage() {
     setPage(1);
   }, []);
 
-  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
-    skip: !isSuperAdmin,
-  });
+  const { data: rawProjects, isFetching: projectsLoading } =
+    useGetAllProjectsQuery(undefined, {
+      skip: !isSuperAdmin,
+    });
 
   const projectFilterOptions = useMemo<SelectOption[]>(
     () => [
@@ -280,6 +281,7 @@ export function AttendancePage() {
                   options={projectFilterOptions}
                   value={selectedProjectFilter}
                   onChange={handleProjectFilterChange}
+                  loading={projectsLoading}
                   placeholder={t("hr:allProjects")}
                 />
               </Box>

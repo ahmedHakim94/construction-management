@@ -11,7 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddContractorIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 import GearIcon from "@mui/icons-material/SettingsOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import { AppButton, AppDialog } from "@/components/ui";
+import { AppButton, AppDialog, DialogLoadingOverlay } from "@/components/ui";
 import type { Contractor, ContractorFormValues } from "../types";
 import { ContractorInfoSection } from "./ContractorInfoSection";
 import { EquipmentSection } from "./EquipmentSection";
@@ -31,6 +31,9 @@ export function ContractorDialog(props: ContractorDialogProps) {
   const {
     methods,
     loading,
+    isInitialEditLoading,
+    projectsLoading,
+    equipmentTypesLoading,
     isSuperAdmin,
     projectOptions,
     equipmentTypeOptions,
@@ -127,8 +130,15 @@ export function ContractorDialog(props: ContractorDialogProps) {
       <FormProvider {...methods}>
         <DialogContent
           dir={isArabic ? "rtl" : "ltr"}
-          sx={{ p: 3, bgcolor: "background.default" }}
+          sx={{
+            p: 3,
+            bgcolor: "background.default",
+            position: "relative",
+            minHeight: isInitialEditLoading ? 280 : undefined,
+          }}
         >
+          <DialogLoadingOverlay loading={isInitialEditLoading} />
+
           <Box
             component="form"
             onSubmit={handleSubmit(submit)}
@@ -142,6 +152,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
             <ContractorInfoSection
               isSuperAdmin={isSuperAdmin}
               projectOptions={projectOptions}
+              projectsLoading={projectsLoading}
             />
 
             {/* Equipment Data Section Wrapper */}
@@ -211,6 +222,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
                       key={field.id}
                       index={index}
                       equipmentTypeOptions={equipmentTypeOptions}
+                      equipmentTypesLoading={equipmentTypesLoading}
                       onDelete={() => remove(index)}
                       isExpanded={expandedId === field.id}
                       onToggle={() =>
@@ -237,6 +249,7 @@ export function ContractorDialog(props: ContractorDialogProps) {
       >
         <AppButton
           loading={loading}
+          disabled={isInitialEditLoading}
           onClick={handleSubmit(submit)}
           variant="contained"
           sx={{ px: 4 }}

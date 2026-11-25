@@ -139,20 +139,22 @@ export function LeavesPage() {
   }, []);
 
   // Parallel independent queries with conditional skip (async-parallel)
-  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
-    skip: !isSuperAdmin,
-  });
+  const { data: rawProjects, isFetching: projectsLoading } =
+    useGetAllProjectsQuery(undefined, {
+      skip: !isSuperAdmin,
+    });
 
-  const { data: employeesResponse } = useGetEmployeesQuery(
-    {
-      page: 1,
-      limit: 100,
-      project_id: activeProjectFilterId,
-    },
-    {
-      skip: !canView,
-    },
-  );
+  const { data: employeesResponse, isFetching: employeesLoading } =
+    useGetEmployeesQuery(
+      {
+        page: 1,
+        limit: 100,
+        project_id: activeProjectFilterId,
+      },
+      {
+        skip: !canView,
+      },
+    );
 
   const projectFilterOptions = useMemo<SelectOption[]>(() => {
     const base: SelectOption[] = [{ value: "", label: t("hr:allProjects") }];
@@ -245,6 +247,7 @@ export function LeavesPage() {
                   options={projectFilterOptions}
                   value={selectedProjectFilter}
                   onChange={handleProjectFilterChange}
+                  loading={projectsLoading}
                   placeholder={t("hr:allProjects")}
                 />
               </Box>
@@ -255,6 +258,7 @@ export function LeavesPage() {
                 options={employeeOptions}
                 value={selectedEmployeeId}
                 onChange={handleEmployeeChange}
+                loading={employeesLoading}
                 placeholder={t("hr:allEmployees")}
               />
             </Box>

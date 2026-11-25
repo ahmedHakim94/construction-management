@@ -23,9 +23,12 @@ export function DailyWorkDetailsFields({
   workingDuration,
     open,
 }: DailyWorkDetailsFieldsProps) {
-  console.log("🚀 ~ DailyWorkDetailsFields ~ isExternal:", isExternal)
   const { t } = useTranslation();
-  const { data: tasks } = useGetAllTasksQuery(undefined, { skip: !open });
+  const {
+    data: tasks,
+    isLoading: tasksLoading,
+    isFetching: tasksFetching,
+  } = useGetAllTasksQuery(undefined, { skip: !open });
 
 
   const taskOptions = useMemo(() => (
@@ -48,6 +51,7 @@ export function DailyWorkDetailsFields({
             options={taskOptions}
             value={field.value}
             onChange={field.onChange}
+            loading={tasksLoading || tasksFetching}
             placeholder={t("selectTask")}
             error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
           />

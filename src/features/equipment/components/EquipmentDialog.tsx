@@ -98,20 +98,23 @@ export function EquipmentDialog({
     name: "contractorId",
   });
 
-  const { data: projects } = useGetAllProjectsQuery(undefined, {
-    skip: !open || !isSuperAdminCreate,
-  });
+  const { data: projects, isFetching: projectsLoading } =
+    useGetAllProjectsQuery(undefined, {
+      skip: !open || !isSuperAdminCreate,
+    });
 
-  const { data: contractors } = useGetAllContractorsQuery(
-    isSuperAdminCreate ? selectedProjectId : undefined,
-    {
-      skip: !open || (isSuperAdminCreate && !selectedProjectId),
-    },
-  );
+  const { data: contractors, isFetching: contractorsLoading } =
+    useGetAllContractorsQuery(
+      isSuperAdminCreate ? selectedProjectId : undefined,
+      {
+        skip: !open || (isSuperAdminCreate && !selectedProjectId),
+      },
+    );
 
-  const { data: equipmentTypes } = useGetAllEquipmentTypeQuery(undefined, {
-    skip: !open || isLinkMode,
-  });
+  const { data: equipmentTypes, isFetching: equipmentTypesLoading } =
+    useGetAllEquipmentTypeQuery(undefined, {
+      skip: !open || isLinkMode,
+    });
 
   const { data: availableEquipments, isFetching: loadingEquipments } =
     useGetAvailableEquipmentsQuery(
@@ -349,6 +352,7 @@ export function EquipmentDialog({
                   options={projectOptions}
                   value={field.value ? String(field.value) : ""}
                   onChange={handleProjectChange}
+                  loading={projectsLoading}
                   placeholder={selectPlaceholder}
                   error={fieldState.error?.message}
                 />
@@ -367,6 +371,8 @@ export function EquipmentDialog({
                   options={contractorOptions}
                   value={field.value ? String(field.value) : ""}
                   onChange={handleContractorChange}
+                  loading={contractorsLoading}
+                  disabled={isSuperAdminCreate && !selectedProjectId}
                   placeholder={
                     isSuperAdminCreate && !selectedProjectId
                       ? t("selectProjectFirst", {
@@ -390,7 +396,9 @@ export function EquipmentDialog({
                 setSelectedEquipmentId(value ? Number(value) : 0);
                 setEquipmentError("");
               }}
-              placeholder={loadingEquipments ? t("loading") : selectPlaceholder}
+              loading={loadingEquipments}
+              disabled={!selectedContractorId}
+              placeholder={selectPlaceholder}
               error={equipmentError}
             />
           ) : (
@@ -408,6 +416,7 @@ export function EquipmentDialog({
                       onChange={(value) =>
                         field.onChange(value ? Number(value) : 0)
                       }
+                      loading={equipmentTypesLoading}
                       placeholder={selectPlaceholder}
                       error={fieldState.error?.message}
                     />
