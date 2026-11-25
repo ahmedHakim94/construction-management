@@ -131,5 +131,6 @@
   "loanEmployeeRequired": "الموظف مطلوب",
   "loanAmountRequired": "المبلغ مطلوب",
   "loanAmountInvalid": "يجب أن يكون المبلغ أكبر من صفر",
-  "loanDateRequired": "التاريخ مطلوب"
+  "loanDateRequired": "التاريخ مطلوب",
+  "loanDateFutureInvalid": "لا يمكن أن يكون تاريخ السلفة في المستقبل"
 }

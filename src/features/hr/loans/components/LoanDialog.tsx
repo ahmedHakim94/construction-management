@@ -1,11 +1,13 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   Box,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
 } from "@mui/material";
+import Close from "@mui/icons-material/Close";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -16,50 +18,77 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { AppButton, AppDialog, AppInput, AppSelect } from "@/components/ui";
 import type { SelectOption } from "@/components/ui/AppSelect";
-import type { Employee, EmployeeProject } from "@/features/hr/employees/types";
+import { useGetEmployeesQuery } from "@/features/hr/employees/services/employees.api";
+import { useGetAllProjectsQuery } from "@/features/settings/projects/services/projects.api";
 import type { Loan, LoanDialogMode, LoanFormValues } from "../types";
+
+const DIALOG_TITLE_SX = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 1.5,
+} as const;
+
+const DIALOG_ACTIONS_SX = { px: 2.5, py: 1.5 } as const;
+const CLOSE_ICON = <Close fontSize="small" />;
+
+const getTodayDateString = (): string => dayjs().format("YYYY-MM-DD");
+
+const isNotFutureLoanDate = (dateStr: string): boolean => {
+  if (!dateStr) return false;
+  const parsed = dayjs(dateStr);
+  if (!parsed.isValid()) return false;
+  return parsed.format("YYYY-MM-DD") <= getTodayDateString();
+};
 
 interface LoanDialogProps {
   open: boolean;
   mode: LoanDialogMode;
   loan?: Loan;
-  employees: Employee[];
-  projects: EmployeeProject[];
   isSuperAdmin: boolean;
   adminProjectId: number | null;
+  submitting?: boolean;
   onClose: () => void;
-  onSubmit: (values: LoanFormValues) => void;
+  onSubmit: (values: LoanFormValues) => Promise<void> | void;
 }
 
 export function LoanDialog({
   open,
   mode,
   loan,
-  employees,
-  projects,
   isSuperAdmin,
   adminProjectId,
+  submitting = false,
   onClose,
   onSubmit,
 }: LoanDialogProps) {
   const { t, i18n } = useTranslation(["hr", "common"]);
   const isArabic = i18n.language === "ar";
 
+  const maxAllowedDate = useMemo(() => dayjs().endOf("day"), []);
+
   const schema = useMemo(
     () =>
       z.object({
-        projectId: z.coerce
-          .number({ message: t("hr:loanProjectRequired") })
-          .min(1, t("hr:loanProjectRequired")),
+        projectId: isSuperAdmin
+          ? z.coerce
+              .number({ message: t("hr:loanProjectRequired") })
+              .min(1, t("hr:loanProjectRequired"))
+          : z.coerce.number(),
         employeeId: z.coerce
           .number({ message: t("hr:loanEmployeeRequired") })
           .min(1, t("hr:loanEmployeeRequired")),
         amount: z.coerce
           .number({ message: t("hr:loanAmountRequired") })
           .positive(t("hr:loanAmountInvalid")),
-        date: z.string().min(1, t("hr:loanDateRequired")),
+        date: z
+          .string()
+          .min(1, t("hr:loanDateRequired"))
+          .refine((val) => isNotFutureLoanDate(val), {
+            message: t("hr:loanDateFutureInvalid"),
+          }),
       }),
-    [t],
+    [t, isSuperAdmin],
   );
 
   const { control, handleSubmit, reset, setValue, getValues } =
@@ -69,11 +98,33 @@ export function LoanDialog({
         projectId: isSuperAdmin ? 0 : (adminProjectId ?? 0),
         employeeId: 0,
         amount: 0,
-        date: dayjs().format("YYYY-MM-DD"),
+        date: getTodayDateString(),
       },
     });
 
   const watchedProjectId = useWatch({ control, name: "projectId" });
+
+  const effectiveProjectId = isSuperAdmin
+    ? Number(watchedProjectId) || null
+    : adminProjectId;
+
+  // Fetch live projects (scoped by backend: all for SuperAdmin, own project for Admin)
+  const { data: rawProjects } = useGetAllProjectsQuery(undefined, {
+    skip: !open,
+  });
+
+  // Fetch live employees belonging to the selected project
+  const { data: employeesResponse } = useGetEmployeesQuery(
+    {
+      page: 1,
+      limit: 100,
+      project_id:
+        isSuperAdmin && effectiveProjectId ? effectiveProjectId : undefined,
+    },
+    {
+      skip: !open || !effectiveProjectId,
+    },
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -94,66 +145,83 @@ export function LoanDialog({
       projectId: isSuperAdmin ? 0 : (adminProjectId ?? 0),
       employeeId: 0,
       amount: 0,
-      date: dayjs().format("YYYY-MM-DD"),
+      date: getTodayDateString(),
     });
   }, [open, mode, loan, isSuperAdmin, adminProjectId, reset]);
 
-  const projectOptions = useMemo<SelectOption[]>(
-    () =>
-      projects.map((project) => ({
-        value: project.id,
-        label: project.name,
-      })),
-    [projects],
-  );
+  // Clear employee selection if SuperAdmin switches to a project that does not contain that employee
+  useEffect(() => {
+    if (!open || !isSuperAdmin || !effectiveProjectId) return;
+    const employees = employeesResponse?.data;
+    if (!employees) return;
 
-  const lockedAdminProjectName = useMemo(
-    () =>
-      projects.find((project) => project.id === adminProjectId)?.name ?? "",
-    [projects, adminProjectId],
-  );
+    const currentEmployeeId = Number(getValues("employeeId"));
+    if (!currentEmployeeId) return;
 
-  const filteredEmployees = useMemo(() => {
-    const effectiveProjectId = isSuperAdmin
-      ? Number(watchedProjectId)
-      : Number(adminProjectId);
-    if (!effectiveProjectId) return [];
-    return employees.filter((employee) =>
-      employee.projectIds.includes(effectiveProjectId),
-    );
-  }, [employees, isSuperAdmin, watchedProjectId, adminProjectId]);
-
-  const employeeOptions = useMemo<SelectOption[]>(
-    () =>
-      filteredEmployees.map((employee) => ({
-        value: employee.id,
-        label: `${employee.name} (${employee.code})`,
-      })),
-    [filteredEmployees],
-  );
-
-  const handleProjectChange = (nextProjectId: number) => {
-    setValue("projectId", nextProjectId, { shouldValidate: true });
-    const currentEmployeeId = getValues("employeeId");
-    if (currentEmployeeId) {
-      const stillAssigned = employees.some(
-        (employee) =>
-          employee.id === currentEmployeeId &&
-          employee.projectIds.includes(nextProjectId),
-      );
-      if (!stillAssigned) {
-        setValue("employeeId", 0);
-      }
+    const employeeIds = new Set(employees.map((emp) => emp.id));
+    if (!employeeIds.has(currentEmployeeId)) {
+      setValue("employeeId", 0);
     }
-  };
+  }, [
+    open,
+    isSuperAdmin,
+    effectiveProjectId,
+    employeesResponse?.data,
+    getValues,
+    setValue,
+  ]);
 
-  const handleFormSubmit = (values: LoanFormValues) => {
-    const effectiveProjectId = isSuperAdmin
+  const projectOptions = useMemo<SelectOption[]>(() => {
+    if (!rawProjects?.length) return [];
+    const list: SelectOption[] = [];
+    for (let i = 0; i < rawProjects.length; i += 1) {
+      const project = rawProjects[i];
+      list.push({ value: Number(project.id), label: project.name });
+    }
+    return list;
+  }, [rawProjects]);
+
+  const lockedAdminProjectName = useMemo(() => {
+    const matched = rawProjects?.find(
+      (project) => Number(project.id) === adminProjectId,
+    );
+    if (matched) return matched.name;
+    if (loan?.projectName) return loan.projectName;
+    return adminProjectId ? `#${adminProjectId}` : "";
+  }, [rawProjects, adminProjectId, loan?.projectName]);
+
+  const employeeOptions = useMemo<SelectOption[]>(() => {
+    const employees = employeesResponse?.data;
+    if (!employees?.length) return [];
+    const list: SelectOption[] = [];
+    for (let i = 0; i < employees.length; i += 1) {
+      const employee = employees[i];
+      list.push({
+        value: employee.id,
+        label: `${employee.name} (#${employee.id})`,
+      });
+    }
+    return list;
+  }, [employeesResponse?.data]);
+
+  const handleProjectChange = useCallback(
+    (nextProjectId: number) => {
+      setValue("projectId", nextProjectId, { shouldValidate: true });
+    },
+    [setValue],
+  );
+
+  const handleFormSubmit = async (values: LoanFormValues) => {
+    if (submitting) return;
+
+    const resolvedProjectId = isSuperAdmin
       ? Number(values.projectId)
       : Number(adminProjectId);
 
-    onSubmit({
-      projectId: effectiveProjectId,
+    if (!isNotFutureLoanDate(values.date)) return;
+
+    await onSubmit({
+      projectId: resolvedProjectId,
       employeeId: Number(values.employeeId),
       amount: Number(values.amount),
       date: values.date,
@@ -161,9 +229,23 @@ export function LoanDialog({
   };
 
   return (
-    <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle dir={isArabic ? "rtl" : "ltr"}>
-        {mode === "edit" ? t("hr:editLoan") : t("hr:addLoan")}
+    <AppDialog
+      open={open}
+      onClose={submitting ? undefined : onClose}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle dir={isArabic ? "rtl" : "ltr"} sx={DIALOG_TITLE_SX}>
+        <span>{mode === "edit" ? t("hr:editLoan") : t("hr:addLoan")}</span>
+        <IconButton
+          size="small"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label={t("hr:close")}
+          sx={{ color: "text.secondary" }}
+        >
+          {CLOSE_ICON}
+        </IconButton>
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
@@ -204,7 +286,7 @@ export function LoanDialog({
                   value={field.value || ""}
                   onChange={(value) => field.onChange(Number(value))}
                   placeholder={
-                    isSuperAdmin && !watchedProjectId
+                    isSuperAdmin && !effectiveProjectId
                       ? t("hr:selectProjectFirst")
                       : t("hr:selectLoanEmployee")
                   }
@@ -243,6 +325,7 @@ export function LoanDialog({
                   <DatePicker
                     label={t("hr:loanDate")}
                     format="YYYY-MM-DD"
+                    maxDate={maxAllowedDate}
                     value={field.value ? dayjs(field.value) : null}
                     onChange={(value) =>
                       field.onChange(
@@ -267,11 +350,16 @@ export function LoanDialog({
           </Stack>
         </DialogContent>
 
-        <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={{ px: 3, pb: 2 }}>
-          <AppButton type="submit" variant="contained">
+        <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={DIALOG_ACTIONS_SX}>
+          <AppButton type="submit" variant="contained" loading={submitting}>
             {t("common:save")}
           </AppButton>
-          <AppButton variant="outlined" color="inherit" onClick={onClose}>
+          <AppButton
+            variant="outlined"
+            color="inherit"
+            onClick={onClose}
+            disabled={submitting}
+          >
             {t("common:cancel")}
           </AppButton>
         </DialogActions>
