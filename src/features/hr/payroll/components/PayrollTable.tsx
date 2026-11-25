@@ -1,33 +1,42 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AppBadge, AppTable, type AppTableColDef } from "@/components/ui";
 import { AppActions } from "@/components/ui/AppActions";
 import type { PayrollRecord } from "../types";
 
+const MONEY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
+
+const EMPLOYEE_CELL_SX = {
+  py: 0.5,
+} as const;
+
 interface PayrollTableProps {
   rows: PayrollRecord[];
+  loading?: boolean;
   canManage: boolean;
+  isFutureMonth?: boolean;
   onViewDetails: (record: PayrollRecord) => void;
   onMarkAsPaid: (record: PayrollRecord) => void;
 }
 
-export function PayrollTable({
+export const PayrollTable = memo(function PayrollTable({
   rows,
+  loading = false,
   canManage,
+  isFutureMonth = false,
   onViewDetails,
   onMarkAsPaid,
 }: PayrollTableProps) {
   const { t } = useTranslation(["hr", "common"]);
-
-  const moneyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [],
-  );
 
   const columns = useMemo<AppTableColDef[]>(
     () => [
@@ -37,7 +46,7 @@ export function PayrollTable({
         flex: 1.4,
         minWidth: 185,
         renderCell: ({ row }: { row: PayrollRecord }) => (
-          <Box sx={{ py: 0.5 }}>
+          <Box sx={EMPLOYEE_CELL_SX}>
             <Typography
               variant="body2"
               fontWeight={600}
@@ -46,7 +55,9 @@ export function PayrollTable({
               {row.employeeName}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {row.employeeCode}
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {row.employeeCode}
+              </Box>
             </Typography>
           </Box>
         ),
@@ -60,9 +71,14 @@ export function PayrollTable({
           <Typography
             variant="body2"
             color={row.isInactive ? "text.disabled" : "text.primary"}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive ? "—" : moneyFormatter.format(row.basicSalary)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.basicSalary)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -75,11 +91,14 @@ export function PayrollTable({
           <Typography
             variant="body2"
             color={row.isInactive ? "text.disabled" : "text.primary"}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive
-              ? "—"
-              : moneyFormatter.format(row.payableWorkingDays)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.payableWorkingDays)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -99,9 +118,14 @@ export function PayrollTable({
                   ? "success.main"
                   : "text.secondary"
             }
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive ? "—" : moneyFormatter.format(row.totalBonuses)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.totalBonuses)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -121,9 +145,14 @@ export function PayrollTable({
                   ? "error.main"
                   : "text.secondary"
             }
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive ? "—" : moneyFormatter.format(row.totalDeductions)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.totalDeductions)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -143,9 +172,14 @@ export function PayrollTable({
                   ? "warning.dark"
                   : "text.secondary"
             }
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive ? "—" : moneyFormatter.format(row.totalLoans)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.totalLoans)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -159,9 +193,14 @@ export function PayrollTable({
             variant="body2"
             fontWeight={700}
             color={row.isInactive ? "text.disabled" : "text.primary"}
-            sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
           >
-            {row.isInactive ? "—" : moneyFormatter.format(row.netSalary)}
+            {row.isInactive ? (
+              "—"
+            ) : (
+              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                {MONEY_FORMATTER.format(row.netSalary)}
+              </Box>
+            )}
           </Typography>
         ),
       },
@@ -202,7 +241,10 @@ export function PayrollTable({
         width: 115,
         renderCell: ({ row }: { row: PayrollRecord }) => {
           const canMarkPaid =
-            canManage && !row.isInactive && row.status === "PENDING";
+            canManage &&
+            !isFutureMonth &&
+            !row.isInactive &&
+            row.status === "PENDING";
 
           return (
             <AppActions
@@ -215,16 +257,17 @@ export function PayrollTable({
         },
       },
     ],
-    [t, moneyFormatter, canManage, onViewDetails, onMarkAsPaid],
+    [t, canManage, isFutureMonth, onViewDetails, onMarkAsPaid],
   );
 
   return (
     <AppTable
       rows={rows}
       columns={columns}
+      loading={loading}
       getRowHeight={() => "auto"}
       showPagination
       emptyMessage={t("hr:noPayrollRecordsFound")}
     />
   );
-}
+});

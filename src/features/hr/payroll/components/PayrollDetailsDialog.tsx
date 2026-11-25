@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -7,13 +6,100 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  IconButton,
   Stack,
   Typography,
+  type Theme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import Close from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
-import { AppBadge, AppButton, AppDialog } from "@/components/ui";
+import {
+  AppBadge,
+  AppButton,
+  AppDialog,
+  DialogLoadingOverlay,
+} from "@/components/ui";
+import { useGetEmployeePayrollDetailsQuery } from "../services/payroll.api";
 import type { PayrollRecord } from "../types";
+
+const MONEY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
+
+const TITLE_SX = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 1.5,
+} as const;
+
+const CONTENT_SX = {
+  position: "relative",
+  minHeight: 240,
+} as const;
+
+const HEADER_ROW_SX = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 1,
+} as const;
+
+const BREAKDOWN_CARD_SX = {
+  p: 2,
+  borderRadius: 1.5,
+  border: "1px solid",
+  borderColor: "divider",
+  bgcolor: "background.default",
+} as const;
+
+const SECTION_HEADER_SX = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  mb: 1,
+} as const;
+
+const ITEM_CARD_SX = {
+  p: 1.25,
+  borderRadius: 1.5,
+  border: "1px solid",
+  borderColor: "divider",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: 1.5,
+} as const;
+
+const LOAN_ITEM_CARD_SX = {
+  ...ITEM_CARD_SX,
+  alignItems: "center",
+} as const;
+
+const METRIC_ROW_SX = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 1.5,
+} as const;
+
+const getNetSalaryBoxSx = (theme: Theme) => ({
+  p: 2,
+  borderRadius: 1.5,
+  bgcolor: alpha(theme.palette.primary.main, 0.08),
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+});
 
 interface PayrollDetailsDialogProps {
   open: boolean;
@@ -30,14 +116,7 @@ interface MetricRowProps {
 
 function MetricRow({ label, value, highlightColor, bold }: MetricRowProps) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 1.5,
-      }}
-    >
+    <Box sx={METRIC_ROW_SX}>
       <Typography variant="body2" color="text.secondary">
         {label}
       </Typography>
@@ -45,9 +124,10 @@ function MetricRow({ label, value, highlightColor, bold }: MetricRowProps) {
         variant="body2"
         fontWeight={bold ? 700 : 600}
         color={highlightColor ?? "text.primary"}
-        sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
       >
-        {value}
+        <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+          {value}
+        </Box>
       </Typography>
     </Box>
   );
@@ -60,51 +140,71 @@ export function PayrollDetailsDialog({
 }: PayrollDetailsDialogProps) {
   const { t, i18n } = useTranslation(["hr", "common"]);
   const isArabic = i18n.language === "ar";
+  const dir = isArabic ? "rtl" : "ltr";
 
-  const moneyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [],
+  const {
+    data: fetchedDetails,
+    isLoading,
+    isFetching,
+  } = useGetEmployeePayrollDetailsQuery(
+    {
+      employeeId: record?.employeeId ?? 0,
+      month: record?.month,
+    },
+    {
+      skip: !open || !record,
+    },
   );
+
+  const loading = isLoading || isFetching;
+  const activeRecord = fetchedDetails ?? record;
 
   return (
     <AppDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle dir={isArabic ? "rtl" : "ltr"}>
-        {t("hr:payrollDetails")}
+      <DialogTitle dir={dir} sx={TITLE_SX}>
+        <span>{t("hr:payrollDetails")}</span>
+        <IconButton
+          size="small"
+          onClick={onClose}
+          aria-label={t("hr:close")}
+          sx={{ color: "text.secondary" }}
+        >
+          <Close fontSize="small" />
+        </IconButton>
       </DialogTitle>
 
-      <DialogContent dir={isArabic ? "rtl" : "ltr"}>
-        {record && (
+      <DialogContent dir={dir} sx={CONTENT_SX}>
+        <DialogLoadingOverlay loading={loading} />
+
+        {activeRecord ? (
           <Stack spacing={2.25} sx={{ pt: 1 }}>
             {/* Employee & Month Header */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: 1,
-              }}
-            >
+            <Box sx={HEADER_ROW_SX}>
               <Box>
                 <Typography variant="subtitle1" fontWeight={700}>
-                  {record.employeeName}
+                  {activeRecord.employeeName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {record.employeeCode} • {record.employeeJobTitle}
+                  <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                    {activeRecord.employeeCode}
+                  </Box>
+                  {activeRecord.employeeJobTitle
+                    ? ` • ${activeRecord.employeeJobTitle}`
+                    : ""}
                 </Typography>
               </Box>
 
               <Stack direction="row" spacing={1} alignItems="center">
                 <Chip
                   size="small"
-                  label={record.month}
-                  sx={{ direction: "ltr", fontWeight: 600 }}
+                  label={
+                    <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                      {activeRecord.month}
+                    </Box>
+                  }
+                  sx={{ fontWeight: 600 }}
                 />
-                {record.isInactive ? (
+                {activeRecord.isInactive ? (
                   <AppBadge
                     label={t("common:inactive")}
                     color="default"
@@ -113,37 +213,31 @@ export function PayrollDetailsDialog({
                 ) : (
                   <AppBadge
                     label={t(
-                      record.status === "PAID"
+                      activeRecord.status === "PAID"
                         ? "hr:payrollStatusPaid"
                         : "hr:payrollStatusPending",
                     )}
-                    color={record.status === "PAID" ? "success" : "warning"}
+                    color={activeRecord.status === "PAID" ? "success" : "warning"}
                     size="small"
                   />
                 )}
               </Stack>
             </Box>
 
-            {record.isInactive ? (
-              <Alert severity="info">{t("hr:inactiveEmployeePayrollNote")}</Alert>
+            {activeRecord.isInactive ? (
+              <Alert severity="info">
+                {t("hr:inactiveEmployeePayrollNote")}
+              </Alert>
             ) : (
               <>
-                {record.status === "PAID" && record.paidAt && (
+                {activeRecord.status === "PAID" && activeRecord.paidAt ? (
                   <Alert severity="success" sx={{ py: 0.5 }}>
-                    {t("hr:payrollLockedInfo", { date: record.paidAt })}
+                    {t("hr:payrollLockedInfo", { date: activeRecord.paidAt })}
                   </Alert>
-                )}
+                ) : null}
 
                 {/* Salary & Attendance Breakdown */}
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 1.5,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    bgcolor: "background.default",
-                  }}
-                >
+                <Box sx={BREAKDOWN_CARD_SX}>
                   <Typography
                     variant="subtitle2"
                     fontWeight={700}
@@ -154,35 +248,43 @@ export function PayrollDetailsDialog({
                   <Stack spacing={1}>
                     <MetricRow
                       label={t("hr:basicSalary")}
-                      value={moneyFormatter.format(record.basicSalary)}
+                      value={MONEY_FORMATTER.format(activeRecord.basicSalary)}
                     />
                     <MetricRow
                       label={t("hr:dailyRate")}
-                      value={moneyFormatter.format(record.dailyRate)}
+                      value={MONEY_FORMATTER.format(activeRecord.dailyRate)}
                     />
                     <Divider sx={{ my: 0.5 }} />
                     <MetricRow
                       label={t("hr:attendanceDays")}
-                      value={moneyFormatter.format(record.attendanceDays)}
+                      value={MONEY_FORMATTER.format(activeRecord.attendanceDays)}
                     />
                     <MetricRow
                       label={t("hr:payableWorkingDays")}
-                      value={moneyFormatter.format(record.payableWorkingDays)}
+                      value={MONEY_FORMATTER.format(
+                        activeRecord.payableWorkingDays,
+                      )}
                     />
                     <MetricRow
                       label={t("hr:totalAbsenceDays")}
-                      value={moneyFormatter.format(record.totalAbsenceDays)}
+                      value={MONEY_FORMATTER.format(
+                        activeRecord.totalAbsenceDays,
+                      )}
                     />
                     <MetricRow
                       label={t("hr:paidAbsenceDays")}
-                      value={moneyFormatter.format(record.paidAbsenceDays)}
+                      value={MONEY_FORMATTER.format(
+                        activeRecord.paidAbsenceDays,
+                      )}
                       highlightColor="success.main"
                     />
                     <MetricRow
                       label={t("hr:unpaidAbsenceDays")}
-                      value={moneyFormatter.format(record.unpaidAbsenceDays)}
+                      value={MONEY_FORMATTER.format(
+                        activeRecord.unpaidAbsenceDays,
+                      )}
                       highlightColor={
-                        record.unpaidAbsenceDays > 0
+                        activeRecord.unpaidAbsenceDays > 0
                           ? "error.main"
                           : "text.secondary"
                       }
@@ -190,12 +292,12 @@ export function PayrollDetailsDialog({
                     <MetricRow
                       label={t("hr:unpaidAbsenceDeduction")}
                       value={
-                        record.unpaidAbsenceDeduction > 0
-                          ? `-${moneyFormatter.format(record.unpaidAbsenceDeduction)}`
+                        activeRecord.unpaidAbsenceDeduction > 0
+                          ? `-${MONEY_FORMATTER.format(activeRecord.unpaidAbsenceDeduction)}`
                           : "0"
                       }
                       highlightColor={
-                        record.unpaidAbsenceDeduction > 0
+                        activeRecord.unpaidAbsenceDeduction > 0
                           ? "error.main"
                           : "text.secondary"
                       }
@@ -203,20 +305,22 @@ export function PayrollDetailsDialog({
                     <Divider sx={{ my: 0.5 }} />
                     <MetricRow
                       label={t("hr:extraWorkingDays")}
-                      value={moneyFormatter.format(record.extraDays)}
+                      value={MONEY_FORMATTER.format(activeRecord.extraDays)}
                       highlightColor={
-                        record.extraDays > 0 ? "success.main" : "text.secondary"
+                        activeRecord.extraDays > 0
+                          ? "success.main"
+                          : "text.secondary"
                       }
                     />
                     <MetricRow
                       label={t("hr:extraDaysAmount")}
                       value={
-                        record.extraDaysAmount > 0
-                          ? `+${moneyFormatter.format(record.extraDaysAmount)}`
+                        activeRecord.extraDaysAmount > 0
+                          ? `+${MONEY_FORMATTER.format(activeRecord.extraDaysAmount)}`
                           : "0"
                       }
                       highlightColor={
-                        record.extraDaysAmount > 0
+                        activeRecord.extraDaysAmount > 0
                           ? "success.main"
                           : "text.secondary"
                       }
@@ -226,14 +330,7 @@ export function PayrollDetailsDialog({
 
                 {/* Bonuses List */}
                 <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 1,
-                    }}
-                  >
+                  <Box sx={SECTION_HEADER_SX}>
                     <Typography variant="subtitle2" fontWeight={700}>
                       {t("hr:payrollBonuses")}
                     </Typography>
@@ -241,62 +338,49 @@ export function PayrollDetailsDialog({
                       variant="body2"
                       fontWeight={700}
                       color={
-                        record.totalBonuses > 0
+                        activeRecord.totalBonuses > 0
                           ? "success.main"
                           : "text.secondary"
                       }
-                      sx={{
-                        direction: "ltr",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
                     >
-                      {record.totalBonuses > 0
-                        ? `+${moneyFormatter.format(record.totalBonuses)}`
-                        : "0"}
+                      <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                        {activeRecord.totalBonuses > 0
+                          ? `+${MONEY_FORMATTER.format(activeRecord.totalBonuses)}`
+                          : "0"}
+                      </Box>
                     </Typography>
                   </Box>
-                  {record.bonuses.length === 0 ? (
+                  {activeRecord.bonuses.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       {t("hr:noBonusesForMonth")}
                     </Typography>
                   ) : (
                     <Stack spacing={1}>
-                      {record.bonuses.map((bonus) => (
-                        <Box
-                          key={bonus.id}
-                          sx={{
-                            p: 1.25,
-                            borderRadius: 1.5,
-                            border: "1px solid",
-                            borderColor: "divider",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            gap: 1.5,
-                          }}
-                        >
+                      {activeRecord.bonuses.map((bonus) => (
+                        <Box key={bonus.id} sx={ITEM_CARD_SX}>
                           <Box>
                             <Typography variant="body2" fontWeight={500}>
-                              {bonus.reason}
+                              {bonus.reason || "—"}
                             </Typography>
                             <Typography
                               variant="caption"
                               color="text.secondary"
                             >
-                              {bonus.projectName} • {bonus.date}
+                              {bonus.projectName} •{" "}
+                              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                                {bonus.date}
+                              </Box>
                             </Typography>
                           </Box>
                           <Typography
                             variant="body2"
                             fontWeight={700}
                             color="success.main"
-                            sx={{
-                              direction: "ltr",
-                              fontVariantNumeric: "tabular-nums",
-                              whiteSpace: "nowrap",
-                            }}
+                            sx={{ whiteSpace: "nowrap" }}
                           >
-                            +{moneyFormatter.format(bonus.amount)}
+                            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                              +{MONEY_FORMATTER.format(bonus.amount)}
+                            </Box>
                           </Typography>
                         </Box>
                       ))}
@@ -308,14 +392,7 @@ export function PayrollDetailsDialog({
 
                 {/* Deductions List */}
                 <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 1,
-                    }}
-                  >
+                  <Box sx={SECTION_HEADER_SX}>
                     <Typography variant="subtitle2" fontWeight={700}>
                       {t("hr:payrollDeductions")}
                     </Typography>
@@ -323,62 +400,49 @@ export function PayrollDetailsDialog({
                       variant="body2"
                       fontWeight={700}
                       color={
-                        record.totalDeductions > 0
+                        activeRecord.totalDeductions > 0
                           ? "error.main"
                           : "text.secondary"
                       }
-                      sx={{
-                        direction: "ltr",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
                     >
-                      {record.totalDeductions > 0
-                        ? `-${moneyFormatter.format(record.totalDeductions)}`
-                        : "0"}
+                      <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                        {activeRecord.totalDeductions > 0
+                          ? `-${MONEY_FORMATTER.format(activeRecord.totalDeductions)}`
+                          : "0"}
+                      </Box>
                     </Typography>
                   </Box>
-                  {record.deductions.length === 0 ? (
+                  {activeRecord.deductions.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       {t("hr:noDeductionsForMonth")}
                     </Typography>
                   ) : (
                     <Stack spacing={1}>
-                      {record.deductions.map((deduction) => (
-                        <Box
-                          key={deduction.id}
-                          sx={{
-                            p: 1.25,
-                            borderRadius: 1.5,
-                            border: "1px solid",
-                            borderColor: "divider",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            gap: 1.5,
-                          }}
-                        >
+                      {activeRecord.deductions.map((deduction) => (
+                        <Box key={deduction.id} sx={ITEM_CARD_SX}>
                           <Box>
                             <Typography variant="body2" fontWeight={500}>
-                              {deduction.reason}
+                              {deduction.reason || "—"}
                             </Typography>
                             <Typography
                               variant="caption"
                               color="text.secondary"
                             >
-                              {deduction.projectName} • {deduction.date}
+                              {deduction.projectName} •{" "}
+                              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                                {deduction.date}
+                              </Box>
                             </Typography>
                           </Box>
                           <Typography
                             variant="body2"
                             fontWeight={700}
                             color="error.main"
-                            sx={{
-                              direction: "ltr",
-                              fontVariantNumeric: "tabular-nums",
-                              whiteSpace: "nowrap",
-                            }}
+                            sx={{ whiteSpace: "nowrap" }}
                           >
-                            -{moneyFormatter.format(deduction.amount)}
+                            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                              -{MONEY_FORMATTER.format(deduction.amount)}
+                            </Box>
                           </Typography>
                         </Box>
                       ))}
@@ -390,14 +454,7 @@ export function PayrollDetailsDialog({
 
                 {/* Loans List */}
                 <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 1,
-                    }}
-                  >
+                  <Box sx={SECTION_HEADER_SX}>
                     <Typography variant="subtitle2" fontWeight={700}>
                       {t("hr:loans")}
                     </Typography>
@@ -405,40 +462,26 @@ export function PayrollDetailsDialog({
                       variant="body2"
                       fontWeight={700}
                       color={
-                        record.totalLoans > 0
+                        activeRecord.totalLoans > 0
                           ? "warning.dark"
                           : "text.secondary"
                       }
-                      sx={{
-                        direction: "ltr",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
                     >
-                      {record.totalLoans > 0
-                        ? `-${moneyFormatter.format(record.totalLoans)}`
-                        : "0"}
+                      <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                        {activeRecord.totalLoans > 0
+                          ? `-${MONEY_FORMATTER.format(activeRecord.totalLoans)}`
+                          : "0"}
+                      </Box>
                     </Typography>
                   </Box>
-                  {record.loans.length === 0 ? (
+                  {activeRecord.loans.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       {t("hr:noLoansForMonth")}
                     </Typography>
                   ) : (
                     <Stack spacing={1}>
-                      {record.loans.map((loan) => (
-                        <Box
-                          key={loan.id}
-                          sx={{
-                            p: 1.25,
-                            borderRadius: 1.5,
-                            border: "1px solid",
-                            borderColor: "divider",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
+                      {activeRecord.loans.map((loan) => (
+                        <Box key={loan.id} sx={LOAN_ITEM_CARD_SX}>
                           <Box>
                             <Typography variant="body2" fontWeight={500}>
                               {loan.projectName}
@@ -447,20 +490,20 @@ export function PayrollDetailsDialog({
                               variant="caption"
                               color="text.secondary"
                             >
-                              {loan.date}
+                              <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                                {loan.date}
+                              </Box>
                             </Typography>
                           </Box>
                           <Typography
                             variant="body2"
                             fontWeight={700}
                             color="warning.dark"
-                            sx={{
-                              direction: "ltr",
-                              fontVariantNumeric: "tabular-nums",
-                              whiteSpace: "nowrap",
-                            }}
+                            sx={{ whiteSpace: "nowrap" }}
                           >
-                            -{moneyFormatter.format(loan.amount)}
+                            <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                              -{MONEY_FORMATTER.format(loan.amount)}
+                            </Box>
                           </Typography>
                         </Box>
                       ))}
@@ -469,17 +512,7 @@ export function PayrollDetailsDialog({
                 </Box>
 
                 {/* Final Net Salary */}
-                <Box
-                  sx={(theme) => ({
-                    p: 2,
-                    borderRadius: 1.5,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  })}
-                >
+                <Box sx={getNetSalaryBoxSx}>
                   <Typography variant="subtitle1" fontWeight={700}>
                     {t("hr:netSalary")}
                   </Typography>
@@ -487,23 +520,21 @@ export function PayrollDetailsDialog({
                     variant="h6"
                     fontWeight={700}
                     color="primary.main"
-                    sx={{
-                      direction: "ltr",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
                   >
-                    {moneyFormatter.format(record.netSalary)}
+                    <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                      {MONEY_FORMATTER.format(activeRecord.netSalary)}
+                    </Box>
                   </Typography>
                 </Box>
               </>
             )}
           </Stack>
-        )}
+        ) : null}
       </DialogContent>
 
-      <DialogActions dir={isArabic ? "rtl" : "ltr"} sx={{ px: 3, pb: 2 }}>
+      <DialogActions dir={dir} sx={{ px: 3, pb: 2 }}>
         <AppButton variant="outlined" onClick={onClose}>
-          {t("common:cancel")}
+          {t("hr:close")}
         </AppButton>
       </DialogActions>
     </AppDialog>

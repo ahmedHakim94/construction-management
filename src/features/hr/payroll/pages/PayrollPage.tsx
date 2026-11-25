@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Suspense, lazy, startTransition, useCallback, useState } from "react";
+import { Box, CircularProgress, Typography, type Theme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -11,35 +11,89 @@ import { AppCard, AppPageHeader } from "@/components/ui";
 import { AppConfirmDialog } from "@/components/ui/AppConfirmDialog";
 import { useAppSelector } from "@/app/store/hooks";
 import { useDialog } from "@/hooks/useDialog";
-import {
-  MOCK_EMPLOYEES,
-  MOCK_EMPLOYEE_PROJECTS,
-} from "@/features/hr/employees/mock/employees.mock";
-import { MOCK_ATTENDANCE_RECORDS } from "@/features/hr/attendance/mock/attendance.mock";
-import { MOCK_TRANSACTIONS } from "@/features/hr/deductions/mock/deductions.mock";
-import { MOCK_LOANS } from "@/features/hr/loans/mock/loans.mock";
-import { PayrollDetailsDialog } from "../components/PayrollDetailsDialog";
 import { PayrollTable } from "../components/PayrollTable";
 import {
-  buildPayrollKey,
-  buildProjectNameMap,
-  calculateEmployeeMonthlyPayroll,
-  roundMoney,
-} from "../utils/payrollCalculations";
-import { loadPaidPayrolls, savePaidPayrolls } from "../utils/payrollStorage";
+  useGetMonthlyPayrollQuery,
+  useMarkPayrollAsPaidMutation,
+} from "../services/payroll.api";
 import type { PayrollRecord } from "../types";
+
+// Lazy-load detailed payroll breakdown dialog only when opened (bundle-dynamic-imports)
+const loadPayrollDetailsDialog = () =>
+  import("../components/PayrollDetailsDialog").then((m) => ({
+    default: m.PayrollDetailsDialog,
+  }));
+
+const PayrollDetailsDialog = lazy(loadPayrollDetailsDialog);
+
+const EMPTY_ROWS: PayrollRecord[] = [];
+
+const MONEY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const CAIRO_MONTH_FORMATTER = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Africa/Cairo",
+  year: "numeric",
+  month: "2-digit",
+});
+
+const getCurrentCairoMonth = () =>
+  CAIRO_MONTH_FORMATTER.format(new Date()).slice(0, 7);
+
+const PAGE_STACK_SX = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 2.5,
+} as const;
+
+const CARD_SX = {
+  p: { xs: 2, md: 2.5 },
+} as const;
+
+const TOOLBAR_SX = {
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 2,
+  mb: 2,
+} as const;
+
+const LTR_NUM_SX = {
+  display: "inline-block",
+  fontVariantNumeric: "tabular-nums",
+} as const;
+
+const MONTH_PICKER_SLOT_PROPS = {
+  textField: {
+    size: "small" as const,
+    sx: { minWidth: { xs: "100%", sm: 200 } },
+  },
+};
+
+const getTotalSummarySx = (theme: Theme) => ({
+  px: 2,
+  py: 1,
+  borderRadius: 1.5,
+  bgcolor: alpha(theme.palette.primary.main, 0.08),
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  display: "flex",
+  alignItems: "center",
+  gap: 1.5,
+});
 
 export function PayrollPage() {
   const { t } = useTranslation(["hr", "common"]);
   const user = useAppSelector((state) => state.auth.user);
   const isSuperAdmin = user?.role === "super_admin";
 
-  const [selectedMonthDate, setSelectedMonthDate] = useState<Dayjs | null>(
-    dayjs(),
+  const currentCairoMonth = getCurrentCairoMonth();
+
+  const [selectedMonthDate, setSelectedMonthDate] = useState<Dayjs | null>(() =>
+    dayjs(`${getCurrentCairoMonth()}-01`),
   );
-  const [paidPayrolls, setPaidPayrolls] = useState<
-    Record<string, PayrollRecord>
-  >(() => loadPaidPayrolls());
 
   const [detailsRecord, setDetailsRecord] = useState<
     PayrollRecord | undefined
@@ -50,138 +104,97 @@ export function PayrollPage() {
 
   const detailsDialog = useDialog();
   const confirmDialog = useDialog();
+  const setDetailsDialogOpen = detailsDialog.setOpen;
+  const setConfirmDialogOpen = confirmDialog.setOpen;
 
   const selectedMonth =
     selectedMonthDate && selectedMonthDate.isValid()
       ? selectedMonthDate.format("YYYY-MM")
-      : dayjs().format("YYYY-MM");
+      : currentCairoMonth;
 
-  const projectNameById = useMemo(
-    () => buildProjectNameMap(MOCK_EMPLOYEE_PROJECTS),
-    [],
+  const isFutureMonth = selectedMonth > currentCairoMonth;
+
+  const { data, isLoading, isFetching } = useGetMonthlyPayrollQuery(
+    { month: selectedMonth },
+    { skip: !isSuperAdmin },
   );
 
-  const moneyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [],
-  );
+  const [markPayrollAsPaid, { isLoading: isMarkingPaid }] =
+    useMarkPayrollAsPaidMutation();
 
-  const payrollRows = useMemo<PayrollRecord[]>(() => {
-    if (!isSuperAdmin) return [];
+  const payrollRows = data?.data ?? EMPTY_ROWS;
+  const totalNetPayroll = data?.summary.totalMonthPayroll ?? 0;
+  const loading = isLoading || isFetching;
 
-    return MOCK_EMPLOYEES.map((employee) => {
-      const key = buildPayrollKey(employee.id, selectedMonth);
-
-      // Once marked Paid, return the locked snapshot directly without recalculating.
-      const lockedSnapshot = paidPayrolls[key];
-      if (lockedSnapshot) {
-        return lockedSnapshot;
-      }
-
-      return calculateEmployeeMonthlyPayroll({
-        employee,
-        month: selectedMonth,
-        attendanceRecords: MOCK_ATTENDANCE_RECORDS,
-        transactions: MOCK_TRANSACTIONS,
-        loans: MOCK_LOANS,
-        projectNameById,
-      });
+  const handleMonthChange = useCallback((value: Dayjs | null) => {
+    startTransition(() => {
+      setSelectedMonthDate(value);
     });
-  }, [isSuperAdmin, selectedMonth, paidPayrolls, projectNameById]);
+  }, []);
 
-  // Exclude INACTIVE employees from payroll totals.
-  const totalNetPayroll = useMemo(
-    () =>
-      roundMoney(
-        payrollRows.reduce(
-          (sum, row) => (row.isInactive ? sum : sum + row.netSalary),
-          0,
-        ),
-      ),
-    [payrollRows],
+  const handleOpenDetails = useCallback(
+    (record: PayrollRecord) => {
+      if (!isSuperAdmin) return;
+      void loadPayrollDetailsDialog();
+      setDetailsRecord(record);
+      setDetailsDialogOpen(true);
+    },
+    [isSuperAdmin, setDetailsDialogOpen],
   );
 
-  const handleOpenDetails = (record: PayrollRecord) => {
-    if (!isSuperAdmin) return;
-    setDetailsRecord(record);
-    detailsDialog.openDialog();
-  };
-
-  const handleCloseDetails = () => {
-    detailsDialog.closeDialog();
+  const handleCloseDetails = useCallback(() => {
+    setDetailsDialogOpen(false);
     setDetailsRecord(undefined);
-  };
+  }, [setDetailsDialogOpen]);
 
-  const handleOpenMarkAsPaid = (record: PayrollRecord) => {
-    if (!isSuperAdmin) return;
-    if (record.isInactive || record.status === "PAID") return;
-    setConfirmPaidRecord(record);
-    confirmDialog.openDialog();
-  };
+  const handleOpenMarkAsPaid = useCallback(
+    (record: PayrollRecord) => {
+      if (!isSuperAdmin) return;
+      if (record.isInactive || record.status === "PAID") return;
+      if (record.month > getCurrentCairoMonth()) return;
+      setConfirmPaidRecord(record);
+      setConfirmDialogOpen(true);
+    },
+    [isSuperAdmin, setConfirmDialogOpen],
+  );
 
-  const handleCloseConfirmDialog = () => {
-    confirmDialog.closeDialog();
+  const handleCloseConfirmDialog = useCallback(() => {
+    setConfirmDialogOpen(false);
     setConfirmPaidRecord(undefined);
-  };
+  }, [setConfirmDialogOpen]);
 
-  const handleConfirmMarkAsPaid = () => {
+  const handleConfirmMarkAsPaid = useCallback(async () => {
     if (!isSuperAdmin || !confirmPaidRecord) return;
     if (confirmPaidRecord.isInactive || confirmPaidRecord.status === "PAID") {
       return;
     }
 
-    const key = buildPayrollKey(
-      confirmPaidRecord.employeeId,
-      confirmPaidRecord.month,
-    );
-
-    setPaidPayrolls((prev) => {
-      // Prevent duplicate or re-locked payroll records for the same employee & month.
-      if (prev[key]) return prev;
-
-      const lockedRecord: PayrollRecord = {
-        ...confirmPaidRecord,
-        bonuses: confirmPaidRecord.bonuses.map((item) => ({ ...item })),
-        deductions: confirmPaidRecord.deductions.map((item) => ({ ...item })),
-        loans: confirmPaidRecord.loans.map((item) => ({ ...item })),
-        status: "PAID",
-        paidAt: dayjs().format("YYYY-MM-DD"),
-      };
-
-      const next = {
-        ...prev,
-        [key]: lockedRecord,
-      };
-      savePaidPayrolls(next);
-      return next;
-    });
-
-    handleCloseConfirmDialog();
-  };
+    try {
+      await markPayrollAsPaid({
+        employeeId: confirmPaidRecord.employeeId,
+        month: confirmPaidRecord.month,
+      }).unwrap();
+      handleCloseConfirmDialog();
+    } catch {
+      // Error notification handled globally by baseApi
+    }
+  }, [
+    isSuperAdmin,
+    confirmPaidRecord,
+    markPayrollAsPaid,
+    handleCloseConfirmDialog,
+  ]);
 
   return (
     <PageContainer>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Box sx={PAGE_STACK_SX}>
         <AppPageHeader
           title={t("hr:payroll")}
           description={t("hr:payrollDescription")}
         />
 
-        <AppCard sx={{ p: { xs: 2, md: 2.5 } }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 2,
-              mb: 2,
-            }}
-          >
+        <AppCard sx={CARD_SX}>
+          <Box sx={TOOLBAR_SX}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label={t("hr:selectMonth")}
@@ -189,68 +202,66 @@ export function PayrollPage() {
                 openTo="month"
                 format="YYYY-MM"
                 value={selectedMonthDate}
-                onChange={(value) => setSelectedMonthDate(value)}
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    sx: { minWidth: { xs: "100%", sm: 200 } },
-                  },
-                }}
+                onChange={handleMonthChange}
+                slotProps={MONTH_PICKER_SLOT_PROPS}
               />
             </LocalizationProvider>
 
-            <Box
-              sx={(theme) => ({
-                px: 2,
-                py: 1,
-                borderRadius: 1.5,
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-              })}
-            >
+            <Box sx={getTotalSummarySx}>
               <Typography variant="body2" color="text.secondary">
                 {t("hr:totalMonthPayroll")}:
               </Typography>
-              <Typography
-                variant="subtitle1"
-                fontWeight={700}
-                color="primary.main"
-                sx={{ direction: "ltr", fontVariantNumeric: "tabular-nums" }}
-              >
-                {moneyFormatter.format(totalNetPayroll)}
-              </Typography>
+              {loading ? (
+                <CircularProgress size={16} />
+              ) : (
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={700}
+                  color="primary.main"
+                >
+                  <Box component="bdi" dir="ltr" sx={LTR_NUM_SX}>
+                    {MONEY_FORMATTER.format(totalNetPayroll)}
+                  </Box>
+                </Typography>
+              )}
             </Box>
           </Box>
 
           <PayrollTable
             rows={payrollRows}
+            loading={loading}
             canManage={isSuperAdmin}
+            isFutureMonth={isFutureMonth}
             onViewDetails={handleOpenDetails}
             onMarkAsPaid={handleOpenMarkAsPaid}
           />
         </AppCard>
 
-        <PayrollDetailsDialog
-          open={detailsDialog.open}
-          record={detailsRecord}
-          onClose={handleCloseDetails}
-        />
+        {detailsDialog.open ? (
+          <Suspense fallback={null}>
+            <PayrollDetailsDialog
+              open={detailsDialog.open}
+              record={detailsRecord}
+              onClose={handleCloseDetails}
+            />
+          </Suspense>
+        ) : null}
 
-        <AppConfirmDialog
-          open={confirmDialog.open}
-          title={t("hr:markAsPaid")}
-          message={t("hr:markAsPaidConfirm", {
-            name: confirmPaidRecord?.employeeName ?? "",
-            month: confirmPaidRecord?.month ?? "",
-          })}
-          confirmText={t("hr:markAsPaid")}
-          cancelText={t("common:cancel")}
-          onClose={handleCloseConfirmDialog}
-          onConfirm={handleConfirmMarkAsPaid}
-        />
+        {confirmDialog.open ? (
+          <AppConfirmDialog
+            open={confirmDialog.open}
+            title={t("hr:markAsPaid")}
+            message={t("hr:markAsPaidConfirm", {
+              name: confirmPaidRecord?.employeeName ?? "",
+              month: confirmPaidRecord?.month ?? "",
+            })}
+            loading={isMarkingPaid}
+            confirmText={t("hr:markAsPaid")}
+            cancelText={t("common:cancel")}
+            onClose={handleCloseConfirmDialog}
+            onConfirm={handleConfirmMarkAsPaid}
+          />
+        ) : null}
       </Box>
     </PageContainer>
   );
